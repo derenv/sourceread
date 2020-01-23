@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <!--ARTICLES-->
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="derenvural.sourceread_prototype.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_statistics"
+        android:name="derenvural.sourceread_prototype.ui.statistics.StatisticsFragment"
+        android:label="@string/menu_statistics"
+        tools:layout="@layout/fragment_statistics" />
+
+
+    <!--APPS-->
+    <fragment
+        android:id="@+id/nav_apps"
+        android:name="derenvural.sourceread_prototype.ui.apps.AppsFragment"
+        android:label="@string/menu_apps"
+        tools:layout="@layout/fragment_apps" />
+
+
+    <!--MISCELLANEOUS-->
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="derenvural.sourceread_prototype.ui.about.AboutFragment"
+        android:label="@string/menu_about"
+        tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_policy"
+        android:name="derenvural.sourceread_prototype.ui.policy.PolicyFragment"
+        android:label="@string/menu_policy"
+        tools:layout="@layout/fragment_policy" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="derenvural.sourceread_prototype.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>
