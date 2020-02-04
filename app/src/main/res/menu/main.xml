@@ -11,4 +11,9 @@
         android:orderInCategory="100"
         android:title="@string/action_refresh_articles"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_logout_user"
+        android:orderInCategory="100"
+        android:title="@string/action_logout_user"
+        app:showAsAction="never" />
 </menu>

@@ -8,6 +8,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -18,7 +19,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -80,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new_activity);
             finish();
         }else{
-            //user already logged in
-            System.out.println("USER ALREADY LOGGED IN");
-
             // Connect to database
             db = FirebaseFirestore.getInstance();
 
@@ -91,11 +88,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh_apps:
+                Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
+                //
+                return true;
+            case R.id.action_refresh_articles:
+                Toast.makeText(this, "Refreshing articles..", Toast.LENGTH_SHORT).show();
+                //
+                return true;
+            case R.id.action_logout_user:
+                Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
+                logout();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -124,18 +141,18 @@ public class MainActivity extends AppCompatActivity {
         //
     }
 
-    private void sign_out(){
+    private void logout(){
         // Sign out firebase user
         mAuth.signOut();
 
         // Check for successful signout
         if(null == mAuth.getCurrentUser()){
-            Toast.makeText(getApplicationContext(), "Successful Sign out", Toast.LENGTH_SHORT).show();
-        }
+            Toast.makeText(getApplicationContext(), "Successful Log out", Toast.LENGTH_SHORT).show();
 
-        // Start login activity
-        Intent new_activity = new Intent(this, LoginActivity.class);
-        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(new_activity);
+            // Start login activity
+            Intent new_activity = new Intent(this, LoginActivity.class);
+            new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(new_activity);
+        }
     }
 }
