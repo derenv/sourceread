@@ -124,8 +124,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUiWithUser(LoggedInUserView model) {
         // Display login message
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
 
         // handle login redirect
         Intent new_activity = new Intent(getApplicationContext(), MainActivity.class);

@@ -43,7 +43,6 @@ public class LoginViewModel extends ViewModel {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // Sign in success, update UI with the signed-in user's information
-                    Toast.makeText(cur_context, "Authentication successful!", Toast.LENGTH_SHORT).show();
                     LoggedInUserView new_user = new LoggedInUserView(new LoggedInUser(mAuth.getCurrentUser()));
                     loginResult.setValue(new LoginResult(new_user));
                 } else {

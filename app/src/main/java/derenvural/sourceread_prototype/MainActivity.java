@@ -84,11 +84,10 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("USER ALREADY LOGGED IN");
 
             // Connect to database
-            FirebaseUser x = mAuth.getCurrentUser();
             db = FirebaseFirestore.getInstance();
 
             // Check if any apps connected
-            check_apps();
+            check_apps(db);
         }
 
         // APIs
@@ -127,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Check how many apps connected & verify each
-    private void check_apps() {
-        sign_out();
+    private void check_apps(FirebaseFirestore db) {
+        //
     }
 
     private void sign_out(){
