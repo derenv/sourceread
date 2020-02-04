@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                     showLoginFailed(loginResult.getError());
                 }
                 if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
+                    updateUiWithUser();
 
                     //Complete and destroy login activity once successful
                     setResult(Activity.RESULT_OK);
@@ -122,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUiWithUser(LoggedInUserView model) {
+    private void updateUiWithUser() {
         // Display login message
         Toast.makeText(getApplicationContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
 
@@ -130,9 +130,13 @@ public class LoginActivity extends AppCompatActivity {
         Intent new_activity = new Intent(getApplicationContext(), MainActivity.class);
         new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(new_activity);
+        startActivity(new_activity);
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+
+        // Display error message
+        //Toast.makeText(getApplicationContext(), "Authentication unsuccessful!", Toast.LENGTH_SHORT).show();
     }
 }

@@ -89,26 +89,6 @@ public class MainActivity extends AppCompatActivity {
             // Check if any apps connected
             check_apps(db);
         }
-
-        // APIs
-        //1.1 if logged in
-            //1.1.1 check attached apps
-            //1.1.2 if attached apps == 0
-                //1.1.2.1 prompt add apps
-            //1.1.3 if attached apps > 0
-                //1.1.3.1 for each attached app
-                    //1.1.3.1.1 request key from database
-                    //1.1.3.1.2 validate key
-                    //1.1.3.1.3 if key invalid
-                        //1.1.3.1.3.1 new login THEN 1.1.3.1.4.1
-                    //1.1.3.1.4 if key valid
-                        //1.1.3.1.4.1 check if new articles
-                        //1.1.3.1.4.2 if new articles
-                            //1.1.3.1.4.2.1 analyse prompt THEN 1.1.3.1.4.3.1
-                        //1.1.3.1.4.3 if no new articles
-                            //1.1.3.1.4.3.1 show current articles
-        //1.2 if not logged in
-            //1.2.1 prompt login THEN 1.1.1
     }
 
     @Override
@@ -126,6 +106,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Check how many apps connected & verify each
+    //1.1.2 if attached apps == 0
+    //  1.1.2.1 prompt add apps
+    //1.1.3 if attached apps > 0
+    //  1.1.3.1 for each attached app
+    //      1.1.3.1.1 request key from database
+    //      1.1.3.1.2 validate key
+    //      1.1.3.1.3 if key invalid
+    //          1.1.3.1.3.1 new login THEN 1.1.3.1.4.1
+    //      1.1.3.1.4 if key valid
+    //          1.1.3.1.4.1 check if new articles
+    //          1.1.3.1.4.2 if new articles
+    //              1.1.3.1.4.2.1 analyse prompt THEN 1.1.3.1.4.3.1
+    //          1.1.3.1.4.3 if no new articles
+    //              1.1.3.1.4.3.1 show current articles
     private void check_apps(FirebaseFirestore db) {
         //
     }
