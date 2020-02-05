@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.model;
+package derenvural.sourceread_prototype.data.login;
 
 import com.google.firebase.auth.FirebaseUser;
 

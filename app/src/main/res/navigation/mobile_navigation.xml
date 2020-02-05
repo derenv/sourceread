@@ -35,12 +35,6 @@
         tools:layout="@layout/fragment_about" />
 
     <fragment
-        android:id="@+id/nav_policy"
-        android:name="derenvural.sourceread_prototype.ui.policy.PolicyFragment"
-        android:label="@string/menu_policy"
-        tools:layout="@layout/fragment_policy" />
-
-    <fragment
         android:id="@+id/nav_settings"
         android:name="derenvural.sourceread_prototype.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"

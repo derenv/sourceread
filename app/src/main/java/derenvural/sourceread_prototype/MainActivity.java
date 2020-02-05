@@ -3,15 +3,12 @@ package derenvural.sourceread_prototype;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -63,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_statistics, R.id.nav_apps,
-                R.id.nav_settings, R.id.nav_about, R.id.nav_policy)
+                R.id.nav_settings, R.id.nav_about)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);

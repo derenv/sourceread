@@ -1,6 +1,6 @@
 package derenvural.sourceread_prototype.ui.login;
 
-import derenvural.sourceread_prototype.data.model.LoggedInUser;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 /**
  * Class exposing authenticated user details to the UI.

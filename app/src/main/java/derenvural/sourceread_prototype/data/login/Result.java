@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data;
+package derenvural.sourceread_prototype.data.login;
 
 /**
  * A generic class that holds a result success w/ data or an error exception.

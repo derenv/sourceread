@@ -13,7 +13,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.data.model.LoggedInUser;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginViewModel extends ViewModel {
 

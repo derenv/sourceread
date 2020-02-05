@@ -10,12 +10,15 @@
 
     <string name="menu_home">Home</string>
     <string name="menu_statistics">Statistics</string>
-
     <string name="menu_apps">Add Apps</string>
-
-    <string name="menu_about">About</string>
-    <string name="menu_policy">Privacy Policy</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
+
+    <string-array name="about_list">
+        <item>Contact Us</item>
+        <item>Privacy Policy</item>
+        <item>Terms of Service</item>
+    </string-array>
 
     <string name="card_image_description">Image for card in list</string>
 
@@ -28,4 +31,163 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+
+    <string name="contact_html">
+        <![CDATA[
+            <h2>Contact Us</h2>
+            <p>
+              <a href="https://sourceread.firebaseapp.com" target="_blank" rel="noopener noreferrer">Website</a>
+            </p>
+            <p>
+              Email : dvural@dundee.ac.uk
+            </p>
+        ]]>
+    </string>
+    <string name="policy_html">
+        <![CDATA[
+            <h2>Privacy Policy</h2>
+            <p>
+              Deren Vural built the Source Read app as
+              an Open Source app. This SERVICE is provided by
+              Deren Vural at no cost and is intended for
+              use as is.
+            </p> <p>
+              This page is used to inform visitors regarding
+              my policies with the collection, use, and
+              disclosure of Personal Information if anyone decided to use
+              my Service.
+            </p> <p>
+              If you choose to use my Service, then you agree
+              to the collection and use of information in relation to this
+              policy. The Personal Information that I collect is
+              used for providing and improving the Service.
+              I will not use or share your
+              information with anyone except as described in this Privacy
+              Policy.
+            </p> <p>
+              The terms used in this Privacy Policy have the same meanings
+              as in our Terms and Conditions, which is accessible at
+              Source Read unless otherwise defined in this Privacy
+              Policy.
+            </p> <p><strong>Information Collection and Use</strong></p> <p>
+              For a better experience, while using our Service,
+              I may require you to provide us with certain
+              personally identifiable information, including but not limited to email address, API keys, first name, surname. The
+              information that I request will be
+              retained on your device and is not collected by me in any way.
+            </p> <p>
+              The app does use third party services that may collect
+              information used to identify you.
+            </p> <div><p>
+                Link to privacy policy of third party service providers
+                used by the app
+              </p> <ul><li><a href="https://www.google.com/policies/privacy/" target="_blank" rel="noopener noreferrer">Google Play Services</a></li><!----><li><a href="https://firebase.google.com/policies/analytics" target="_blank" rel="noopener noreferrer">Firebase Analytics</a></li><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----></ul></div> <p><strong>Log Data</strong></p> <p>
+              I want to inform you that whenever
+              you use my Service, in a case of an error in the
+              app I collect data and information (through third
+              party products) on your phone called Log Data. This Log Data
+              may include information such as your device Internet
+              Protocol (“IP”) address, device name, operating system
+              version, the configuration of the app when utilizing
+              my Service, the time and date of your use of the
+              Service, and other statistics.
+            </p> <p><strong>Cookies</strong></p> <p>
+              Cookies are files with a small amount of data that are
+              commonly used as anonymous unique identifiers. These are
+              sent to your browser from the websites that you visit and
+              are stored on your device\'s internal memory.
+            </p> <p>
+              This Service does not use these “cookies” explicitly.
+              However, the app may use third party code and libraries that
+              use “cookies” to collect information and improve their
+              services. You have the option to either accept or refuse
+              these cookies and know when a cookie is being sent to your
+              device. If you choose to refuse our cookies, you may not be
+              able to use some portions of this Service.
+            </p> <p><strong>Service Providers</strong></p> <p>
+              I may employ third-party companies
+              and individuals due to the following reasons:
+            </p> <ul><li>To facilitate our Service;</li> <li>To provide the Service on our behalf;</li> <li>To perform Service-related services; or</li> <li>To assist us in analyzing how our Service is used.</li></ul> <p>
+              I want to inform users of this
+              Service that these third parties have access to your
+              Personal Information. The reason is to perform the tasks
+              assigned to them on our behalf. However, they are obligated
+              not to disclose or use the information for any other
+              purpose.
+            </p> <p><strong>Security</strong></p> <p>
+              I value your trust in providing us
+              your Personal Information, thus we are striving to use
+              commercially acceptable means of protecting it. But remember
+              that no method of transmission over the internet, or method
+              of electronic storage is 100% secure and reliable, and
+              I cannot guarantee its absolute security.
+            </p> <p><strong>Links to Other Sites</strong></p> <p>
+              This Service may contain links to other sites. If you click
+              on a third-party link, you will be directed to that site.
+              Note that these external sites are not operated by
+              me. Therefore, I strongly advise you to
+              review the Privacy Policy of these websites.
+              I have no control over and assume no
+              responsibility for the content, privacy policies, or
+              practices of any third-party sites or services.
+            </p> <p><strong>Children’s Privacy</strong></p> <p>
+              These Services do not address anyone under the age of 13.
+              I do not knowingly collect personally
+              identifiable information from children under 13. In the case
+              I discover that a child under 13 has provided
+              me with personal information,
+              I immediately delete this from our servers. If you
+              are a parent or guardian and you are aware that your child
+              has provided us with personal information, please contact
+              me so that I will be able to do
+              necessary actions.
+            </p> <p><strong>Changes to This Privacy Policy</strong></p> <p>
+              I may update our Privacy Policy from
+              time to time. Thus, you are advised to review this page
+              periodically for any changes. I will
+              notify you of any changes by posting the new Privacy Policy
+              on this page. These changes are effective immediately after
+              they are posted on this page.
+            </p> <p><strong>Contact Us</strong></p> <p>
+              If you have any questions or suggestions about
+              my Privacy Policy, do not hesitate to contact
+              me at: dvural@dundee.ac.uk
+            </p> <p>
+              This privacy policy page was created at
+              <a href="https://privacypolicytemplate.net" target="_blank" rel="noopener noreferrer">privacypolicytemplate.net</a>
+              and modified/generated by
+              <a href="https://app-privacy-policy-generator.firebaseapp.com/" target="_blank" rel="noopener noreferrer">App Privacy Policy Generator</a></p>
+        ]]>
+    </string>
+    <string name="tos_html">
+        <![CDATA[
+            <h1>Website Terms and Conditions of Use</h1>
+            <h2>1. Terms</h2>
+            <p>By accessing this Website, accessible from https://sourceread.firebaseapp.com, you are agreeing to be bound by these Website Terms and Conditions of Use and agree that you are responsible for the agreement with any applicable local laws. If you disagree with any of these terms, you are prohibited from accessing this site. The materials contained in this Website are protected by copyright and trade mark law. These Terms of Service has been created with the help of the <a href="https://www.termsofservicegenerator.net">Terms of Service Generator</a> and the <a href="https://www.termsconditionsexample.com">Terms & Conditions Example</a>.</p>
+            <h2>2. Use License</h2>
+            <p>Permission is granted to temporarily download one copy of the materials on SourceRead\'s Website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+            <ul>
+              <li>modify or copy the materials;</li>
+              <li>use the materials for any commercial purpose or for any public display;</li>
+              <li>attempt to reverse engineer any software contained on SourceRead\'s Website;</li>
+              <li>remove any copyright or other proprietary notations from the materials; or</li>
+              <li>transferring the materials to another person or "mirror" the materials on any other server.</li>
+            </ul>
+            <p>This will let SourceRead to terminate upon violations of any of these restrictions. Upon termination, your viewing right will also be terminated and you should destroy any downloaded materials in your possession whether it is printed or electronic format.</p>
+            <h2>3. Disclaimer</h2>
+            <p>All the materials on SourceRead’s Website are provided "as is". SourceRead makes no warranties, may it be expressed or implied, therefore negates all other warranties. Furthermore, SourceRead does not make any representations concerning the accuracy or reliability of the use of the materials on its Website or otherwise relating to such materials or any sites linked to this Website.</p>
+            <h2>4. Limitations</h2>
+            <p>SourceRead or its suppliers will not be hold accountable for any damages that will arise with the use or inability to use the materials on SourceRead’s Website, even if SourceRead or an authorize representative of this Website has been notified, orally or written, of the possibility of such damage. Some jurisdiction does not allow limitations on implied warranties or limitations of liability for incidental damages, these limitations may not apply to you.</p>
+            <h2>5. Revisions and Errata</h2>
+            <p>The materials appearing on SourceRead\'s Website may include technical, typographical, or photographic errors. SourceRead will not promise that any of the materials in this Website are accurate, complete, or current. SourceRead may change the materials contained on its Website at any time without notice. SourceRead does not make any commitment to update the materials.</p>
+            <h2>6. Links</h2>
+            <p>SourceRead has not reviewed all of the sites linked to its Website and is not responsible for the contents of any such linked site. The presence of any link does not imply endorsement by SourceRead of the site. The use of any linked website is at the user’s own risk.</p>
+            <h2>7. Site Terms of Use Modifications</h2>
+            <p>SourceRead may revise these Terms of Use for its Website at any time without prior notice. By using this Website, you are agreeing to be bound by the current version of these Terms and Conditions of Use.</p>
+            <h2>8. Your Privacy</h2>
+            <p>Please read <a href="./privacy_policy.html">our Privacy Policy</a>.</p>
+            <h2>9. Governing Law</h2>
+            <p>Any claim related to SourceRead\'s Website shall be governed by the laws of gb without regards to its conflict of law provisions.</p>
+        ]]>
+    </string>
 </resources>
