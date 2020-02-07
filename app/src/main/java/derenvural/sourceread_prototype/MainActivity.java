@@ -6,9 +6,12 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -16,7 +19,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -26,13 +28,17 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
+    private fdatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,11 +83,11 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new_activity);
             finish();
         }else{
-            // Connect to database
-            db = FirebaseFirestore.getInstance();
+            // Create database object
+            db = new fdatabase();
 
             // Check if any apps connected
-            check_apps(db);
+            check_apps();
         }
     }
 
@@ -97,11 +103,11 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_refresh_apps:
                 Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
-                //
+                // TODO: REFRESH APPS
                 return true;
             case R.id.action_refresh_articles:
                 Toast.makeText(this, "Refreshing articles..", Toast.LENGTH_SHORT).show();
-                //
+                // TODO: REFRESH ARTICLES
                 return true;
             case R.id.action_logout_user:
                 Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
@@ -120,36 +126,56 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Check how many apps connected & verify each
-    //1.1.2 if attached apps == 0
-    //  1.1.2.1 prompt add apps
-    //1.1.3 if attached apps > 0
-    //  1.1.3.1 for each attached app
-    //      1.1.3.1.1 request key from database
-    //      1.1.3.1.2 validate key
-    //      1.1.3.1.3 if key invalid
-    //          1.1.3.1.3.1 new login THEN 1.1.3.1.4.1
-    //      1.1.3.1.4 if key valid
-    //          1.1.3.1.4.1 check if new articles
-    //          1.1.3.1.4.2 if new articles
-    //              1.1.3.1.4.2.1 analyse prompt THEN 1.1.3.1.4.3.1
-    //          1.1.3.1.4.3 if no new articles
-    //              1.1.3.1.4.3.1 show current articles
-    private void check_apps(FirebaseFirestore db) {
-        //
+    private void check_apps() {
+        // Make apps request
+        db.request_user_apps();
+
+        // Add observer for db response
+        db.get_user_apps().observe(this, new Observer<HashMap<String,String>>() {
+            @Override
+            public void onChanged(@Nullable HashMap<String,String> apps) {
+                // Get list of apps
+                Log.d("DB", "# Saved Apps: " + apps.size());
+
+                // Check for invalid data
+                if (apps == null) {
+                    return;
+                }
+                if (apps.size() == 0) {
+                    // Prompt to add apps
+                    //
+                }else if (apps.size() > 0) {
+                    // Validate each app key
+                    for (Map.Entry<String,String> entry : apps.entrySet()) {
+                        // Get app & key
+                        String app = entry.getKey();
+                        String api_key = entry.getValue();
+                        Log.d("DB", "app: " + app + ", API-key: " + api_key);
+
+                        // TODO: Validate key
+                    }
+                }
+            }
+        });
     }
 
     private void logout(){
-        // Sign out firebase user
+        // Sign out Firebase user
         mAuth.signOut();
 
-        // Check for successful signout
+        // Check for successful sign out
         if(null == mAuth.getCurrentUser()){
             Toast.makeText(getApplicationContext(), "Successful Log out", Toast.LENGTH_SHORT).show();
+
+            // Remove objects
+            db = null;
 
             // Start login activity
             Intent new_activity = new Intent(this, LoginActivity.class);
             new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(new_activity);
+        }else {
+            Toast.makeText(getApplicationContext(), "Log out failed!", Toast.LENGTH_SHORT).show();
         }
     }
 }

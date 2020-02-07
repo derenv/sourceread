@@ -30,21 +30,23 @@ import derenvural.sourceread_prototype.R;
 public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
-    private FirebaseAuth mAuth;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Check database connection
-        mAuth = FirebaseAuth.getInstance();
-        loginViewModel = new LoginViewModel(mAuth);
 
+        // Check database connection
+        loginViewModel = new LoginViewModel();
+
+        //get components
         final EditText usernameEditText = findViewById(R.id.username);
         final EditText passwordEditText = findViewById(R.id.password);
         final Button loginButton = findViewById(R.id.login);
+        final Button registerButton = findViewById(R.id.register);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
+        // Observe login form
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
             public void onChanged(@Nullable LoginFormState loginFormState) {
@@ -52,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
                 loginButton.setEnabled(loginFormState.isDataValid());
+                registerButton.setEnabled(loginFormState.isDataValid());
                 if (loginFormState.getUsernameError() != null) {
                     usernameEditText.setError(getString(loginFormState.getUsernameError()));
                 }
@@ -61,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Observe login result
         loginViewModel.getLoginResult().observe(this, new Observer<LoginResult>() {
             @Override
             public void onChanged(@Nullable LoginResult loginResult) {
@@ -81,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Check for change in input text
         TextWatcher afterTextChangedListener = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -112,11 +117,20 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Button click events
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString(), LoginActivity.this);
+            }
+        });
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadingProgressBar.setVisibility(View.VISIBLE);
+                loginViewModel.register(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString(), LoginActivity.this);
             }
         });
@@ -130,13 +144,11 @@ public class LoginActivity extends AppCompatActivity {
         Intent new_activity = new Intent(getApplicationContext(), MainActivity.class);
         new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(new_activity);
-        startActivity(new_activity);
+        finish();
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
-        //Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
-
         // Display error message
-        Toast.makeText(getApplicationContext(), "Authentication unsuccessful!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Authentication unsuccessful!: "+errorString, Toast.LENGTH_SHORT).show();
     }
 }

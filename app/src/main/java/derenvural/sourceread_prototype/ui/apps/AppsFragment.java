@@ -1,8 +1,7 @@
 package derenvural.sourceread_prototype.ui.apps;
 
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.DrawableContainer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +16,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.cards.CardAdapter;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.data.database.fdatabase;
 
 public class AppsFragment extends Fragment {
 
     private AppsViewModel appsViewModel;
+    private fdatabase db;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -48,7 +51,7 @@ public class AppsFragment extends Fragment {
 
         // link & update message text
         final TextView textView = root.findViewById(R.id.text_apps);
-        appsViewModel.getText().observe(this, new Observer<String>() {
+        appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
@@ -56,33 +59,64 @@ public class AppsFragment extends Fragment {
         });
 
         // link & update cards
-        appsViewModel.getCards().observe(this, new Observer<ArrayList<Card>>() {
+        appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
             @Override
-            public void onChanged(final ArrayList<Card> updatedList) {
-                //textView.setCards(s);
+            public void onChanged(@Nullable ArrayList<Card> updatedList) {
+                // Reset adapter
                 mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
                 recyclerView.setAdapter(mAdapter);
 
-                // if list still empty, display appropriate text
+                // If list still empty, display appropriate text
                 if(mAdapter.getItemCount() <= 0) {
                     appsViewModel.setText("This is where you add article saver apps!");
                 } else {
-                    appsViewModel.setText("All apps successfully added!");
+                    appsViewModel.setText("");
                 }
             }
         });
 
-        // add test value
-        ArrayList<Card> newCards = new ArrayList<Card>();
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "Test Title 1", "this is testing text, test test test test! test test"));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "TEST Title 2", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor  ex ea commodo consequat. Duis aute irure dolor"));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "TEST TITLE 3", "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip"));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "Test Title 4", "in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat"));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "TEST TITLE 5", "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "TEST TITLE 6", "test test test test test"));
-        newCards.add(new Card(R.drawable.ic_card_placeholder1, "Test Title 7", "iufn ijufrngb viun eiuon wreoiun wrjiun wfdejiunmn wefjiu ewkiju nswjhud iudn iunn diw oiisd junfr yhks unsdkjih iundsc dsunjs idsjuncki iujhsoic cx"));
-        appsViewModel.setCards(newCards);
+        // Check if current user has > 0 articles
+        db = new fdatabase();
+        check_apps();
 
         return root;
+    }
+
+    // Check how many articles connected & verify quantity
+    private void check_apps() {
+        // Make apps request
+        db.request_user_apps();
+
+        // Add observer for db response
+        db.get_user_apps().observe(getViewLifecycleOwner(), new Observer<HashMap<String,String>>() {
+            @Override
+            public void onChanged(@Nullable HashMap<String,String> apps) {
+                // Get list of apps
+                Log.d("DB", "# Saved Apps: " + apps.size());
+
+                // Check for invalid data
+                if (apps == null) {
+                    return;
+                }
+                if (apps.size() > 0) {
+                    db.request_app_data(apps.keySet().toArray());
+                    db.get_current_apps().observe(getViewLifecycleOwner(), new Observer<ArrayList<HashMap<String, Object>>>() {
+                        @Override
+                        public void onChanged(@Nullable ArrayList<HashMap<String, Object>> app_data) {
+                            // Fetch data to be displayed
+                            final ArrayList<Card> cards = new ArrayList<Card>();
+                            for(HashMap<String, Object> app : app_data) {
+                                // TODO: reformat cards
+                                Card new_card = new Card(0, (String) app.get("key"), "");
+                                cards.add(new_card);
+                            }
+                            appsViewModel.setCards(cards);
+                        }
+                    });
+                }
+
+                // TODO: add 'add app' card to list
+            }
+        });
     }
 }

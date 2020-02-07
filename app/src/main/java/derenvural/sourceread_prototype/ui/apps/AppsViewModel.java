@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.data.cards.Card;
@@ -11,7 +14,6 @@ import derenvural.sourceread_prototype.data.cards.Card;
 public class AppsViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
-
     private MutableLiveData<ArrayList<Card>> mCards;
 
     public AppsViewModel() {
@@ -25,20 +27,12 @@ public class AppsViewModel extends ViewModel {
     public void setText(String s) {
         mText.setValue(s);
     }
-
-    public LiveData<String> getText() {
-        return mText;
-    }
-
     public void setCards(ArrayList<Card> cards) {
         mCards.setValue(cards);
     }
 
-    public void addCard(int si, String st, String sd) {
-        ArrayList<Card> NewCards = mCards.getValue();
-        NewCards.add(new Card(si,st,sd));
-        mCards.setValue(NewCards);
+    public LiveData<String> getText() {
+        return mText;
     }
-
     public LiveData<ArrayList<Card>> getCards() { return mCards; }
 }
