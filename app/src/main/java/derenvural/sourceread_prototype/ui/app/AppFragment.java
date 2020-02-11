@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.ui.apps;
+package derenvural.sourceread_prototype.ui.app;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,20 +16,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.cards.CardAdapter;
-import derenvural.sourceread_prototype.R;
 
-public class AppsFragment extends Fragment {
+public class AppFragment extends Fragment {
 
-    private AppsViewModel appsViewModel;
+    private AppViewModel appViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         // get view model
-        appsViewModel = ViewModelProviders.of(this).get(AppsViewModel.class);
+        appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_apps, container, false);
 
         // find view to be linked
@@ -40,12 +40,12 @@ public class AppsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
+        mAdapter = new CardAdapter(getActivity(), appViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
 
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_apps);
-        appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        appViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
@@ -53,24 +53,21 @@ public class AppsFragment extends Fragment {
         });
 
         // link cards to view-model data
-        appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
+        appViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Card> updatedList) {
                 // Reset adapter
-                mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
+                mAdapter = new CardAdapter(getActivity(), appViewModel.getCards().getValue());
                 recyclerView.setAdapter(mAdapter);
 
                 // If list still empty, display appropriate text
                 if(mAdapter.getItemCount() <= 0) {
-                    appsViewModel.setText("This is where you add article saver apps!");
+                    appViewModel.setText("This is where you add article saver apps!");
                 } else {
-                    appsViewModel.setText("");
+                    appViewModel.setText("");
                 }
             }
         });
-
-        // Check if current user has > 0 apps
-        appsViewModel.check_apps(getActivity());
 
         return root;
     }

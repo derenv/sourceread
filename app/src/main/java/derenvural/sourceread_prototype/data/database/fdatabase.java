@@ -19,9 +19,10 @@ import java.util.HashMap;
 
 public class fdatabase {
 
-    private MutableLiveData<ArrayList<String>> articles = new MutableLiveData<>();
+    private MutableLiveData<ArrayList<String>> articles = new MutableLiveData<ArrayList<String>>();
     private MutableLiveData<ArrayList<HashMap<String,Object>>> current_articles = new MutableLiveData<>();
-    private MutableLiveData<HashMap<String,String>> apps = new MutableLiveData<>();
+    private MutableLiveData<HashMap<String,String>> apps = new MutableLiveData<HashMap<String,String>>();
+    private MutableLiveData<String> current_app_key = new MutableLiveData("");
     private MutableLiveData<ArrayList<HashMap<String,Object>>> current_apps = new MutableLiveData<>();
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -101,7 +102,7 @@ public class fdatabase {
                         DocumentSnapshot document = task.getResult();
                         ArrayList<HashMap<String, Object>> new_list = current_apps.getValue();
                         new_list.add((HashMap<String, Object>) document.getData());
-                        current_articles.setValue(new_list);
+                        current_apps.setValue(new_list);
                     } else {
                         Log.d("DB", "get failed: ", task.getException());
                     }
@@ -110,10 +111,82 @@ public class fdatabase {
         }
     }
 
-    public LiveData<ArrayList<HashMap<String,Object>>> get_current_apps(){ return current_articles; }
-    public LiveData<ArrayList<HashMap<String,Object>>> get_current_articles(){ return current_articles; }
-    public LiveData<ArrayList<String>> get_user_articles(){ return articles; }
-    public LiveData<HashMap<String,String>> get_user_apps(){ return apps; }
+    public void request_app_key(@NonNull Object[] apps){
+        // Fetch article data for each
+        for(Object id : apps) {
+            DocumentReference app_request = get_app_request(id.toString());
+            app_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        // Get list of apps
+                        DocumentSnapshot document = task.getResult();
+                        final HashMap<String, Object> app = (HashMap<String, Object>) document.getData();
+                        current_app_key.setValue(app.get("key").toString());
+                    } else {
+                        Log.d("DB", "get failed: ", task.getException());
+                    }
+                }
+            });
+        }
+    }
+
+    public void request_app_card(@NonNull Object[] apps){
+        // Fetch article data for each
+        for(Object id : apps) {
+            DocumentReference app_request = get_app_request(id.toString());
+            app_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        // Get list of apps
+                        //DocumentSnapshot document = task.getResult();
+                        //ArrayList<HashMap<String, Object>> new_list = current_apps.getValue();
+                        //new_list.add((HashMap<String, Object>) document.getData());
+                        //current_articles.setValue(new_list);
+                    } else {
+                        Log.d("DB", "get failed: ", task.getException());
+                    }
+                }
+            });
+        }
+    }
+
+    public LiveData<ArrayList<HashMap<String,Object>>> get_current_apps(){
+        if(mAuth.getUid() != null) {
+            return current_apps;
+        }else{
+            return null;
+        }
+    }
+    public LiveData<ArrayList<HashMap<String,Object>>> get_current_articles(){
+        if(mAuth.getUid() != null) {
+            return current_articles;
+        }else{
+            return null;
+        }
+    }
+    public LiveData<ArrayList<String>> get_user_articles(){
+        if(mAuth.getUid() != null) {
+            return articles;
+        }else{
+            return null;
+        }
+    }
+    public LiveData<HashMap<String,String>> get_user_apps(){
+        if(mAuth.getUid() != null) {
+            return apps;
+        }else{
+            return null;
+        }
+    }
+    public LiveData<String> get_user_app_key(){
+        if(mAuth.getUid() != null) {
+            return current_app_key;
+        }else{
+            return null;
+        }
+    }
 
 
 

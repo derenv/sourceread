@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.ui.apps;
+package derenvural.sourceread_prototype.ui.app;
 
 import android.util.Log;
 
@@ -15,12 +15,12 @@ import java.util.HashMap;
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 
-public class AppsViewModel extends ViewModel {
+public class AppViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
     private MutableLiveData<ArrayList<Card>> mCards;
 
-    public AppsViewModel() {
+    public AppViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("");
 
