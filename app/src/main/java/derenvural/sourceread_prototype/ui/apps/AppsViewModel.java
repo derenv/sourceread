@@ -30,6 +30,11 @@ public class AppsViewModel extends ViewModel {
     public void setCards(ArrayList<Card> cards) {
         mCards.setValue(cards);
     }
+    public void addCard(Card card) {
+        ArrayList<Card> new_cards = mCards.getValue();
+        new_cards.add(card);
+        mCards.setValue(new_cards);
+    }
 
     public LiveData<String> getText() {
         return mText;

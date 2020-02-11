@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.cards.CardAdapter;
@@ -30,7 +29,6 @@ public class AppsFragment extends Fragment {
     private fdatabase db;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -42,14 +40,14 @@ public class AppsFragment extends Fragment {
         recyclerView = root.findViewById(R.id.card_view);
 
         // use a linear layout manager
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
         mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
 
-        // link & update message text
+        // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_apps);
         appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
@@ -58,7 +56,7 @@ public class AppsFragment extends Fragment {
             }
         });
 
-        // link & update cards
+        // link cards to view-model data
         appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Card> updatedList) {
@@ -75,14 +73,14 @@ public class AppsFragment extends Fragment {
             }
         });
 
-        // Check if current user has > 0 articles
+        // Check if current user has > 0 apps
         db = new fdatabase();
         check_apps();
 
         return root;
     }
 
-    // Check how many articles connected & verify quantity
+    // Check how many apps connected & verify quantity
     private void check_apps() {
         // Make apps request
         db.request_user_apps();
@@ -91,31 +89,48 @@ public class AppsFragment extends Fragment {
         db.get_user_apps().observe(getViewLifecycleOwner(), new Observer<HashMap<String,String>>() {
             @Override
             public void onChanged(@Nullable HashMap<String,String> apps) {
-                // Get list of apps
-                Log.d("DB", "# Saved Apps: " + apps.size());
-
                 // Check for invalid data
                 if (apps == null) {
                     return;
                 }
                 if (apps.size() > 0) {
-                    db.request_app_data(apps.keySet().toArray());
+                    // Get list of apps
+                    Log.d("DB", "# Saved Apps: " + apps.size());
+
+                    // Request all connected apps
+                    final Object[] app_names = apps.keySet().toArray();
+                    db.request_app_data(app_names);
                     db.get_current_apps().observe(getViewLifecycleOwner(), new Observer<ArrayList<HashMap<String, Object>>>() {
                         @Override
                         public void onChanged(@Nullable ArrayList<HashMap<String, Object>> app_data) {
-                            // Fetch data to be displayed
-                            final ArrayList<Card> cards = new ArrayList<Card>();
-                            for(HashMap<String, Object> app : app_data) {
-                                // TODO: reformat cards
-                                Card new_card = new Card(0, (String) app.get("key"), "");
-                                cards.add(new_card);
+                            // Check for invalid data
+                            if (app_data == null) {
+                                return;
                             }
-                            appsViewModel.setCards(cards);
+                            if (app_data.size() > 0) {
+                                // Format list cards & add to view-model
+                                final ArrayList<Card> cards = new ArrayList<Card>();
+                                for (int i = 0; i < app_data.size(); i++) {
+                                    // Show title & other fields of app in list
+                                    // TODO: other fields
+                                    Card new_card = new Card(0, app_names[i].toString(), app_data.get(i).get("key").toString());
+                                    cards.add(new_card);
+                                }
+
+                                // Add 'add app' card to list
+                                cards.add(new Card(0, "Add new App", "(click me!)"));
+                                appsViewModel.setCards(cards);
+                            }
                         }
                     });
-                }
+                }else{
 
-                // TODO: add 'add app' card to list
+                    // Add 'add app' card to list
+                    final ArrayList<Card> cards = new ArrayList<Card>();
+                    cards.add(new Card(0, "Add new App", "(click me!)"));
+                    appsViewModel.setCards(cards);
+                }
+                // TODO: add separate click listener for add apps? or check title in original?
             }
         });
     }
