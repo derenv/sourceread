@@ -4,20 +4,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public abstract class DataHolder {
-    private int image;
+    private String image;
     private String title;
     private String text;
 
-    public DataHolder(){}
-
-    public DataHolder(@Nullable int newImage, @NonNull String newTitle, @Nullable String newText){
-
+    public DataHolder(@Nullable String newImage, @NonNull String newTitle, @Nullable String newText){
         image = newImage;
         title = newTitle;
         text = newText;
     }
 
-    public int getImage(){
+    public String getImage(){
         return image;
     }
 

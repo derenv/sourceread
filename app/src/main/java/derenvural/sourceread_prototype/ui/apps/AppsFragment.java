@@ -48,7 +48,7 @@ public class AppsFragment extends Fragment {
         appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            textView.setText(s);
             }
         });
 
@@ -56,16 +56,16 @@ public class AppsFragment extends Fragment {
         appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Card> updatedList) {
-                // Reset adapter
-                mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
-                recyclerView.setAdapter(mAdapter);
+            // Reset adapter
+            mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
+            recyclerView.setAdapter(mAdapter);
 
-                // If list still empty, display appropriate text
-                if(mAdapter.getItemCount() <= 0) {
-                    appsViewModel.setText("This is where you add article saver apps!");
-                } else {
-                    appsViewModel.setText("");
-                }
+            // If list still empty, display appropriate text
+            if(mAdapter.getItemCount() <= 0) {
+                appsViewModel.setText("This is where you add article saver apps!");
+            } else {
+                appsViewModel.setText("");
+            }
             }
         });
 

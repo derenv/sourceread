@@ -3,7 +3,7 @@ package derenvural.sourceread_prototype.ui.apps;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LifecycleOwner;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -34,11 +34,6 @@ public class AppsViewModel extends ViewModel {
     public void setCards(ArrayList<Card> cards) {
         mCards.setValue(cards);
     }
-    public void addCard(Card card) {
-        ArrayList<Card> new_cards = mCards.getValue();
-        new_cards.add(card);
-        mCards.setValue(new_cards);
-    }
 
     public LiveData<String> getText() {
         return mText;
@@ -47,7 +42,7 @@ public class AppsViewModel extends ViewModel {
 
 
     // Check how many apps connected & verify quantity
-    public void check_apps(final LifecycleOwner context) {
+    public void check_apps(final FragmentActivity context) {
         // Make apps request
         final fdatabase db = new fdatabase();
         db.request_user_apps();
@@ -66,36 +61,32 @@ public class AppsViewModel extends ViewModel {
 
                     // Request all connected apps
                     final Object[] app_names = apps.keySet().toArray();
-                    db.request_app_data(app_names);
-                    db.get_current_apps().observe(context, new Observer<ArrayList<HashMap<String, Object>>>() {
+                    db.request_app_card(app_names,context);
+                    db.get_current_cards().observe(context, new Observer<ArrayList<Card>>() {
                         @Override
-                        public void onChanged(@Nullable ArrayList<HashMap<String, Object>> app_data) {
+                        public void onChanged(@Nullable ArrayList<Card> app_cards) {
                             // Check for invalid data
-                            if (app_data == null) {
+                            if (app_cards == null) {
                                 return;
                             }
-                            if (app_data.size() > 0) {
-                                // Format list cards & add to view-model
-                                final ArrayList<Card> cards = new ArrayList<Card>();
-                                for (int i = 0; i < app_data.size(); i++) {
-                                    // Show title & other fields of app in list
-                                    // TODO: other fields
-                                    //app_data.get(i).get("key").toString()
-                                    Card new_card = new Card(0, app_names[i].toString(), "");
-                                    cards.add(new_card);
+                            if (app_cards.size() > 0) {
+                                // Remove old 'add app' card
+                                ArrayList<Card> new_app_cards = (ArrayList<Card>) app_cards.clone();
+                                for(Card app: new_app_cards){
+                                    if(app.getTitle().equals("Add new App")){
+                                        new_app_cards.remove(app);
+                                    }
                                 }
-
                                 // Add 'add app' card to list
-                                cards.add(new Card(0, "Add new App", "(click me!)"));
-                                setCards(cards);
+                                new_app_cards.add(new Card(null, "Add new App", "(click me!)"));
+                                setCards(new_app_cards);
                             }
                         }
                     });
                 }else{
-
                     // Add 'add app' card to list
                     final ArrayList<Card> cards = new ArrayList<Card>();
-                    cards.add(new Card(0, "Add new App", "(click me!)"));
+                    cards.add(new Card(null, "Add new App", "(click me!)"));
                     setCards(cards);
                 }
             }

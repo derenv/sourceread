@@ -4,12 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
@@ -38,12 +41,12 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             // Add click listener for fragment transition
             v.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View vx) {
-                    // CardView item clicked
-                    TextView current = vx.findViewById(vTitle.getId());
-                    Toast.makeText(vx.getContext(), "Item in list: "+current.getText(), Toast.LENGTH_SHORT).show();
+                // CardView item clicked
+                TextView current = vx.findViewById(vTitle.getId());
+                Toast.makeText(vx.getContext(), "Item in list: "+current.getText(), Toast.LENGTH_SHORT).show();
 
-                    // TODO: Transition to fragment for app OR article
-                    //
+                // TODO: Transition to fragment for app OR article
+                //
                 }
             });
         }
@@ -69,7 +72,14 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     public void onBindViewHolder(CardViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.vImage.setImageResource(mDataHolders.get(position).getImage());
+        try {
+            String image = mDataHolders.get(position).getImage();
+            if(image != null) {
+                Glide.with(holder.vImage).load(mDataHolders.get(position).getImage()).into(holder.vImage);
+            }
+        }catch(Exception e){
+            Log.d("IMG", "image fetch failed: ", e.getCause());
+        }
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
         holder.vText.setText(mDataHolders.get(position).getText());
     }

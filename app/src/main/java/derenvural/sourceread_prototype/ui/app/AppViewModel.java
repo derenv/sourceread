@@ -81,12 +81,12 @@ public class AppViewModel extends ViewModel {
                                     // Show title & other fields of app in list
                                     // TODO: other fields
                                     //app_data.get(i).get("key").toString()
-                                    Card new_card = new Card(0, app_names[i].toString(), "");
+                                    Card new_card = new Card(null, app_names[i].toString(), "");
                                     cards.add(new_card);
                                 }
 
                                 // Add 'add app' card to list
-                                cards.add(new Card(0, "Add new App", "(click me!)"));
+                                cards.add(new Card(null, "Add new App", "(click me!)"));
                                 setCards(cards);
                             }
                         }
@@ -95,7 +95,7 @@ public class AppViewModel extends ViewModel {
 
                     // Add 'add app' card to list
                     final ArrayList<Card> cards = new ArrayList<Card>();
-                    cards.add(new Card(0, "Add new App", "(click me!)"));
+                    cards.add(new Card(null, "Add new App", "(click me!)"));
                     setCards(cards);
                 }
             }
