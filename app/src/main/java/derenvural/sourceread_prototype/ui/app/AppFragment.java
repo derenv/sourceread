@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.cards.CardAdapter;
@@ -23,8 +24,8 @@ import derenvural.sourceread_prototype.data.cards.CardAdapter;
 public class AppFragment extends Fragment {
 
     private AppViewModel appViewModel;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    //private RecyclerView recyclerView;
+    //private RecyclerView.Adapter mAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -33,27 +34,27 @@ public class AppFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_apps, container, false);
 
         // find view to be linked
-        recyclerView = root.findViewById(R.id.card_view);
+        //recyclerView = root.findViewById(R.id.card_view);
 
         // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        //RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        //recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        mAdapter = new CardAdapter(getActivity(), appViewModel.getCards().getValue());
-        recyclerView.setAdapter(mAdapter);
+        //mAdapter = new CardAdapter(getActivity(), appViewModel.getCards().getValue());
+        //recyclerView.setAdapter(mAdapter);
 
         // link message text to view-model data
-        final TextView textView = root.findViewById(R.id.text_apps);
-        appViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        //final TextView textView = root.findViewById(R.id.text_apps);
+        //appViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        //    @Override
+        //    public void onChanged(@Nullable String s) {
+        //        textView.setText(s);
+        //    }
+        //});
 
         // link cards to view-model data
-        appViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
+        /*appViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Card> updatedList) {
                 // Reset adapter
@@ -67,8 +68,22 @@ public class AppFragment extends Fragment {
                     appViewModel.setText("");
                 }
             }
-        });
+        }); */
+
+        // Request app
+        update();
 
         return root;
+    }
+
+    /*
+     * Fetch api tokens, auth tokens, and user token
+     * */
+    public void update(){
+        // Request articles
+        MainActivity main = (MainActivity) getActivity();
+
+        // Add observer to articles
+        //appViewModel.check_app(main, main.getUser());
     }
 }

@@ -20,13 +20,14 @@ import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginViewModel extends ViewModel {
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
+    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<LoginFormState>();
+    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<LoginResult>();
+    private MutableLiveData<LoggedInUser> login_user = new MutableLiveData<LoggedInUser>();
 
     LiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
-
+    LoggedInUser getLoginUser() { return login_user.getValue(); }
     LiveData<LoginResult> getLoginResult() {
         return loginResult;
     }
@@ -39,8 +40,10 @@ public class LoginViewModel extends ViewModel {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // Set login result
-                    LoggedInUserView new_user = new LoggedInUserView(new LoggedInUser(FirebaseAuth.getInstance().getCurrentUser()));
-                    loginResult.setValue(new LoginResult(new_user));
+                    LoggedInUser new_user = new LoggedInUser(FirebaseAuth.getInstance().getCurrentUser());
+                    LoggedInUserView new_user_view = new LoggedInUserView(new_user);
+                    login_user.setValue(new_user);
+                    loginResult.setValue(new LoginResult(new_user_view));
                 } else {
                     // If sign in fails, display a message to the user.
                     loginResult.setValue(new LoginResult(R.string.login_failed));

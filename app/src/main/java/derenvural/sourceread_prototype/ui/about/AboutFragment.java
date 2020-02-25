@@ -53,7 +53,7 @@ public class AboutFragment extends Fragment {
                 text = new TextView(getActivity());
                 text.setVerticalScrollBarEnabled(true);
                 backButton = new Button(getActivity());
-                backButton.setText("Back");
+                backButton.setText("@string/button_back");
                 scrolledText = new ScrollView(getActivity());
 
                 // Add back listener

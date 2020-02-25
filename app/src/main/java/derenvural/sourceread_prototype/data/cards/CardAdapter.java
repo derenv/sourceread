@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,15 +11,12 @@ import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
     private ArrayList<Card> mDataHolders;
-
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -70,15 +66,19 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(CardViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-        try {
-            String image = mDataHolders.get(position).getImage();
-            if(image != null) {
-                Glide.with(holder.vImage).load(mDataHolders.get(position).getImage()).into(holder.vImage);
-            }
-        }catch(Exception e){
-            Log.d("IMG", "image fetch failed: ", e.getCause());
+        if(mDataHolders.get(position).getTitle().equals("pocket")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }else if(mDataHolders.get(position).getTitle().equals("instapaper")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
+        }else if(mDataHolders.get(position).getTitle().equals("evernote")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }else if(mDataHolders.get(position).getTitle().equals("wallabag")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
+        }else if(mDataHolders.get(position).getTitle().equals("pinboard")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }else{
+            // Load article icon
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
         }
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
         holder.vText.setText(mDataHolders.get(position).getText());

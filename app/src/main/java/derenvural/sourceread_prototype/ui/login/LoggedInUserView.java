@@ -17,12 +17,12 @@ class LoggedInUserView {
 
     LoggedInUserView(LoggedInUser user) {
         // Populate object from database
-        this.userId = user.getUserId();
-        this.displayName = user.getDisplayName();
-        this.articles = user.getArticles();
-        this.apps = user.getApps();
-        this.veracity = user.getOverallVeracity();
-        this.email = user.getEmail();
+        this.userId = user.getUserId().getValue();
+        this.displayName = user.getDisplayName().getValue();
+        //this.articles = user.getArticles();
+        //this.apps = user.getApps();
+        this.veracity = user.getOverallVeracity().getValue();
+        this.email = user.getEmail().getValue();
     }
 
     public String getUserId() {

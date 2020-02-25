@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class AppsViewModel extends ViewModel {
 
@@ -40,49 +42,42 @@ public class AppsViewModel extends ViewModel {
     }
     public LiveData<ArrayList<Card>> getCards() { return mCards; }
 
+    // Check how many articles connected & verify quantity
+    public void check_apps(LifecycleOwner context, LoggedInUser user) {
+        // Populate apps
+        // Get current apps
+        if(user.getApps().getValue() != null && user.getApps().getValue().size() != 0) {
+            final ArrayList<Card> cards = new ArrayList<Card>();
+            for (HashMap<String, Object> app : user.getApps().getValue()) {
+                Card new_card = new Card(null, app.get("name").toString(), app.get("description").toString());
+                cards.add(new_card);
+            }
+            // Add 'add app' card to list
+            cards.add(new Card(null, "Add new App", "(click me!)"));
+            setCards(cards);
+        }
 
-    // Check how many apps connected & verify quantity
-    public void check_apps(final FragmentActivity context) {
-        // Make apps request
-        final fdatabase db = new fdatabase();
-        db.request_user_apps();
-
-        // Add observer for db response
-        db.get_user_apps().observe(context, new Observer<HashMap<String,String>>() {
+        // Add observer for future
+        user.getApps().observe(context, new Observer<ArrayList<HashMap<String, Object>>>() {
             @Override
-            public void onChanged(@Nullable HashMap<String,String> apps) {
-                // Check for invalid data
+            public void onChanged(@Nullable ArrayList<HashMap<String, Object>> apps) {
+                //
                 if (apps == null) {
                     return;
                 }
                 if (apps.size() > 0) {
-                    // Get list of apps
                     Log.d("DB", "# Saved Apps: " + apps.size());
 
-                    // Request all connected apps
-                    final Object[] app_names = apps.keySet().toArray();
-                    db.request_app_card(app_names,context);
-                    db.get_current_cards().observe(context, new Observer<ArrayList<Card>>() {
-                        @Override
-                        public void onChanged(@Nullable ArrayList<Card> app_cards) {
-                            // Check for invalid data
-                            if (app_cards == null) {
-                                return;
-                            }
-                            if (app_cards.size() > 0) {
-                                // Remove old 'add app' card
-                                ArrayList<Card> new_app_cards = (ArrayList<Card>) app_cards.clone();
-                                for(Card app: new_app_cards){
-                                    if(app.getTitle().equals("Add new App")){
-                                        new_app_cards.remove(app);
-                                    }
-                                }
-                                // Add 'add app' card to list
-                                new_app_cards.add(new Card(null, "Add new App", "(click me!)"));
-                                setCards(new_app_cards);
-                            }
-                        }
-                    });
+                    // Fetch data to be displayed
+                    final ArrayList<Card> cards = new ArrayList<Card>();
+                    for (HashMap<String, Object> app : apps) {
+                        Card new_card = new Card(null, app.get("name").toString(), app.get("description").toString());
+                        cards.add(new_card);
+                    }
+
+                    // Add 'add app' card to list
+                    cards.add(new Card(null, "Add new App", "(click me!)"));
+                    setCards(cards);
                 }else{
                     // Add 'add app' card to list
                     final ArrayList<Card> cards = new ArrayList<Card>();

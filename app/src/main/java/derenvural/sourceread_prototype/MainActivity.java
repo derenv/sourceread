@@ -1,6 +1,7 @@
 package derenvural.sourceread_prototype;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -10,8 +11,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.annotation.Nullable;
-import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -29,16 +28,31 @@ import android.view.Menu;
 import android.widget.Toast;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.http.httpHandler;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
-
+    // Android
     private AppBarConfiguration mAppBarConfiguration;
+
+    // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
+    private httpHandler httph;
+
+    public LoggedInUser getUser() {
+        return user;
+    }
+
+    public void setUser(LoggedInUser user) {
+        this.user = user;
+    }
+
+    // User
+    public LoggedInUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,21 +87,77 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        // Initialize Firebase Auth
+        // Initialize Firebase Authentication
         mAuth = FirebaseAuth.getInstance();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        if(null == mAuth.getCurrentUser()){
-            // Redirect to login page
-            Intent new_activity = new Intent(this, LoginActivity.class);
-            new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(new_activity);
-            finish();
-        }else{
-            // Create database object
-            db = new fdatabase();
 
-            // Check if any apps connected
-            check_apps();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        if(mAuth.getUid() == null){
+            login_redirect();
+        } else {
+            // Fetch user object from previous activity
+            Intent i = getIntent();
+            user = (LoggedInUser) i.getParcelableExtra("user");
+            Log.d("USERDATA", "user: " + user);
+
+            // Check if user started from outside login
+            if (user == null) {
+                user = new LoggedInUser(mAuth.getCurrentUser());
+            }
+
+            // Instantiate database/http objects
+            create_objects();
+
+            // Get user fields from database using http requests
+            populate_user();
+
+            // handle app links
+            handleIntent(i);
+        }
+    }
+
+    private void populate_user(){
+        // Check if any apps connected
+        user.populate(this, this, db, httph);
+    }
+
+    private void create_objects(){
+        // Create http object
+        httph = new httpHandler(this);
+
+        // Create database object
+        db = new fdatabase();
+    }
+
+    private void login_redirect(){
+        // Redirect to login page
+        Intent new_activity = new Intent(this, LoginActivity.class);
+        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(new_activity);
+        finish();
+    }
+
+    private void handleIntent(Intent intent) {
+        // Get intent data
+        String appLinkAction = intent.getAction();
+        Uri appLinkData = intent.getData();
+        Log.d("DEEPLINK","checking for deeplink..");
+
+        // Check if intent comes from deeplink
+        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
+            // Fetch deeplink type
+            String link_type = appLinkData.getLastPathSegment();
+            Log.d("DEEPLINK value", appLinkData.toString());
+            Log.d("DEEPLINK type", link_type);
+
+            // Whitelist deeplinks
+            if(link_type.equals("successful_login")){
+                // Get app
+                String app = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
+                Log.d("DEEPLINK app",app);
+
+                // Request access tokens
+                user.access_tokens(this, httph);
+            }
         }
     }
 
@@ -123,40 +193,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    // Check how many apps connected & verify each
-    private void check_apps() {
-        // Make apps request
-        db.request_user_apps();
-
-        // Add observer for db response
-        db.get_user_apps().observe(this, new Observer<HashMap<String,String>>() {
-            @Override
-            public void onChanged(@Nullable HashMap<String,String> apps) {
-                // Get list of apps
-                Log.d("DB", "# Saved Apps: " + apps.size());
-
-                // Check for invalid data
-                if (apps == null) {
-                    return;
-                }
-                if (apps.size() == 0) {
-                    // Prompt to add apps
-                    //
-                }else if (apps.size() > 0) {
-                    // Validate each app key
-                    for (Map.Entry<String,String> entry : apps.entrySet()) {
-                        // Get app & key
-                        String app = entry.getKey();
-                        String api_key = entry.getValue();
-                        Log.d("DB", "app: " + app + ", API-key: " + api_key);
-
-                        // TODO: Validate key
-                    }
-                }
-            }
-        });
     }
 
     private void logout(){

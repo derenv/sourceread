@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -141,9 +142,13 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
 
         // handle login redirect
-        Intent new_activity = new Intent(getApplicationContext(), MainActivity.class);
-        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(new_activity);
+        Intent main_activity = new Intent(getApplicationContext(), MainActivity.class);
+        LoggedInUser user_data = loginViewModel.getLoginUser();
+        main_activity.putExtra("user", user_data);
+        main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Start next activity and close login activity
+        startActivity(main_activity);
         finish();
     }
 

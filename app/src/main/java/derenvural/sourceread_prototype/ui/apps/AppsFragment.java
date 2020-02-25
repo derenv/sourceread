@@ -1,6 +1,9 @@
 package derenvural.sourceread_prototype.ui.apps;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.cards.CardAdapter;
 import derenvural.sourceread_prototype.R;
@@ -69,9 +73,20 @@ public class AppsFragment extends Fragment {
             }
         });
 
-        // Check if current user has > 0 apps
-        appsViewModel.check_apps(getActivity());
+        // Request apps
+        update();
 
         return root;
+    }
+
+    /*
+     * Fetch api tokens, auth tokens, and user token
+     * */
+    public void update(){
+        // Request articles
+        MainActivity main = (MainActivity) getActivity();
+
+        // Add observer to articles
+        appsViewModel.check_apps(main, main.getUser());
     }
 }

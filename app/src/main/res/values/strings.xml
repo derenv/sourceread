@@ -14,6 +14,10 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About</string>
 
+    <string name="menu_section_articles">Articles</string>
+    <string name="menu_section_apps">Apps</string>
+    <string name="menu_section_misc">Miscellaneous</string>
+
     <string-array name="about_list">
         <item>Contact Us</item>
         <item>Privacy Policy</item>
@@ -33,6 +37,8 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="register_failed">"Registration failed"</string>
+
+    <string name="button_back">Back</string>
 
     <string name="contact_html">
         <![CDATA[
@@ -192,4 +198,5 @@
             <p>Any claim related to SourceRead\'s Website shall be governed by the laws of gb without regards to its conflict of law provisions.</p>
         ]]>
     </string>
+    <string name="asset_statements" translatable="false">[{ \"include\": \"https://sourceread.firebaseapp.com/.well-known/assetlinks.json\" }]</string>
 </resources>

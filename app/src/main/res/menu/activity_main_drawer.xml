@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <item android:title="Articles">
+    <item android:title="@string/menu_section_articles">
         <menu>
             <item
                 android:id="@+id/nav_home"
@@ -16,7 +16,7 @@
         </menu>
     </item>
 
-    <item android:title="Apps">
+    <item android:title="@string/menu_section_apps">
         <menu>
             <item
                 android:id="@+id/nav_apps"
@@ -25,7 +25,7 @@
         </menu>
     </item>
 
-    <item android:title="Miscellaneous">
+    <item android:title="@string/menu_section_misc">
         <menu>
             <item
                 android:id="@+id/nav_about"
