@@ -7,11 +7,21 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class httpHandler {
     private RequestQueue queue;
@@ -30,11 +40,46 @@ public class httpHandler {
         context.startActivity(browserIntent);
     }
 
-    public void make_volley_request(@NonNull final  String url, @NonNull final Response.Listener<String> response, @NonNull final Response.ErrorListener error){
-        // Request a string response from the provided URL
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, response, error);
+    public void make_volley_request(@NonNull String url,
+                                    HashMap<String, String> parameters,
+                                    @NonNull Response.Listener<JSONObject> response,
+                                    @NonNull Response.ErrorListener error){
+        // Create JSON object
+        JSONObject jsonParam = new JSONObject();
+
+        //Add string parameters
+        try {
+            for(String key : parameters.keySet()) {
+                jsonParam.put(key, parameters.get(key));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Create JSON request with custom headers
+        JsonObjectRequest request_json = new JsonObjectRequest(Request.Method.POST,
+                url,
+                jsonParam,
+                response,
+                error){
+            /**
+             * Passing some request headers
+             * set request & response to JSON
+             */
+            @Override
+            public String getBodyContentType()
+            {
+                return "application/json; charset=utf-8";
+            }
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("X-Accept", "application/json");
+                return params;
+            }
+        };
 
         // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+        queue.add(request_json);
     }
 }

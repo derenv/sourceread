@@ -3,6 +3,7 @@ package derenvural.sourceread_prototype.data.login;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.HttpAuthHandler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,6 +15,10 @@ import androidx.lifecycle.Observer;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -247,32 +252,45 @@ public class LoggedInUser implements Serializable {
         for (final HashMap<String, Object> app : found_apps) {
             // Get request token request URL for current app
             HashMap<String, Object> app_requests = (HashMap<String, Object>) app.get("requests");
-            String app_request_token_url = app_requests.get("request").toString();
-            Log.d("HTTP request token request", app_request_token_url);
-
-            // Get app key for current app
-            String app_key = app.get("key").toString();
-            String url = app_request_token_url.replaceAll("REPLACEME", app_key);
+            String url = app_requests.get("request").toString();
             Log.d("HTTP request token request", url);
 
+            // Cut out redirect URL from url
+            String[] db_vals = url.split("\\?");
+            url = db_vals[0];
+            String redirect_uri = db_vals[1];
+            Log.d("HTTP access token request", url);
+
+            // Fetch app key
+            String app_key = app.get("key").toString();
+
+            // Get app key for current app
+            HashMap<String, String> parameters = new HashMap<String, String>();
+            parameters.put("consumer_key",app_key);
+            parameters.put("redirect_uri",redirect_uri);
+
             // Make https POST request
-            httph.make_volley_request(url,
-                    new Response.Listener<String>() {
+            httph.make_volley_request(url, parameters,
+                    new Response.Listener<JSONObject>() {
                         @Override
-                        public void onResponse(String response) {
+                        public void onResponse(JSONObject response) {
                             // Cut token out of html response
-                            Log.d("API response", "Request Response is: " + response.substring(5));
+                            Log.d("API response", "Request Response is: " + response);
 
-                            // Create new hash-map
-                            HashMap<String, String> new_request_tokens = getRequestTokens().getValue();
-                            if (new_request_tokens == null) {
-                                new_request_tokens = new HashMap<String, String>();
+                            try {
+                                // Create new hash-map
+                                HashMap<String, String> new_request_tokens = getRequestTokens().getValue();
+                                if (new_request_tokens == null) {
+                                    new_request_tokens = new HashMap<String, String>();
+                                }
+                                new_request_tokens.put(app.get("name").toString(), response.getString("code"));
+
+                                // Add new request token
+                                setRequestTokens(new_request_tokens);
+                                Log.d("API request token", getRequestTokens().getValue().toString());
+                            }catch(JSONException error){
+                                Log.e("JSON error", "error reading JSON: " + error.getMessage());
                             }
-                            new_request_tokens.put(app.get("name").toString(), response.substring(5));
-
-                            // Add new request token
-                            setRequestTokens(new_request_tokens);
-                            Log.d("API request token", getRequestTokens().getValue().toString());
                         }
                     },
                     new Response.ErrorListener() {
@@ -308,7 +326,7 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-    public void access_tokens(httpHandler httph, ArrayList<HashMap<String, Object>> found_apps, String app_name){
+    public void access_tokens(httpHandler httph, ArrayList<HashMap<String, Object>> found_apps, final String app_name){
         for (HashMap<String, Object> app : found_apps) {
             if(app.get("name").equals(app_name)) {
                 // Get login URL
@@ -316,35 +334,44 @@ public class LoggedInUser implements Serializable {
                 String url = requests.get("access");
                 Log.d("HTTP access token request", url);
 
-                // Insert app key
-                String app_key = app.get("key").toString();
-                url = url.replaceAll("REPLACEME1", app_key);
+                // Cut out redirect URL from url
+                String[] db_vals = url.split("\\?");
+                url = db_vals[0];
+                String redirect_uri = db_vals[1];
                 Log.d("HTTP access token request", url);
 
-                // Insert request token
+                // Fetch app key & request token
+                String app_key = app.get("key").toString();
                 String request_token = getRequestTokens().getValue().get(app_name);
-                url = url.replaceAll("REPLACEME2", request_token);
-                Log.d("HTTP access token request", url);
+
+                HashMap<String, String> parameters = new HashMap<String, String>();
+                parameters.put("consumer_key",app_key);
+                parameters.put("code",request_token);
+                parameters.put("redirect_uri",redirect_uri);
 
                 // Request access token by http request to URL
-                httph.make_volley_request(url,
-                        new Response.Listener<String>() {
+                httph.make_volley_request(url, parameters,
+                        new Response.Listener<JSONObject>() {
                             @Override
-                            public void onResponse(String response) {
+                            public void onResponse(JSONObject response) {
                                 // Cut token out of html response
-                                Log.d("API response", "Access Response is: " + response.substring(5));
+                                Log.d("API response", "Access Response is: " + response);
 
-                                // Create new hash-map
-                                HashMap<String, String> new_access_tokens = getAccessTokens().getValue();
-                                if (new_access_tokens == null) {
-                                    new_access_tokens = new HashMap<String, String>();
+                                try{
+                                    // Create new hash-map
+                                    HashMap<String, String> new_access_tokens = getAccessTokens().getValue();
+                                    if (new_access_tokens == null) {
+                                        new_access_tokens = new HashMap<String, String>();
+                                    }
+                                    new_access_tokens.put(app_name, response.getString("access_token"));
+                                    setDisplayName(response.getString("username"));
+
+                                    // Add new access token
+                                    setAccessTokens(new_access_tokens);
+                                    Log.d("API access token", getAccessTokens().getValue().toString());
+                                }catch(JSONException error){
+                                    Log.e("JSON error", "error reading JSON: " + error.getMessage());
                                 }
-                                String new_token = response.substring(13).split("&")[0];
-                                new_access_tokens.put("access_token", new_token);
-
-                                // Add new access token
-                                setAccessTokens(new_access_tokens);
-                                Log.d("API access token", getAccessTokens().getValue().toString());
                             }
                         },
                         new Response.ErrorListener() {
