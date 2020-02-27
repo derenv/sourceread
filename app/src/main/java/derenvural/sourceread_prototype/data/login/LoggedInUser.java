@@ -3,9 +3,7 @@ package derenvural.sourceread_prototype.data.login;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
@@ -16,14 +14,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +25,6 @@ import java.util.HashMap;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class LoggedInUser implements Serializable {
     // Basic data
@@ -253,13 +245,11 @@ public class LoggedInUser implements Serializable {
             // Get request token request URL for current app
             HashMap<String, Object> app_requests = (HashMap<String, Object>) app.get("requests");
             String url = app_requests.get("request").toString();
-            Log.d("HTTP request token request", url);
 
             // Cut out redirect URL from url
-            String[] db_vals = url.split("\\?");
-            url = db_vals[0];
-            String redirect_uri = db_vals[1];
-            Log.d("HTTP access token request", url);
+            String[] fullUrl = url.split("\\?");
+            url = fullUrl[0];
+            String redirect_uri = fullUrl[1];
 
             // Fetch app key
             String app_key = app.get("key").toString();
@@ -275,7 +265,7 @@ public class LoggedInUser implements Serializable {
                         @Override
                         public void onResponse(JSONObject response) {
                             // Cut token out of html response
-                            Log.d("API response", "Request Response is: " + response);
+                            Log.d("API", "Request Response recieved");
 
                             try {
                                 // Create new hash-map
@@ -287,7 +277,6 @@ public class LoggedInUser implements Serializable {
 
                                 // Add new request token
                                 setRequestTokens(new_request_tokens);
-                                Log.d("API request token", getRequestTokens().getValue().toString());
                             }catch(JSONException error){
                                 Log.e("JSON error", "error reading JSON: " + error.getMessage());
                             }
@@ -332,13 +321,11 @@ public class LoggedInUser implements Serializable {
                 // Get login URL
                 HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
                 String url = requests.get("access");
-                Log.d("HTTP access token request", url);
 
                 // Cut out redirect URL from url
-                String[] db_vals = url.split("\\?");
-                url = db_vals[0];
-                String redirect_uri = db_vals[1];
-                Log.d("HTTP access token request", url);
+                String[] fullUrl = url.split("\\?");
+                url = fullUrl[0];
+                String redirect_uri = fullUrl[1];
 
                 // Fetch app key & request token
                 String app_key = app.get("key").toString();
@@ -355,7 +342,7 @@ public class LoggedInUser implements Serializable {
                             @Override
                             public void onResponse(JSONObject response) {
                                 // Cut token out of html response
-                                Log.d("API response", "Access Response is: " + response);
+                                Log.d("API", "Request Response recieved");
 
                                 try{
                                     // Create new hash-map
@@ -368,7 +355,6 @@ public class LoggedInUser implements Serializable {
 
                                     // Add new access token
                                     setAccessTokens(new_access_tokens);
-                                    Log.d("API access token", getAccessTokens().getValue().toString());
                                 }catch(JSONException error){
                                     Log.e("JSON error", "error reading JSON: " + error.getMessage());
                                 }
