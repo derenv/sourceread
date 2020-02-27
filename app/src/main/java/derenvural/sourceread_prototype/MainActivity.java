@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,32 +28,28 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.Toast;
 
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
+import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
     // Android
     private AppBarConfiguration mAppBarConfiguration;
-
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
     private httpHandler httph;
-
-    public LoggedInUser getUser() {
-        return user;
-    }
-
-    public void setUser(LoggedInUser user) {
-        this.user = user;
-    }
-
     // User
     public LoggedInUser user;
+
+    public LoggedInUser getUser() { return user; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,38 +91,14 @@ public class MainActivity extends AppCompatActivity {
         if(mAuth.getUid() == null){
             login_redirect();
         } else {
-            // Fetch user object from previous activity
-            Intent i = getIntent();
-            user = (LoggedInUser) i.getParcelableExtra("user");
-            Log.d("USERDATA", "user: " + user);
-
-            // Check if user started from outside login
-            if (user == null) {
-                user = new LoggedInUser(mAuth.getCurrentUser());
-            }
-
-            // Instantiate database/http objects
-            create_objects();
-
-            // Get user fields from database using http requests
-            populate_user();
+            // Create http object
+            httph = new httpHandler(this);
+            // Create database object
+            db = new fdatabase();
 
             // handle app links
-            handleIntent(i);
+            handleIntent(getIntent());
         }
-    }
-
-    private void populate_user(){
-        // Check if any apps connected
-        user.populate(this, this, db, httph);
-    }
-
-    private void create_objects(){
-        // Create http object
-        httph = new httpHandler(this);
-
-        // Create database object
-        db = new fdatabase();
     }
 
     private void login_redirect(){
@@ -140,23 +113,49 @@ public class MainActivity extends AppCompatActivity {
         // Get intent data
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
-        Log.d("DEEPLINK","checking for deeplink..");
+        Log.d("DEEP-LINK","checking for deeplink..");
 
-        // Check if intent comes from deeplink
+        // Check if intent comes from deeplink or activity
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
             // Fetch deeplink type
             String link_type = appLinkData.getLastPathSegment();
-            Log.d("DEEPLINK value", appLinkData.toString());
-            Log.d("DEEPLINK type", link_type);
+            Log.d("DEEP-LINK value", appLinkData.toString());
+            Log.d("DEEP-LINK type", link_type);
 
-            // Whitelist deeplinks
+            // Whitelist deep-links
             if(link_type.equals("successful_login")){
-                // Get app
-                String app = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
-                Log.d("DEEPLINK app",app);
+                // Get app name
+                String app_name = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
+                Log.d("DEEPLINK app",app_name);
 
-                // Request access tokens
-                user.access_tokens(this, httph);
+                // Create blank user for populating
+                user = new LoggedInUser(mAuth.getCurrentUser());
+
+                // Fetch user from local persistence
+                if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
+                    // Request access tokens
+                    user.request_access_tokens(this, httph, app_name);
+                }else{
+                    // Attempt population again
+                    user.populate(this, this, db, httph);
+                }
+            }
+        }else{
+            // Fetch the bundle & check if it has extras
+            String previous_activity = intent.getStringExtra("activity");
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                // Fetch serialised user
+                user = new LoggedInUser(mAuth.getCurrentUser());
+                user.loadInstanceState(extras);
+
+                if(previous_activity.equals("login")) {
+                    user.populate(this, this, db, httph);
+                }
+            }else {
+                // Attempt population
+                user = new LoggedInUser(mAuth.getCurrentUser());
+                user.populate(this, this, db, httph);
             }
         }
     }

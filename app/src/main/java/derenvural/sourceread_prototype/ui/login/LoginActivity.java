@@ -22,8 +22,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
@@ -143,8 +141,16 @@ public class LoginActivity extends AppCompatActivity {
 
         // handle login redirect
         Intent main_activity = new Intent(getApplicationContext(), MainActivity.class);
+
+        // Get user for passing
         LoggedInUser user_data = loginViewModel.getLoginUser();
-        main_activity.putExtra("user", user_data);
+
+        // Create bundle with serialised object
+        Bundle bundle = new Bundle();
+        user_data.saveInstanceState(bundle);
+        //bundle.putSerializable("user", user_data);
+        main_activity.putExtra("activity","login");
+        main_activity.putExtras(bundle);
         main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         // Start next activity and close login activity

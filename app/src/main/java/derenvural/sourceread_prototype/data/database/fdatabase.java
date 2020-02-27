@@ -46,7 +46,7 @@ public class fdatabase {
                     user.setArticleIDs((ArrayList<String>) document.get("articles"));
                 } else {
                     // Log error
-                    Log.d("DB", "get failed: ", task.getException());
+                    Log.e("DB", "get failed: ", task.getException());
                 }
             }
         });
@@ -77,7 +77,7 @@ public class fdatabase {
                         user.setApps(apps);
                     } else {
                         // Log error
-                        Log.d("DB", "get failed: ", task.getException());
+                        Log.e("DB", "get failed: ", task.getException());
                     }
                 }
             });
@@ -113,7 +113,7 @@ public class fdatabase {
                         user.setArticles(articles);
                     } else {
                         // Log error
-                        Log.d("DB", "get failed: ", task.getException());
+                        Log.e("DB", "get failed: ", task.getException());
                     }
                 }
             });

@@ -21,7 +21,7 @@ class LoggedInUserView {
         this.displayName = user.getDisplayName().getValue();
         //this.articles = user.getArticles();
         //this.apps = user.getApps();
-        this.veracity = user.getOverallVeracity().getValue();
+        this.veracity = user.getVeracity().getValue();
         this.email = user.getEmail().getValue();
     }
 
