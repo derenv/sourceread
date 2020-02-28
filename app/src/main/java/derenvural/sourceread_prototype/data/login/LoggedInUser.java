@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +22,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
@@ -315,6 +319,62 @@ public class LoggedInUser implements Serializable {
         }
     }
 
+    public void import_articles(httpHandler httph){
+        for (HashMap<String, Object> app : getApps().getValue()) {
+            // Get get URL
+            HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
+            String url = requests.get("articles");
+
+            // Fetch access token
+            String app_key = app.get("key").toString();
+            String access_token = getAccessTokens().getValue().get(app.get("name"));
+
+            HashMap<String, String> parameters = new HashMap<String, String>();
+            parameters.put("consumer_key",app_key);
+            parameters.put("access_token",access_token);
+            parameters.put("count","10");
+            parameters.put("detailType","complete");
+            parameters.put("contentType","article");
+            parameters.put("state","all");
+
+            // Request access token by http request to URL
+            httph.make_volley_request(url, parameters,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            // Cut token out of html response
+                            Log.d("API", "Request Response recieved");
+
+                            try{
+                                Log.d("API url", response.getString("status"));
+
+                                // TODO: store timestamp for updating efficiency
+
+                                // Get articles from JSON
+                                JSONObject articles_json = response.getJSONObject("list");
+                                ArrayList<Article> articles = new ArrayList<Article>();
+                                for (Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
+                                    // Get article information
+                                    Article current_article = new Article(articles_json.getJSONObject(it.next()));
+                                    articles.add(current_article);
+
+                                    // TODO: fit database data into article class
+                                }
+                            }catch(JSONException error){
+                                Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("API error", "api get failed: " + error.getMessage());
+                        }
+                    }
+            );
+        }
+    }
+
     public void access_tokens(httpHandler httph, ArrayList<HashMap<String, Object>> found_apps, final String app_name){
         for (HashMap<String, Object> app : found_apps) {
             if(app.get("name").equals(app_name)) {
@@ -351,10 +411,12 @@ public class LoggedInUser implements Serializable {
                                         new_access_tokens = new HashMap<String, String>();
                                     }
                                     new_access_tokens.put(app_name, response.getString("access_token"));
-                                    setDisplayName(response.getString("username"));
 
                                     // Add new access token
                                     setAccessTokens(new_access_tokens);
+
+                                    // Set display nameset
+                                    setDisplayName(response.getString("username"));
                                 }catch(JSONException error){
                                     Log.e("JSON error", "error reading JSON: " + error.getMessage());
                                 }

@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -68,8 +69,8 @@ public class httpHandler {
                 return "application/json; charset=utf-8";
             }
             @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String>  params = new HashMap<String, String>();
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String>  params = new HashMap<String, String>();
                 params.put("X-Accept", "application/json");
                 return params;
             }

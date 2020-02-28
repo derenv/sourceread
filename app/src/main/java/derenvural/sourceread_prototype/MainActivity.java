@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -26,6 +28,11 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
@@ -61,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "This should begin article analysis", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                user.import_articles(httph);
             }
         });
 
@@ -107,11 +116,11 @@ public class MainActivity extends AppCompatActivity {
         // Get intent data
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
-        Log.d("DEEP-LINK","checking for deeplink..");
+        Log.d("DEEP-LINK","checking for deep-link..");
 
-        // Check if intent comes from deeplink or activity
+        // Check if intent comes from deep-link or activity
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
-            // Fetch deeplink type
+            // Fetch deep-link type
             String link_type = appLinkData.getLastPathSegment();
             Log.d("DEEP-LINK value", appLinkData.toString());
             Log.d("DEEP-LINK type", link_type);
@@ -120,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             if(link_type.equals("successful_login")){
                 // Get app name
                 String app_name = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
-                Log.d("DEEPLINK app",app_name);
+                Log.d("DEEP-LINK app",app_name);
 
                 // Create blank user for populating
                 user = new LoggedInUser(mAuth.getCurrentUser());
