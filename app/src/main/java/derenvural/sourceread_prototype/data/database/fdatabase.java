@@ -9,11 +9,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
+import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class fdatabase {
@@ -28,6 +33,87 @@ public class fdatabase {
         // Objects
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+    }
+
+    /*
+     * Write an article id field to database
+     * */
+    public void write_article_id(final String new_id){
+        // Make update attempt
+        DocumentReference user_request = get_current_user_request();
+        user_request.update("articles", FieldValue.arrayUnion(new_id)).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d("DB saved article ID", new_id);
+                }else{
+                    // Log error
+                    Log.e("DB", "write failed: ", task.getException());
+                }
+            }
+        });
+    }
+
+    /*
+     * Write an app id field to database
+     * */
+    public void write_app_ids(final String new_id){
+        // Make update attempt
+        DocumentReference user_request = get_current_user_request();
+        user_request.update("apps", FieldValue.arrayUnion(new_id)).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d("DB saved app ID", new_id);
+                }else{
+                    // Log error
+                    Log.e("DB", "write failed: ", task.getException());
+                }
+            }
+        });
+    }
+
+    /*
+     * Write an user veracity field to database
+     * */
+    public void write_user_veracity(LoggedInUser user){
+        //
+    }
+    /*
+     * Write an user veracity field to database
+     * */
+    public void write_article_veracity(final String article_id){
+        //
+    }
+
+    /*
+     * Write an article document to database
+     * */
+    public void write_new_article(final Article article, final LoggedInUser user) {
+        // Create a Map to fill
+        Map<String, Object> docData = article.map_data();
+
+        // make write attempt
+        db.collection("articles").add(docData).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+                if (task.isSuccessful()) {
+                    // Get database id
+                    String id = task.getResult().getId();
+                    Log.d("DB saved article", id);
+
+                    // Add to user object
+                    user.addArticleID(id);
+                    user.addArticle(article);
+
+                    // Update user db entry
+                    write_article_id(id);
+                }else{
+                    // Log error
+                    Log.e("DB", "write failed: ", task.getException());
+                }
+            }
+        });
     }
 
     /*
@@ -46,7 +132,7 @@ public class fdatabase {
                     user.setArticleIDs((ArrayList<String>) document.get("articles"));
                 } else {
                     // Log error
-                    Log.e("DB", "get failed: ", task.getException());
+                    Log.e("DB", "read failed: ", task.getException());
                 }
             }
         });
@@ -77,7 +163,7 @@ public class fdatabase {
                         user.setApps(apps);
                     } else {
                         // Log error
-                        Log.e("DB", "get failed: ", task.getException());
+                        Log.e("DB", "read failed: ", task.getException());
                     }
                 }
             });
@@ -87,7 +173,7 @@ public class fdatabase {
      * Request all app data
      * */
     public void request_article_data(final LoggedInUser user){
-        final ArrayList<HashMap<String, String>> articles = new ArrayList<HashMap<String, String>>();
+        final ArrayList<Article> articles = new ArrayList<Article>();
         for(final String article : user.getArticleIDs().getValue()) {
             DocumentReference article_request = get_article_request(article);
             article_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -97,23 +183,15 @@ public class fdatabase {
                         // Get list of articles
                         DocumentSnapshot document = task.getResult();
 
-                        // Populate hash map
-                        HashMap<String, String> this_article = new HashMap<String, String>();
-                        this_article.put("id", article);
-                        this_article.put("title", document.get("title").toString());
-                        this_article.put("app", document.get("app").toString());
-                        this_article.put("author", document.get("author").toString());
-                        this_article.put("author_veracity", document.get("author_veracity").toString());
-                        this_article.put("publication", document.get("publication").toString());
-                        this_article.put("publication_veracity", document.get("publication_veracity").toString());
-                        this_article.put("veracity", document.get("veracity").toString());
+                        // Populate object
+                        Article this_article = new Article(document, article);
 
                         // Add to list
                         articles.add(this_article);
                         user.setArticles(articles);
                     } else {
                         // Log error
-                        Log.e("DB", "get failed: ", task.getException());
+                        Log.e("DB", "read failed: ", task.getException());
                     }
                 }
             });

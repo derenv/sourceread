@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(view, "This should begin article analysis", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                user.import_articles(httph);
+                user.import_articles(httph, db);
             }
         });
 

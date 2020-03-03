@@ -10,8 +10,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
+import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
@@ -46,16 +46,16 @@ public class HomeViewModel extends ViewModel {
         // Get current apps
         if(user.getArticles().getValue() != null && user.getArticles().getValue().size() != 0) {
             final ArrayList<Card> cards = new ArrayList<Card>();
-            for (HashMap<String, String> article : user.getArticles().getValue()) {
-                Card new_card = new Card(null, article.get("title").toString(), article.get("author").toString());
+            for (Article article : user.getArticles().getValue()) {
+                Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
                 cards.add(new_card);
             }
             setCards(cards);
         }
         // Add observer for future
-        user.getArticles().observe(context, new Observer<ArrayList<HashMap<String, String>>>() {
+        user.getArticles().observe(context, new Observer<ArrayList<Article>>() {
             @Override
-            public void onChanged(@Nullable ArrayList<HashMap<String, String>> articles) {
+            public void onChanged(@Nullable ArrayList<Article> articles) {
                 //
                 if (articles == null) {
                     return;
@@ -65,8 +65,8 @@ public class HomeViewModel extends ViewModel {
 
                     // Fetch data to be displayed
                     final ArrayList<Card> cards = new ArrayList<Card>();
-                    for (HashMap<String, String> article : articles) {
-                        Card new_card = new Card(null, article.get("title").toString(), article.get("author").toString());
+                    for (Article article : articles) {
+                        Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
                         cards.add(new_card);
                     }
                     setCards(cards);

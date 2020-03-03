@@ -39,7 +39,7 @@ public class LoggedInUser implements Serializable {
     private MutableLiveData<ArrayList<HashMap<String, Object>>> apps = new MutableLiveData<ArrayList<HashMap<String, Object>>>();
     private MutableLiveData<ArrayList<String>> appIDs = new MutableLiveData<ArrayList<String>>();
     // Article data
-    private MutableLiveData<ArrayList<HashMap<String, String>>> articles = new MutableLiveData<ArrayList<HashMap<String, String>>>();
+    private MutableLiveData<ArrayList<Article>> articles = new MutableLiveData<ArrayList<Article>>();
     private MutableLiveData<ArrayList<String>> articleIDs = new MutableLiveData<ArrayList<String>>();
     // Tokens/Keys
     private MutableLiveData<HashMap<String, String>> requestTokens = new MutableLiveData<HashMap<String, String>>();
@@ -319,8 +319,10 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-    public void import_articles(httpHandler httph){
-        for (HashMap<String, Object> app : getApps().getValue()) {
+    public void import_articles(httpHandler httph, final fdatabase db){
+        for (final HashMap<String, Object> app : getApps().getValue()) {
+            final LoggedInUser user = this;
+
             // Get get URL
             HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
             String url = requests.get("articles");
@@ -329,13 +331,17 @@ public class LoggedInUser implements Serializable {
             String app_key = app.get("key").toString();
             String access_token = getAccessTokens().getValue().get(app.get("name"));
 
+            // Fetch timestamp
+            //
+
             HashMap<String, String> parameters = new HashMap<String, String>();
-            parameters.put("consumer_key",app_key);
-            parameters.put("access_token",access_token);
-            parameters.put("count","10");
-            parameters.put("detailType","complete");
-            parameters.put("contentType","article");
-            parameters.put("state","all");
+            parameters.put("consumer_key", app_key);
+            parameters.put("access_token", access_token);
+            parameters.put("count", "10");
+            parameters.put("detailType", "complete");
+            parameters.put("contentType", "article");
+            parameters.put("state", "all");
+            //parameters.put("since", timestamp);
 
             // Request access token by http request to URL
             httph.make_volley_request(url, parameters,
@@ -343,22 +349,27 @@ public class LoggedInUser implements Serializable {
                         @Override
                         public void onResponse(JSONObject response) {
                             // Cut token out of html response
-                            Log.d("API", "Request Response recieved");
+                            Log.d("API", "Request Response received");
 
                             try{
                                 Log.d("API url", response.getString("status"));
 
-                                // TODO: store timestamp for updating efficiency
+                                // TODO: store timestamp (for updating efficiency)
+                                //
 
                                 // Get articles from JSON
                                 JSONObject articles_json = response.getJSONObject("list");
                                 ArrayList<Article> articles = new ArrayList<Article>();
-                                for (Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
-                                    // Get article information
-                                    Article current_article = new Article(articles_json.getJSONObject(it.next()));
+                                for (Iterator<String> it = articles_json.keys(); it.hasNext();){
+                                    // Add article information to user object for display
+                                    Article current_article = new Article(articles_json.getJSONObject(it.next()), app.get("name").toString());
                                     articles.add(current_article);
 
-                                    // TODO: fit database data into article class
+                                    // Analyse articles
+                                    current_article.analyse();
+
+                                    // Add new article to database
+                                    db.write_new_article(current_article, user);
                                 }
                             }catch(JSONException error){
                                 Log.e("JSON error", "error reading JSON: " + error.getMessage());
@@ -373,6 +384,29 @@ public class LoggedInUser implements Serializable {
                     }
             );
         }
+    }
+
+    public void addArticleID(String new_id) {
+        // Get previous article ids
+        ArrayList<String> old_ids = getArticleIDs().getValue();
+        if(old_ids == null){
+            old_ids = new ArrayList<String>();
+        }
+
+        // Add new article id
+        old_ids.add(new_id);
+        setArticleIDs(old_ids);
+    }
+    public void addArticle(Article new_article){
+        // Get previous articles
+        ArrayList<Article> old_articles = getArticles().getValue();
+        if(old_articles == null){
+            old_articles = new ArrayList<Article>();
+        }
+
+        // Add new article
+        old_articles.add(new_article);
+        setArticles(old_articles);
     }
 
     public void access_tokens(httpHandler httph, ArrayList<HashMap<String, Object>> found_apps, final String app_name){
@@ -439,7 +473,7 @@ public class LoggedInUser implements Serializable {
     public void setEmail(String email) { this.email.setValue(email); }
     public void setApps(ArrayList<HashMap<String, Object>> apps) { this.apps.setValue(apps); }
     public void setAppIDs(ArrayList<String> appIDs) { this.appIDs.setValue(appIDs); }
-    public void setArticles(ArrayList<HashMap<String, String>> articles) { this.articles.setValue(articles); }
+    public void setArticles(ArrayList<Article> articles) { this.articles.setValue(articles); }
     public void setArticleIDs(ArrayList<String> articles) { this.articleIDs.setValue(articles); }
     public void setRequestTokens(HashMap<String, String> requestTokens) { this.requestTokens.setValue(requestTokens); }
     public void setAccessTokens(HashMap<String, String> accessTokens) { this.accessTokens.setValue(accessTokens); }
@@ -451,7 +485,7 @@ public class LoggedInUser implements Serializable {
     public LiveData<String> getEmail() { return email; }
     public LiveData<ArrayList<HashMap<String, Object>>> getApps() { return apps; }
     public LiveData<ArrayList<String>> getAppIDs() { return appIDs; }
-    public LiveData<ArrayList<HashMap<String, String>>> getArticles() { return articles; }
+    public LiveData<ArrayList<Article>> getArticles() { return articles; }
     public LiveData<ArrayList<String>> getArticleIDs() { return articleIDs; }
     public LiveData<HashMap<String, String>> getRequestTokens() { return requestTokens; }
     public LiveData<HashMap<String, String>> getAccessTokens() { return accessTokens; }
