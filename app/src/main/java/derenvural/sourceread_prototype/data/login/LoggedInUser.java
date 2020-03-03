@@ -14,12 +14,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -35,7 +39,7 @@ public class LoggedInUser implements Serializable {
     private MutableLiveData<String> email = new MutableLiveData<String>();
     // App data
     private MutableLiveData<ArrayList<HashMap<String, Object>>> apps = new MutableLiveData<ArrayList<HashMap<String, Object>>>();
-    private MutableLiveData<ArrayList<String>> appIDs = new MutableLiveData<ArrayList<String>>();
+    private MutableLiveData<HashMap<String, Object>> appIDs = new MutableLiveData<HashMap<String, Object>>();
     // Article data
     private MutableLiveData<ArrayList<Article>> articles = new MutableLiveData<ArrayList<Article>>();
     private MutableLiveData<ArrayList<String>> articleIDs = new MutableLiveData<ArrayList<String>>();
@@ -62,7 +66,7 @@ public class LoggedInUser implements Serializable {
         setEmail((String) outState.getSerializable("email"));
         // App data
         setApps((ArrayList) outState.getSerializable("apps"));
-        setAppIDs((ArrayList) outState.getSerializable("appids"));
+        setAppIDs((HashMap) outState.getSerializable("appids"));
         // Article data
         setArticles((ArrayList) outState.getSerializable("articles"));
         setArticleIDs((ArrayList) outState.getSerializable("articleids"));
@@ -115,7 +119,7 @@ public class LoggedInUser implements Serializable {
         setEmail((String) stream.readObject());
         // App data
         setApps((ArrayList) stream.readObject());
-        setAppIDs((ArrayList) stream.readObject());
+        setAppIDs((HashMap) stream.readObject());
         // Article data
         setArticles((ArrayList) stream.readObject());
         setArticleIDs((ArrayList) stream.readObject());
@@ -144,9 +148,9 @@ public class LoggedInUser implements Serializable {
          * ++key
          * ++requests
          */
-        getAppIDs().observe(owner, new Observer<ArrayList<String>>() {
+        getAppIDs().observe(owner, new Observer<HashMap<String, Object>>() {
             @Override
-            public void onChanged(@Nullable ArrayList<String> found_apps) {
+            public void onChanged(@Nullable HashMap<String, Object> found_apps) {
                 // Called when "request_user_data" has a response
                 if (found_apps == null) {
                     return;
@@ -329,18 +333,22 @@ public class LoggedInUser implements Serializable {
             String app_key = app.get("key").toString();
             String access_token = getAccessTokens().getValue().get(app.get("name"));
 
-            // Fetch timestamp
-            //
-
             // Add JSON parameters
             HashMap<String, String> parameters = new HashMap<String, String>();
             parameters.put("consumer_key", app_key);
             parameters.put("access_token", access_token);
-            parameters.put("count", "10");
+            parameters.put("sort", "newest");
             parameters.put("detailType", "complete");
             parameters.put("contentType", "article");
             parameters.put("state", "all");
-            //parameters.put("since", timestamp);
+
+            // Fetch timestamp
+            for(String app_name: getAppIDs().getValue().keySet()){
+                if(getAppIDs().getValue() != null && !getAppIDs().getValue().get(app_name).equals("")){
+                    long previous_request = Long.parseLong(getAppIDs().getValue().get(app_name).toString());
+                    parameters.put("since", Long.toString(previous_request));
+                }
+            }
 
             // Request access token by http request to URL
             httph.make_volley_request(url, parameters,
@@ -351,24 +359,28 @@ public class LoggedInUser implements Serializable {
                             Log.d("API", "Request Response received");
 
                             try{
-                                Log.d("API url", response.getString("status"));
+                                Log.d("API response status", response.getString("status"));
 
-                                // TODO: store timestamp (for updating efficiency)
-                                //
+                                // store timestamp (for updating efficiency)
+                                long request_stamp = Instant.now().getEpochSecond();
+                                db.write_app_timestamp(app.get("name").toString(), request_stamp);
 
                                 // Get articles from JSON
-                                JSONObject articles_json = response.getJSONObject("list");
-                                ArrayList<Article> articles = new ArrayList<Article>();
-                                for (Iterator<String> it = articles_json.keys(); it.hasNext();){
-                                    // Add article information to user object for display
-                                    Article current_article = new Article(articles_json.getJSONObject(it.next()), app.get("name").toString());
-                                    articles.add(current_article);
+                                JSONArray q = response.getJSONArray("list");
+                                if(q.length() != 0){
+                                    JSONObject articles_json = response.getJSONObject("list");
+                                    ArrayList<Article> articles = new ArrayList<Article>();
+                                    for (Iterator<String> it = articles_json.keys(); it.hasNext();){
+                                        // Add article information to user object for display
+                                        Article current_article = new Article(articles_json.getJSONObject(it.next()), app.get("name").toString());
+                                        articles.add(current_article);
 
-                                    // Analyse articles
-                                    current_article.analyse();
+                                        // Analyse articles
+                                        current_article.analyse();
 
-                                    // Add new article to database
-                                    db.write_new_article(current_article, user);
+                                        // Add new article to database
+                                        db.write_new_article(current_article, user);
+                                    }
                                 }
                             }catch(JSONException error){
                                 Log.e("JSON error", "error reading JSON: " + error.getMessage());
@@ -471,7 +483,7 @@ public class LoggedInUser implements Serializable {
     public void setDisplayName(String displayName) { this.displayName.setValue(displayName); }
     public void setEmail(String email) { this.email.setValue(email); }
     public void setApps(ArrayList<HashMap<String, Object>> apps) { this.apps.setValue(apps); }
-    public void setAppIDs(ArrayList<String> appIDs) { this.appIDs.setValue(appIDs); }
+    public void setAppIDs(HashMap<String, Object> appIDs) { this.appIDs.setValue(appIDs); }
     public void setArticles(ArrayList<Article> articles) { this.articles.setValue(articles); }
     public void setArticleIDs(ArrayList<String> articles) { this.articleIDs.setValue(articles); }
     public void setRequestTokens(HashMap<String, String> requestTokens) { this.requestTokens.setValue(requestTokens); }
@@ -483,7 +495,7 @@ public class LoggedInUser implements Serializable {
     public LiveData<String> getDisplayName() { return displayName; }
     public LiveData<String> getEmail() { return email; }
     public LiveData<ArrayList<HashMap<String, Object>>> getApps() { return apps; }
-    public LiveData<ArrayList<String>> getAppIDs() { return appIDs; }
+    public LiveData<HashMap<String, Object>> getAppIDs() { return appIDs; }
     public LiveData<ArrayList<Article>> getArticles() { return articles; }
     public LiveData<ArrayList<String>> getArticleIDs() { return articleIDs; }
     public LiveData<HashMap<String, String>> getRequestTokens() { return requestTokens; }

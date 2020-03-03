@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +65,29 @@ public class fdatabase {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Log.d("DB saved app ID", new_id);
+                }else{
+                    // Log error
+                    Log.e("DB", "write failed: ", task.getException());
+                }
+            }
+        });
+    }
+
+    /*
+     * Write an app id field to database
+     * */
+    public void write_app_timestamp(final String app_name, long timestamp){
+        // Create map object containing timestamp with correct format
+        Map<String, Object> new_stamp = new HashMap<>();
+        new_stamp.put(app_name, timestamp);
+
+        // Make update attempt
+        DocumentReference user_request = get_current_user_request();
+        user_request.update("apps", new_stamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d("DB new timestamp", app_name);
                 }else{
                     // Log error
                     Log.e("DB", "write failed: ", task.getException());
@@ -127,7 +151,7 @@ public class fdatabase {
                     // Get list of articles
                     DocumentSnapshot document = task.getResult();
                     user.setVeracity((String) document.get("veracity"));
-                    user.setAppIDs((ArrayList<String>) document.get("apps"));
+                    user.setAppIDs((HashMap<String, Object>) document.get("apps"));
                     user.setArticleIDs((ArrayList<String>) document.get("articles"));
                 } else {
                     // Log error
@@ -141,8 +165,8 @@ public class fdatabase {
      * */
     public void request_app_data(final LoggedInUser user){
         final ArrayList<HashMap<String, Object>> apps = new ArrayList<HashMap<String, Object>>();
-        for(final String app : user.getAppIDs().getValue()) {
-            DocumentReference app_request = get_app_request(app);
+        for(final String app_name : user.getAppIDs().getValue().keySet()) {
+            DocumentReference app_request = get_app_request(app_name);
             app_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -152,9 +176,10 @@ public class fdatabase {
 
                         // Populate hash map
                         HashMap<String, Object> this_app = new HashMap<String, Object>();
-                        this_app.put("name", app);
+                        this_app.put("name", app_name);
                         this_app.put("description", document.get("description").toString());
                         this_app.put("key", document.get("key").toString());
+                        this_app.put("timestamp", user.getAppIDs().getValue().get(app_name));
                         this_app.put("requests", document.get("requests"));
 
                         // Add to list
