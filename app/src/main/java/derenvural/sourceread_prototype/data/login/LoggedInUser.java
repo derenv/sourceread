@@ -14,7 +14,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,7 +22,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
@@ -258,7 +256,7 @@ public class LoggedInUser implements Serializable {
             // Fetch app key
             String app_key = app.get("key").toString();
 
-            // Get app key for current app
+            // Add JSON parameters
             HashMap<String, String> parameters = new HashMap<String, String>();
             parameters.put("consumer_key",app_key);
             parameters.put("redirect_uri",redirect_uri);
@@ -334,6 +332,7 @@ public class LoggedInUser implements Serializable {
             // Fetch timestamp
             //
 
+            // Add JSON parameters
             HashMap<String, String> parameters = new HashMap<String, String>();
             parameters.put("consumer_key", app_key);
             parameters.put("access_token", access_token);
