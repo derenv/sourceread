@@ -1,12 +1,10 @@
 package derenvural.sourceread_prototype.ui.apps;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,6 +27,7 @@ public class AppsFragment extends Fragment {
     private AppsViewModel appsViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
+    private ProgressBar progressBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -47,6 +46,9 @@ public class AppsFragment extends Fragment {
         mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
 
+        // Progress bar
+        progressBar = root.findViewById(R.id.loading_apps);
+
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_apps);
         appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -64,7 +66,7 @@ public class AppsFragment extends Fragment {
             mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
             recyclerView.setAdapter(mAdapter);
 
-            // If list still empty, display appropriate text
+            // If list still empty, display appropriate text and hide loading bar
             if(mAdapter.getItemCount() <= 0) {
                 appsViewModel.setText("This is where you add article saver apps!");
             } else {
@@ -87,6 +89,7 @@ public class AppsFragment extends Fragment {
         MainActivity main = (MainActivity) getActivity();
 
         // Add observer to articles
-        appsViewModel.check_apps(main, main.getUser());
+        progressBar.setVisibility(View.VISIBLE);
+        appsViewModel.check_apps(main, main.getUser(), progressBar);
     }
 }

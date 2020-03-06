@@ -1,9 +1,10 @@
 package derenvural.sourceread_prototype.ui.apps;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import derenvural.sourceread_prototype.data.cards.Card;
-import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class AppsViewModel extends ViewModel {
@@ -43,7 +43,7 @@ public class AppsViewModel extends ViewModel {
     public LiveData<ArrayList<Card>> getCards() { return mCards; }
 
     // Check how many articles connected & verify quantity
-    public void check_apps(LifecycleOwner context, LoggedInUser user) {
+    public void check_apps(LifecycleOwner context, LoggedInUser user, final ProgressBar progressBar) {
         // Populate apps
         // Get current apps
         if(user.getApps().getValue() != null && user.getApps().getValue().size() != 0) {
@@ -61,7 +61,10 @@ public class AppsViewModel extends ViewModel {
         user.getApps().observe(context, new Observer<ArrayList<HashMap<String, Object>>>() {
             @Override
             public void onChanged(@Nullable ArrayList<HashMap<String, Object>> apps) {
-                //
+                // Update UI
+                progressBar.setVisibility(View.GONE);
+
+                //check apps returned
                 if (apps == null) {
                     return;
                 }

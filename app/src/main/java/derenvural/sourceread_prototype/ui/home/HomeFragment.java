@@ -1,12 +1,10 @@
 package derenvural.sourceread_prototype.ui.home;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -30,7 +28,7 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private ProgressBar progressBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -41,12 +39,15 @@ public class HomeFragment extends Fragment {
         recyclerView = root.findViewById(R.id.card_view);
 
         // use a linear layout manager
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
         mAdapter = new CardAdapter(getActivity(), homeViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
+
+        // Progress bar
+        progressBar = root.findViewById(R.id.loading_home);
 
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_home);
@@ -65,9 +66,9 @@ public class HomeFragment extends Fragment {
                 mAdapter = new CardAdapter(getActivity(), homeViewModel.getCards().getValue());
                 recyclerView.setAdapter(mAdapter);
 
-                // If list still empty, display appropriate text
+                // If list still empty, display appropriate text and hide loading bar
                 if(mAdapter.getItemCount() == 0) {
-                    homeViewModel.setText("Import some articles...");
+                    homeViewModel.setText("This is where imported articles appear!");
                 } else {
                     // Set text blank
                     homeViewModel.setText("");
@@ -89,6 +90,7 @@ public class HomeFragment extends Fragment {
         MainActivity main = (MainActivity) getActivity();
 
         // Add observer to articles
-        homeViewModel.check_articles(main, main.getUser());
+        progressBar.setVisibility(View.VISIBLE);
+        homeViewModel.check_articles(main, main.getUser(), progressBar);
     }
 }
