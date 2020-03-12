@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -27,9 +28,13 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
+import derenvural.sourceread_prototype.data.scraper.scraper;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
@@ -169,6 +174,33 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_refresh_apps:
                 Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
                 // TODO: refresh apps using authenticate functions
+                Article article = user.getArticles().getValue().get(0);
+
+                // Create async task and set observer
+                final scraper scraper_task = new scraper();
+                scraper_task.get_done().observe(this, new Observer<Boolean>() {
+                    // Called when "request_app_data" has a response
+                    @Override
+                    public void onChanged(Boolean done) {
+                        if(done) {
+                            // Get paragraphs from finished scraper
+                            ArrayList<String> paragraphs = scraper_task.get_result().getValue();
+
+                            if (paragraphs.size() != 0) {
+                                // Test output
+                                for (String paragraph : paragraphs) {
+                                    Log.d("JSOUP", paragraph);
+                                }
+                            } else {
+                                Log.e("JSOUP", "empty doc");
+                            }
+                        }
+                    }
+                });
+
+                // execute async task
+                scraper_task.execute(article.getResolved_url());
+
                 return true;
             case R.id.action_refresh_articles:
                 Toast.makeText(this, "Refreshing articles..", Toast.LENGTH_SHORT).show();

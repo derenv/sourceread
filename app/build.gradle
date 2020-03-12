@@ -3,7 +3,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29"
     defaultConfig {
         applicationId "derenvural.sourceread_prototype"
         minSdkVersion 26
@@ -39,4 +39,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:21.4.0'
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     implementation 'com.android.volley:volley:1.1.1'
+
+    // JAR files
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
