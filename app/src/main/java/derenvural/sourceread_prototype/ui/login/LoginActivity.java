@@ -148,7 +148,8 @@ public class LoginActivity extends AppCompatActivity {
         // Create bundle with serialised object
         Bundle bundle = new Bundle();
         user_data.saveInstanceState(bundle);
-        //bundle.putSerializable("user", user_data);
+
+        // Add title & bundle to intent
         main_activity.putExtra("activity","login");
         main_activity.putExtras(bundle);
         main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

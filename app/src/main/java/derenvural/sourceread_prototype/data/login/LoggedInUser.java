@@ -74,22 +74,22 @@ public class LoggedInUser implements Serializable {
         // Statistical data
         setVeracity((String) outState.getSerializable("veracity"));
     }
-    public void saveInstanceState(Bundle outState) {
+    public void saveInstanceState(Bundle bundle) {
         // Basic data
-        outState.putSerializable("id", getUserId().getValue());
-        outState.putSerializable("displayName", getDisplayName().getValue());
-        outState.putSerializable("email", getEmail().getValue());
+        bundle.putSerializable("id", getUserId().getValue());
+        bundle.putSerializable("displayName", getDisplayName().getValue());
+        bundle.putSerializable("email", getEmail().getValue());
         // App data
-        outState.putSerializable("apps", getApps().getValue());
-        outState.putSerializable("appids", getAppIDs().getValue());
+        bundle.putSerializable("apps", getApps().getValue());
+        bundle.putSerializable("appids", getAppIDs().getValue());
         // Article data
-        outState.putSerializable("articles", getArticles().getValue());
-        outState.putSerializable("articleids", getArticleIDs().getValue());
+        bundle.putSerializable("articles", getArticles().getValue());
+        bundle.putSerializable("articleids", getArticleIDs().getValue());
         // Tokens/Keys
-        outState.putSerializable("request", getRequestTokens().getValue());
-        outState.putSerializable("access", getAccessTokens().getValue());
+        bundle.putSerializable("request", getRequestTokens().getValue());
+        bundle.putSerializable("access", getAccessTokens().getValue());
         // Statistical data
-        outState.putSerializable("veracity", getVeracity().getValue());
+        bundle.putSerializable("veracity", getVeracity().getValue());
     }
 
     public void writeObject(java.io.ObjectOutputStream stream) throws IOException {
@@ -344,7 +344,11 @@ public class LoggedInUser implements Serializable {
             for(String app_name: getAppIDs().getValue().keySet()){
                 if(getAppIDs().getValue() != null && !getAppIDs().getValue().get(app_name).equals("")){
                     long previous_request = Long.parseLong(getAppIDs().getValue().get(app_name).toString());
-                    parameters.put("since", Long.toString(previous_request));
+
+                    // Catch for first time import
+                    if(previous_request != 0) {
+                        parameters.put("since", Long.toString(previous_request));
+                    }
                 }
             }
 
@@ -359,14 +363,9 @@ public class LoggedInUser implements Serializable {
                             try{
                                 Log.d("API response status", response.getString("status"));
 
-                                // store timestamp (for updating efficiency)
-                                long request_stamp = Instant.now().getEpochSecond();
-                                db.write_app_timestamp(app.get("name").toString(), request_stamp);
-
                                 // Get articles from JSON
-                                JSONArray q = response.getJSONArray("list");
-                                if(q.length() != 0){
-                                    JSONObject articles_json = response.getJSONObject("list");
+                                JSONObject articles_json = response.getJSONObject("list");
+                                if(articles_json.length() != 0){
                                     ArrayList<Article> articles = new ArrayList<Article>();
                                     for (Iterator<String> it = articles_json.keys(); it.hasNext();){
                                         // Add article information to user object for display
@@ -380,6 +379,10 @@ public class LoggedInUser implements Serializable {
                                         db.write_new_article(current_article, user);
                                     }
                                 }
+
+                                // store timestamp (for updating efficiency)
+                                long request_stamp = Instant.now().getEpochSecond();
+                                db.write_app_timestamp(app.get("name").toString(), request_stamp);
                             }catch(JSONException error){
                                 Log.e("JSON error", "error reading JSON: " + error.getMessage());
                             }

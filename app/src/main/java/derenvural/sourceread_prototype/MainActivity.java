@@ -5,13 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,13 +26,9 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
-import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
-import derenvural.sourceread_prototype.data.scraper.scraper;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
@@ -64,9 +58,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Importing articles...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
+                // Import articles from user accounts
+                Toast.makeText(view.getContext(), "Importing articles...", Toast.LENGTH_SHORT).show();
                 user.import_articles(httph, db);
             }
         });
@@ -94,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Create http object
             httph = new httpHandler(this);
+
             // Create database object
             db = new fdatabase();
 
@@ -140,14 +134,16 @@ public class MainActivity extends AppCompatActivity {
                     // Attempt population again
                     user.populate(this, this, db, httph);
                 }
+            }else{
+                // TODO: other deep links
             }
         }else{
             // Fetch the bundle & check if it has extras
             String previous_activity = intent.getStringExtra("activity");
             Bundle extras = intent.getExtras();
+            user = new LoggedInUser(mAuth.getCurrentUser());
             if (extras != null) {
                 // Fetch serialised user
-                user = new LoggedInUser(mAuth.getCurrentUser());
                 user.loadInstanceState(extras);
 
                 if(previous_activity.equals("login")) {
@@ -155,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }else {
                 // Attempt population
-                user = new LoggedInUser(mAuth.getCurrentUser());
                 user.populate(this, this, db, httph);
             }
         }
@@ -169,45 +164,18 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh_apps:
-                Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
-                // TODO: refresh apps using authenticate functions
-                Article article = user.getArticles().getValue().get(0);
-
-                // Create async task and set observer
-                final scraper scraper_task = new scraper();
-                scraper_task.get_done().observe(this, new Observer<Boolean>() {
-                    // Called when "request_app_data" has a response
-                    @Override
-                    public void onChanged(Boolean done) {
-                        if(done) {
-                            // Get paragraphs from finished scraper
-                            ArrayList<String> paragraphs = scraper_task.get_result().getValue();
-
-                            if (paragraphs.size() != 0) {
-                                // Test output
-                                for (String paragraph : paragraphs) {
-                                    Log.d("JSOUP", paragraph);
-                                }
-                            } else {
-                                Log.e("JSOUP", "empty doc");
-                            }
-                        }
-                    }
-                });
-
-                // execute async task
-                scraper_task.execute(article.getResolved_url());
-
-                return true;
             case R.id.action_refresh_articles:
-                Toast.makeText(this, "Refreshing articles..", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Refreshing articles...", Toast.LENGTH_SHORT).show();
                 // TODO: REFRESH ARTICLES
                 return true;
+            case R.id.action_refresh_apps:
+                Toast.makeText(this, "Refreshing apps...", Toast.LENGTH_SHORT).show();
+                // TODO: refresh apps using authenticate functions
+                return true;
             case R.id.action_logout_user:
-                Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
                 logout();
                 return true;
             default:
@@ -232,6 +200,8 @@ public class MainActivity extends AppCompatActivity {
 
             // Remove objects
             db = null;
+            httph = null;
+            user = null;
 
             // Start login activity
             Intent new_activity = new Intent(this, LoginActivity.class);

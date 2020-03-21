@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -13,62 +14,126 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import derenvural.sourceread_prototype.data.article.Article;
+
 /* Scrapes content from webpages
  * user-agent list:
  * http://www.useragentstring.com/pages/useragentstring.php?name=Firefox
  * */
-public class scraper extends AsyncTask<String, Void, Void> {
+public class scraper extends AsyncTask<Void, Void, Void> {
     // Query data
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0";
     private final static String REFERRER = "http://www.google.com";
     private final static int TIMEOUT = 24000;
 
     // Data
-    private MutableLiveData<ArrayList<String>> document = new MutableLiveData<ArrayList<String>>();
     private MutableLiveData<Boolean> done = new MutableLiveData<Boolean>();
+    private MutableLiveData<Article> article = new MutableLiveData<Article>();
 
-    public scraper(){
-        set_result(new ArrayList<String>());
-        set_done(false);
+    public scraper(Article article){
+        setDone(false);
+        setArticle(article);
     }
 
     @Override
-    protected Void doInBackground(String... url){
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+
+        Article article = getArticle().getValue();
+
+        // Test output
+        for (String text : article.getText()){
+            Log.d("JSOUP", text);
+        }
+
+        // Analyse article
+        Log.d("JSOUP", "analysing now..");
+        article.analyse();
+
+        // End task
+        postArticle(article);
+        postDone(true);
+    }
+
+    private Connection.Response getResponse(String url){
         try {
-            // Attempt scrape
-            Element body = Jsoup.connect(url[0])
+            return Jsoup.connect(url)
                     .ignoreContentType(true)
                     .userAgent(USER_AGENT)
                     .referrer(REFERRER)
                     .timeout(TIMEOUT)
                     .followRedirects(true)
-                    .get().body();
+                    .execute();
+        } catch (IOException error) {
+            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
+            error.printStackTrace();
+        } catch (StackOverflowError error) {
+            // catch memory errors from badly written pages
+            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
+            error.printStackTrace();
+        } catch (OutOfMemoryError error) {
+            // catch memory errors from badly written pages
+            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
+            error.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    protected Void doInBackground(Void... params){
+        Article article = getArticle().getValue();
+
+        try {
+            // Attempt scrape
+            Connection.Response response = getResponse(article.getResolved_url());
+            if(response == null){
+                Log.e("JSOUP error", "error scraping web-page code");
+            }else if(response.statusCode() != 200) {
+                Log.e("JSOUP error", "error response scraping web-page code: " + response.statusCode());
+                Log.e("JSOUP error", "error response scraping web-page message: " + response.statusMessage());
+            }
+
+            // Get paragraph elements
+            Elements paragraphElements = response
+                    .parse()
+                    .body()
+                    .getElementsByTag("p");
 
             // Get paragraphs of article
-            Elements paragraphs = body.getElementsByTag("p");
-            ArrayList<String> data = new ArrayList<String>();
-            for(Element paragraph : paragraphs){
+            ArrayList<String> paragraphs = new ArrayList<String>();
+            for (Element paragraph : paragraphElements) {
                 // TODO: remove image descriptions & credits
                 // TODO: remove publication descriptions & credits
                 // TODO: remove author descriptions & credits
-                data.add(paragraph.text());
+                paragraphs.add(paragraph.text());
             }
 
-            // Set live data with paragraph text
-            set_result(data);
-            set_done(true);
-        }catch(IOException error){
-            Log.e("JSOUP error", "error scraping webpage: " + error.getMessage());
-            set_result(new ArrayList<String>());
+            // Add text to article & add to list of fetched articles
+            article.setText(paragraphs);
+        } catch (IOException error) {
+            Log.e("JSOUP error", "unknown error scraping web-page: " + error.getMessage());
+            error.printStackTrace();
+            article.setText(new ArrayList<String>());
+        } catch (StackOverflowError | OutOfMemoryError error) {
+            // catch memory errors from badly written pages
+            Log.e("JSOUP error", "memory error scraping web-page: " + error.getMessage());
+            error.printStackTrace();
+            article.setText(new ArrayList<String>());
         }
+
+        // Set live data with articles (or empty list for failure)
+        postArticle(article);
         return null;
     }
 
     // Get
-    public LiveData<ArrayList<String>> get_result(){ return document; }
-    public LiveData<Boolean> get_done(){ return done; }
+    public LiveData<Article> getArticle(){ return article; }
+    public LiveData<Boolean> getDone(){ return done; }
 
     // Set
-    public void set_result(ArrayList<String> document){ this.document.postValue(document); }
-    public void set_done(Boolean done){ this.done.postValue(done); }
+    public void setArticle(Article article){ this.article.setValue(article); }
+    public void setDone(Boolean done){ this.done.setValue(done); }
+    public void postArticle(Article article){ this.article.postValue(article); }
+    public void postDone(Boolean done){ this.done.postValue(done); }
 }

@@ -14,6 +14,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -53,7 +54,7 @@ public class AboutFragment extends Fragment {
                 text = new TextView(getActivity());
                 text.setVerticalScrollBarEnabled(true);
                 backButton = new Button(getActivity());
-                backButton.setText("@string/button_back");
+                backButton.setText(getString(R.string.button_back));
                 scrolledText = new ScrollView(getActivity());
 
                 // Add back listener
@@ -72,7 +73,7 @@ public class AboutFragment extends Fragment {
                 if(item.getText().equals("Contact Us")){
                     // Open Contact Us
                     // Set text
-                    aboutViewModel.setText(Html.fromHtml(getString(R.string.contact_html)));
+                    aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.contact_html), HtmlCompat.FROM_HTML_MODE_LEGACY));
                     text.setText(aboutViewModel.getText().getValue());
                     scrolledText.addView(text);
 
@@ -85,7 +86,7 @@ public class AboutFragment extends Fragment {
                 }else if(item.getText().equals("Privacy Policy")){
                     // Open Privacy Policy
                     // Set text
-                    aboutViewModel.setText(Html.fromHtml(getString(R.string.policy_html)));
+                    aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.policy_html), HtmlCompat.FROM_HTML_MODE_LEGACY));
                     text.setText(aboutViewModel.getText().getValue());
                     scrolledText.addView(text);
 
@@ -98,7 +99,7 @@ public class AboutFragment extends Fragment {
                 }else if(item.getText().equals("Terms of Service")){
                     // Open Terms of Service
                     // Set text
-                    aboutViewModel.setText(Html.fromHtml(getString(R.string.tos_html)));
+                    aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.tos_html), HtmlCompat.FROM_HTML_MODE_LEGACY));
                     text.setText(aboutViewModel.getText().getValue());
                     scrolledText.addView(text);
 

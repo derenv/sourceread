@@ -19,20 +19,20 @@ import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class HomeViewModel extends ViewModel {
     private MutableLiveData<String> mText;
-    private MutableLiveData<ArrayList<Card>> mCards;
+    private MutableLiveData<ArrayList<Article>> mCards;
 
     public HomeViewModel() {
         mText = new MutableLiveData<String>();
         mText.setValue("");
-        mCards = new MutableLiveData<ArrayList<Card>>();
-        mCards.setValue(new ArrayList<Card>());
+        mCards = new MutableLiveData<ArrayList<Article>>();
+        mCards.setValue(new ArrayList<Article>());
     }
 
     // SET
     public void setText(String s) {
         mText.setValue(s);
     }
-    public void setCards(ArrayList<Card> cards) {
+    public void setCards(ArrayList<Article> cards) {
         mCards.setValue(cards);
     }
 
@@ -40,17 +40,17 @@ public class HomeViewModel extends ViewModel {
     public LiveData<String> getText() {
         return mText;
     }
-    public LiveData<ArrayList<Card>> getCards() { return mCards; }
+    public LiveData<ArrayList<Article>> getCards() { return mCards; }
 
     // Check how many articles connected & verify quantity
     public void check_articles(LifecycleOwner context, LoggedInUser user, final ProgressBar progressBar) {
         // Populate articles
         // Get current apps
         if(user.getArticles().getValue() != null && user.getArticles().getValue().size() != 0) {
-            final ArrayList<Card> cards = new ArrayList<Card>();
+            final ArrayList<Article> cards = new ArrayList<Article>();
             for (Article article : user.getArticles().getValue()) {
-                Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
-                cards.add(new_card);
+                //Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
+                cards.add(article);
             }
             setCards(cards);
         }
@@ -66,15 +66,7 @@ public class HomeViewModel extends ViewModel {
                     return;
                 }
                 if (articles.size() > 0) {
-                    Log.d("DB", "# Saved Articles: " + articles.size());
-
-                    // Fetch data to be displayed
-                    final ArrayList<Card> cards = new ArrayList<Card>();
-                    for (Article article : articles) {
-                        Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
-                        cards.add(new_card);
-                    }
-                    setCards(cards);
+                    setCards(articles);
                 }
             }
         });

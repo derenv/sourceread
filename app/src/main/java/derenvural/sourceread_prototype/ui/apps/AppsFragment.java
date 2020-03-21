@@ -68,7 +68,7 @@ public class AppsFragment extends Fragment {
 
             // If list still empty, display appropriate text and hide loading bar
             if(mAdapter.getItemCount() <= 0) {
-                appsViewModel.setText("This is where you add article saver apps!");
+                appsViewModel.setText(getString(R.string.apps_placeholder));
             } else {
                 appsViewModel.setText("");
             }

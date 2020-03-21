@@ -19,9 +19,8 @@ import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.data.cards.Card;
-import derenvural.sourceread_prototype.data.cards.CardAdapter;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
+import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
 
 public class HomeFragment extends Fragment {
 
@@ -31,7 +30,8 @@ public class HomeFragment extends Fragment {
     private ProgressBar progressBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -43,7 +43,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        mAdapter = new CardAdapter(getActivity(), homeViewModel.getCards().getValue());
+        mAdapter = new ArticleAdapter(getActivity(), homeViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
 
         // Progress bar
@@ -59,16 +59,16 @@ public class HomeFragment extends Fragment {
         });
 
         // link cards to view-model data
-        homeViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
+        homeViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Article>>() {
             @Override
-            public void onChanged(@Nullable ArrayList<Card> updatedList) {
+            public void onChanged(@Nullable ArrayList<Article> updatedList) {
                 // Reset adapter
-                mAdapter = new CardAdapter(getActivity(), homeViewModel.getCards().getValue());
+                mAdapter = new ArticleAdapter(getActivity(), updatedList);
                 recyclerView.setAdapter(mAdapter);
 
                 // If list still empty, display appropriate text and hide loading bar
                 if(mAdapter.getItemCount() == 0) {
-                    homeViewModel.setText("This is where imported articles appear!");
+                    homeViewModel.setText(getString(R.string.home_placeholder));
                 } else {
                     // Set text blank
                     homeViewModel.setText("");
@@ -82,15 +82,21 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
+    public static HomeFragment newInstance(){return new HomeFragment();}
+
     /*
      * Fetch api tokens, auth tokens, and user token
      * */
     public void update(){
-        // Request articles
-        MainActivity main = (MainActivity) getActivity();
+        if(getActivity().getClass() == MainActivity.class) {
+            // Request articles
+            MainActivity main = (MainActivity) getActivity();
 
-        // Add observer to articles
-        progressBar.setVisibility(View.VISIBLE);
-        homeViewModel.check_articles(main, main.getUser(), progressBar);
+            // Add observer to articles
+            progressBar.setVisibility(View.VISIBLE);
+            homeViewModel.check_articles(main, main.getUser(), progressBar);
+        }else{
+            //return from article activity
+        }
     }
 }

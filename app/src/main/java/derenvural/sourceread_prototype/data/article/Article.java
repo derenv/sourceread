@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.data.article;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,6 +27,7 @@ public class Article implements Serializable {
     // Article Information
     private String word_count;
     private String veracity;
+    private ArrayList<String> text;
 
     /*
      * Create object from database document
@@ -43,10 +45,18 @@ public class Article implements Serializable {
         if(document.get("word_count") != null) {
             setWord_count(document.get("word_count").toString());
         }else{
-            setWord_count("n/a");
+            setWord_count("");
         }
-        setVeracity(document.get("veracity").toString());
-
+        if(document.get("veracity") == null){
+            setVeracity("");
+        }else{
+            setVeracity(document.get("veracity").toString());
+        }
+        if(document.get("text") == null){
+            setText(new ArrayList<String>());
+        }else{
+            setText((ArrayList<String>) document.get("text"));
+        }
     }
 
     /*
@@ -93,11 +103,17 @@ public class Article implements Serializable {
             if(article.getString("word_count") != null) {
                 setWord_count(article.getString("word_count"));
             }else{
-                setWord_count("n/a");
+                setWord_count("");
             }
+            setVeracity("");
+            setText(new ArrayList<String>());
         }catch(JSONException error){
             Log.e("JSON error", "error reading JSON: " + error.getMessage());
         }
+    }
+
+    public Article() {
+
     }
 
     public Map<String, Object> map_data(){
@@ -117,8 +133,42 @@ public class Article implements Serializable {
         // Article Information
         docData.put("word_count", getWord_count());
         docData.put("veracity", getVeracity());
+        docData.put("text", getText());
 
         return docData;
+    }
+
+    public void loadInstanceState(Bundle bundle) {
+        // Fill in data
+        // Identifiers
+        setResolved_url((String) bundle.getSerializable("url"));
+        setResolved_id((String) bundle.getSerializable("id"));
+        setResolved_title((String) bundle.getSerializable("title"));
+        setApp((String) bundle.getSerializable("app"));
+        // External Information
+        setAuthors((ArrayList) bundle.getSerializable("authors"));
+        //setPublication(bundle.getSerializable("publication"));
+        //setPublication_veracity(bundle.getSerializable"publication_veracity"));
+        // Article Information
+        setWord_count((String) bundle.getSerializable("word_count"));
+        setVeracity((String) bundle.getSerializable("veracity"));
+        setText((ArrayList) bundle.getSerializable("text"));
+    }
+    public void saveInstanceState(Bundle bundle) {
+        // Fill in data
+        // Identifiers
+        bundle.putSerializable("url", getResolved_url());
+        bundle.putSerializable("id", getResolved_id());
+        bundle.putSerializable("title", getResolved_title());
+        bundle.putSerializable("app", getApp());
+        // External Information
+        bundle.putSerializable("authors", getAuthors());
+        //bundle.putSerializable("publication", getPublication());
+        //bundle.putSerializable("publication_veracity", getPublication_veracity());
+        // Article Information
+        bundle.putSerializable("word_count", getWord_count());
+        bundle.putSerializable("veracity", getVeracity());
+        bundle.putSerializable("text", getText());
     }
 
     public void analyse(){
@@ -136,6 +186,7 @@ public class Article implements Serializable {
     public String getApp() { return app; }
     public String getPublication() { return publication; }
     public String getPublication_veracity() { return publication_veracity; }
+    public ArrayList<String> getText() { return text; }
 
     // Sets
     public void setResolved_url(String resolved_url) { this.resolved_url = resolved_url; }
@@ -147,5 +198,5 @@ public class Article implements Serializable {
     public void setApp(String app) { this.app = app; }
     public void setPublication(String publication) { this.publication = publication; }
     public void setPublication_veracity(String publication_veracity) { this.publication_veracity = publication_veracity; }
-
+    public void setText(ArrayList<String> text) { this.text = text; }
 }
