@@ -1,6 +1,5 @@
 package derenvural.sourceread_prototype.ui.home;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -14,7 +13,6 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.data.article.Article;
-import derenvural.sourceread_prototype.data.cards.Card;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class HomeViewModel extends ViewModel {

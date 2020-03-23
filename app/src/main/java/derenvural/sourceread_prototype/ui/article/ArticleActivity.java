@@ -7,21 +7,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
-import androidx.navigation.NavGraph;
-import androidx.navigation.NavInflater;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
@@ -51,23 +52,21 @@ public class ArticleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_article);
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
-        /*
-        if(savedInstanceState == null){
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.nav_article, ArticleFragment.newInstance())
-                    .commitNow();
-        }
-        */
-
         // Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        //toolbar.setTitle("Article View");
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+        articleViewModel.getTitle().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                toolbar.setTitle(s);
+                Log.d("article", "title set");
+            }
+        });
 
         // Navigation Drawer
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home)
+                R.id.nav_home, R.id.nav_about, R.id.nav_settings)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -110,6 +109,9 @@ public class ArticleActivity extends AppCompatActivity {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             String previous_activity = intent.getStringExtra("activity");
+            if(previous_activity.equals("")){
+                // switch to article not default
+            }
 
             // Fetch serialised article
             article = new Article();

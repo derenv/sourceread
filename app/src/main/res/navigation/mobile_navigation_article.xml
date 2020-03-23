@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation_article"
+    app:startDestination="@+id/nav_article">
+
+    <!--DETAIL-->
+    <fragment
+        android:id="@+id/nav_article"
+        android:name="derenvural.sourceread_prototype.ui.article.ArticleFragment"
+        android:label="@string/menu_article"
+        tools:layout="@layout/fragment_article" />
+
+    <!--MISCELLANEOUS-->
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="derenvural.sourceread_prototype.ui.about.AboutFragment"
+        android:label="@string/menu_about"
+        tools:layout="@layout/fragment_about" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="derenvural.sourceread_prototype.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>

@@ -42,9 +42,11 @@ public class scraper extends AsyncTask<Void, Void, Void> {
         Article article = getArticle().getValue();
 
         // Test output
+        Log.d("JSOUP", "==START==");
         for (String text : article.getText()){
             Log.d("JSOUP", text);
         }
+        Log.d("JSOUP", "==END==");
 
         // Analyse article
         Log.d("JSOUP", "analysing now..");
@@ -67,11 +69,7 @@ public class scraper extends AsyncTask<Void, Void, Void> {
         } catch (IOException error) {
             Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
             error.printStackTrace();
-        } catch (StackOverflowError error) {
-            // catch memory errors from badly written pages
-            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
-            error.printStackTrace();
-        } catch (OutOfMemoryError error) {
+        } catch (StackOverflowError | OutOfMemoryError error) {
             // catch memory errors from badly written pages
             Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
             error.printStackTrace();
@@ -113,11 +111,6 @@ public class scraper extends AsyncTask<Void, Void, Void> {
             article.setText(paragraphs);
         } catch (IOException error) {
             Log.e("JSOUP error", "unknown error scraping web-page: " + error.getMessage());
-            error.printStackTrace();
-            article.setText(new ArrayList<String>());
-        } catch (StackOverflowError | OutOfMemoryError error) {
-            // catch memory errors from badly written pages
-            Log.e("JSOUP error", "memory error scraping web-page: " + error.getMessage());
             error.printStackTrace();
             article.setText(new ArrayList<String>());
         }

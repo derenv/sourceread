@@ -82,8 +82,6 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    public static HomeFragment newInstance(){return new HomeFragment();}
-
     /*
      * Fetch api tokens, auth tokens, and user token
      * */
