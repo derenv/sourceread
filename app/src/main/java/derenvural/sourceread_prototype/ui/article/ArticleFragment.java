@@ -33,13 +33,21 @@ public class ArticleFragment extends Fragment {
 
         ArticleViewModel articleViewModel = ViewModelProviders.of(getActivity()).get(ArticleViewModel.class);
 
+        // link author text to view-model data
+        final TextView titleView = root.findViewById(R.id.text_article_title);
+        articleViewModel.getTitle().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                titleView.setText("Full Title - "+s);
+            }
+        });
+
         // link URL text to view-model data
         final TextView urlView = root.findViewById(R.id.text_article_url);
         articleViewModel.getUrl().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 urlView.setText("URL - "+s);
-                Log.d("article", "url set");
             }
         });
 
@@ -53,7 +61,6 @@ public class ArticleFragment extends Fragment {
                     q = q + "\n'" + t.get("name")+"'";
                 }
                 authorView.setText(q);
-                Log.d("article", "authors set");
             }
         });
 
@@ -63,7 +70,6 @@ public class ArticleFragment extends Fragment {
             @Override
             public void onChanged(@Nullable String s) {
                 veracityView.setText("Veracity - "+s);
-                Log.d("article", "veracity set");
             }
         });
 
