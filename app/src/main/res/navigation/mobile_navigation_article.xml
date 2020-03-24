@@ -7,6 +7,11 @@
 
     <!--DETAIL-->
     <fragment
+        android:id="@+id/nav_home"
+        android:name="derenvural.sourceread_prototype.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
         android:id="@+id/nav_article"
         android:name="derenvural.sourceread_prototype.ui.article.ArticleFragment"
         android:label="@string/menu_article"

@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.ui.article;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,9 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -20,9 +19,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
@@ -52,26 +48,46 @@ public class ArticleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_article);
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
-        // Toolbar
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-        articleViewModel.getTitle().observe(this, new Observer<String>() {
+        // Navigation Drawer
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        final NavigationView navigationView = findViewById(R.id.nav_view);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_article, R.id.nav_home,
+                R.id.nav_about, R.id.nav_settings)
+                .setDrawerLayout(drawer)
+                .build();
+        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, navController);
+
+        // Add custom navigation listener to catch different activities
+        final Activity this_activity = this;
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onChanged(@Nullable String s) {
-                toolbar.setTitle(s);
-                Log.d("article", "title set");
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+                switch (id) {
+                    case R.id.nav_home:
+                        main_redirect();
+                        break;
+                    case R.id.nav_article:
+                        // Replace current fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
+                        break;
+                    case R.id.nav_about:
+                        // Replace current fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
+                        break;
+                    case R.id.nav_settings:
+                        // Replace current fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
+                        break;
+                }
+                return false;
             }
         });
 
-        // Navigation Drawer
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_about, R.id.nav_settings)
-                .setDrawerLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+
 
         // Initialize Firebase Authentication
         mAuth = FirebaseAuth.getInstance();
@@ -98,9 +114,21 @@ public class ArticleActivity extends AppCompatActivity {
 
     private void main_redirect(){
         // Redirect to login page
-        Intent new_activity = new Intent(this, MainActivity.class);
-        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(new_activity);
+        Intent main_activity = new Intent(this, MainActivity.class);
+
+        // Get user for passing
+        LoggedInUser user_data = getUser();
+
+        // Create bundle with serialised object
+        Bundle bundle = new Bundle();
+        user_data.saveInstanceState(bundle);
+
+        // Add title & bundle to intent
+        main_activity.putExtra("activity","article");
+        main_activity.putExtras(bundle);
+        main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        startActivity(main_activity);
         finish();
     }
 
@@ -128,10 +156,11 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     public void loadArticle(){
-        //TODO: add to viewmodel
+        // Add to viewmodel
         articleViewModel.setTitle(article.getResolved_title());
         articleViewModel.setUrl(article.getResolved_url());
         articleViewModel.setAuthors(article.getAuthors());
+        articleViewModel.setWordCount(article.getWord_count());
         articleViewModel.setVeracity(article.getVeracity());
     }
 

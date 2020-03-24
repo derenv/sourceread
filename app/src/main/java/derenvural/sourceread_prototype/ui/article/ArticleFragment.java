@@ -65,6 +65,16 @@ public class ArticleFragment extends Fragment {
         });
 
         // link message text to view-model data
+        final TextView wordcountView = root.findViewById(R.id.text_article_word_count);
+        articleViewModel.getWordCount().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                // FIXME: if wordcount invalid
+                wordcountView.setText("Word Count - "+s);
+            }
+        });
+
+        // link message text to view-model data
         final TextView veracityView = root.findViewById(R.id.text_article_veracity);
         articleViewModel.getVeracity().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override

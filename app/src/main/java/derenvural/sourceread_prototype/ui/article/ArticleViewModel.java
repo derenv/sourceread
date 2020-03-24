@@ -11,6 +11,7 @@ public class ArticleViewModel extends ViewModel {
     private MutableLiveData<String> mTitle;
     private MutableLiveData<String> mUrl;
     private MutableLiveData<ArrayList<HashMap<String,String>>> mAuthors;
+    private MutableLiveData<String> mWordCount;
     private MutableLiveData<String> mVeracity;
 
     public ArticleViewModel(){
@@ -20,6 +21,8 @@ public class ArticleViewModel extends ViewModel {
         setUrl("");
         mAuthors = new MutableLiveData<ArrayList<HashMap<String,String>>>();
         setAuthors(new ArrayList<HashMap<String,String>>());
+        mWordCount = new MutableLiveData<String>();
+        setWordCount("");
         mVeracity = new MutableLiveData<String>();
         setVeracity("");
     }
@@ -34,6 +37,9 @@ public class ArticleViewModel extends ViewModel {
     public void setAuthors(ArrayList<HashMap<String,String>> s) {
         mAuthors.setValue(s);
     }
+    public void setWordCount(String s) {
+        mWordCount.setValue(s);
+    }
     public void setVeracity(String s) {
         mVeracity.setValue(s);
     }
@@ -47,6 +53,9 @@ public class ArticleViewModel extends ViewModel {
     }
     public LiveData<ArrayList<HashMap<String,String>>> getAuthors() {
         return mAuthors;
+    }
+    public LiveData<String> getWordCount() {
+        return mWordCount;
     }
     public LiveData<String> getVeracity() {
         return mVeracity;

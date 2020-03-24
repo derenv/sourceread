@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
@@ -379,9 +380,14 @@ public class LoggedInUser implements Serializable {
                                     }
                                 }
 
-                                // store timestamp (for updating efficiency)
+                                // Create map object containing timestamp with correct format
                                 long request_stamp = Instant.now().getEpochSecond();
-                                db.write_app_timestamp(app.get("name").toString(), request_stamp);
+                                Map<String, Object> new_stamp = new HashMap<>();
+                                new_stamp.put(app.get("name").toString(), request_stamp);
+
+                                // store timestamp
+                                //String app_name, String field, Object new_data)
+                                db.update_user_field("apps", new_stamp);
                             }catch(JSONException error){
                                 Log.e("JSON error", "error reading JSON: " + error.getMessage());
                             }

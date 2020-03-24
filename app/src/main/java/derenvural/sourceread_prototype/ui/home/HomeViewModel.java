@@ -47,7 +47,6 @@ public class HomeViewModel extends ViewModel {
         if(user.getArticles().getValue() != null && user.getArticles().getValue().size() != 0) {
             final ArrayList<Article> cards = new ArrayList<Article>();
             for (Article article : user.getArticles().getValue()) {
-                //Card new_card = new Card(null, article.getResolved_title(), article.getResolved_url());
                 cards.add(article);
             }
             setCards(cards);

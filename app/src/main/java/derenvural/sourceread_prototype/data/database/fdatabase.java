@@ -35,7 +35,6 @@ public class fdatabase {
 
     /*
      * Write an article id field to database
-     * */
     public void write_article_id(final String new_id){
         // Make update attempt
         DocumentReference user_request = get_current_user_request();
@@ -51,18 +50,18 @@ public class fdatabase {
             }
         });
     }
-
-    /*
-     * Write an app id field to database
      * */
-    public void write_new_app(final String new_id){
+    /*
+     * Write an article id field to database
+     * */
+    public void add_user_field(String field, Object new_data){
         // Make update attempt
         DocumentReference user_request = get_current_user_request();
-        user_request.update("apps", FieldValue.arrayUnion(new_id)).addOnCompleteListener(new OnCompleteListener<Void>() {
+        user_request.update(field, FieldValue.arrayUnion(new_data)).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Log.d("DB saved app ID", new_id);
+                    Log.d("DB insert", "done");
                 }else{
                     // Log error
                     Log.e("DB", "write failed: ", task.getException());
@@ -72,20 +71,16 @@ public class fdatabase {
     }
 
     /*
-     * Write an app id field to database
+     * Write a user field to database
      * */
-    public void write_app_timestamp(final String app_name, long timestamp){
-        // Create map object containing timestamp with correct format
-        Map<String, Object> new_stamp = new HashMap<>();
-        new_stamp.put(app_name, timestamp);
-
+    public void update_user_field(String field, Object new_data) {
         // Make update attempt
         DocumentReference user_request = get_current_user_request();
-        user_request.update("apps", new_stamp).addOnCompleteListener(new OnCompleteListener<Void>() {
+        user_request.update(field, new_data).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Log.d("DB new timestamp", app_name);
+                    Log.d("DB update","done");
                 }else{
                     // Log error
                     Log.e("DB", "write failed: ", task.getException());
@@ -149,7 +144,8 @@ public class fdatabase {
                     user.addArticle(article);
 
                     // Update user db entry
-                    write_article_id(id);
+                    add_user_field("articles", id);
+                    //write_article_id(id);
                 }else{
                     // Log error
                     Log.e("DB", "write failed - ", task.getException());

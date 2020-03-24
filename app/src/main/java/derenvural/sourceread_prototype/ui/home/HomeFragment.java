@@ -21,6 +21,7 @@ import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
+import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class HomeFragment extends Fragment {
 
@@ -48,6 +49,7 @@ public class HomeFragment extends Fragment {
 
         // Progress bar
         progressBar = root.findViewById(R.id.loading_home);
+        progressBar.setVisibility(View.VISIBLE);
 
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_home);
@@ -91,10 +93,13 @@ public class HomeFragment extends Fragment {
             MainActivity main = (MainActivity) getActivity();
 
             // Add observer to articles
-            progressBar.setVisibility(View.VISIBLE);
             homeViewModel.check_articles(main, main.getUser(), progressBar);
-        }else{
-            //return from article activity
+        }else if(getActivity().getClass() == ArticleActivity.class){
+            // Request articles
+            ArticleActivity articleActivity = (ArticleActivity) getActivity();
+
+            // Add observer to articles
+            homeViewModel.check_articles(articleActivity, articleActivity.getUser(), progressBar);
         }
     }
 }

@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
+        //TODO: disable interface & enable worm
+
         // Get intent data
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
@@ -130,9 +132,11 @@ public class MainActivity extends AppCompatActivity {
                 if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
                     // Request access tokens
                     user.request_access_tokens(this, httph, app_name);
+                    //TODO: reactivate interface & disable worm
                 }else{
                     // Attempt population again
                     user.populate(this, this, db, httph);
+                    //TODO: reactivate interface & disable worm
                 }
             }else{
                 // TODO: other deep links
@@ -148,10 +152,14 @@ public class MainActivity extends AppCompatActivity {
 
                 if(previous_activity.equals("login")) {
                     user.populate(this, this, db, httph);
+                    //TODO: reactivate interface & disable worm
+                }else if(previous_activity.equals("article")) {
+                    //TODO: reactivate interface & disable worm
                 }
             }else {
                 // Attempt population
                 user.populate(this, this, db, httph);
+                //TODO: reactivate interface & disable worm
             }
         }
     }
