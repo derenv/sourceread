@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 /* Scrapes content from webpages
  * user-agent list:
@@ -25,32 +27,39 @@ public class scraper extends AsyncTask<Void, Void, Void> {
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0";
     private final static String REFERRER = "http://www.google.com";
     private final static int TIMEOUT = 24000;
-
+    // Database & user
+    private fdatabase db;
+    private LoggedInUser user;
     // Data
     private MutableLiveData<Boolean> done = new MutableLiveData<Boolean>();
     private MutableLiveData<Article> article = new MutableLiveData<Article>();
 
-    public scraper(Article article){
+    public scraper(Article article, fdatabase db, LoggedInUser user){
         setDone(false);
         setArticle(article);
+        this.db = db;
+        this.user = user;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
 
+        // Save text to database
         Article article = getArticle().getValue();
+        db.update_article_field(article, user, "text");
 
         // Test output
         Log.d("JSOUP", "==START==");
-        for (String text : article.getText()){
-            Log.d("JSOUP", text);
-        }
+        Log.d("JSOUP", article.getText());
         Log.d("JSOUP", "==END==");
 
         // Analyse article
         Log.d("JSOUP", "analysing now..");
         article.analyse();
+
+        // Save analysis to database
+        db.update_article_field(article, user, "veracity");
 
         // End task
         postArticle(article);
@@ -92,30 +101,34 @@ public class scraper extends AsyncTask<Void, Void, Void> {
                 Log.e("JSOUP error", "error response scraping web-page message: " + response.statusMessage());
             }
 
-            // Get paragraph elements
+            // Fetch paragraph elements of page
             Elements paragraphElements = response
                     .parse()
                     .body()
                     .getElementsByTag("p");
 
-            // Get paragraphs of article
-            ArrayList<String> paragraphs = new ArrayList<String>();
+            // Extract paragraphs from paragraph elements
+            String text = "";
             for (Element paragraph : paragraphElements) {
                 // TODO: remove image descriptions & credits
                 // TODO: remove publication descriptions & credits
                 // TODO: remove author descriptions & credits
-                paragraphs.add(paragraph.text());
+                text += paragraph.text();
             }
 
-            // Add text to article & add to list of fetched articles
-            article.setText(paragraphs);
+            // replace extraneous spaces
+            text.replace("  "," ");
+            text.substring(0,text.length() -1);
+
+            // Add text to article
+            article.setText(text);
         } catch (IOException error) {
             Log.e("JSOUP error", "unknown error scraping web-page: " + error.getMessage());
             error.printStackTrace();
-            article.setText(new ArrayList<String>());
+            article.setText("");
         }
 
-        // Set live data with articles (or empty list for failure)
+        // Set live data with article (with found text on success OR empty text on failure)
         postArticle(article);
         return null;
     }

@@ -55,7 +55,7 @@ public class fdatabase {
     /*
      * Write an app id field to database
      * */
-    public void write_app_ids(final String new_id){
+    public void write_new_app(final String new_id){
         // Make update attempt
         DocumentReference user_request = get_current_user_request();
         user_request.update("apps", FieldValue.arrayUnion(new_id)).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -100,11 +100,32 @@ public class fdatabase {
     public void write_user_veracity(LoggedInUser user){
         //
     }
+
     /*
-     * Write an user veracity field to database
+     * Update an article document in database
      * */
-    public void write_article_veracity(final String article_id){
-        //
+    public void update_article_field(Article article, LoggedInUser user, String field) {
+        // Create a Map to fill
+        Map<String, Object> docData = article.map_data();
+
+        // Get ID of article
+        for(int i=0;i<user.getArticles().getValue().size();i++){
+            if(user.getArticles().getValue().get(i).getResolved_title().equals(article.getResolved_title())){
+                final String id = user.getArticleIDs().getValue().get(i);
+
+                // Make update attempt
+                DocumentReference article_request = get_article_request(id);
+                article_request.update(field, docData.get(field)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // Get database id
+                        Log.d("DB", "updated article - "+id);
+                    }
+                });
+
+                break;
+            }
+        }
     }
 
     /*
@@ -121,7 +142,7 @@ public class fdatabase {
                 if (task.isSuccessful()) {
                     // Get database id
                     String id = task.getResult().getId();
-                    Log.d("DB saved article", id);
+                    Log.d("DB", "saved article - "+id);
 
                     // Add to user object
                     user.addArticleID(id);
@@ -131,7 +152,7 @@ public class fdatabase {
                     write_article_id(id);
                 }else{
                     // Log error
-                    Log.e("DB", "write failed: ", task.getException());
+                    Log.e("DB", "write failed - ", task.getException());
                 }
             }
         });

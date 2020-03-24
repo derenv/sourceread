@@ -27,7 +27,7 @@ public class Article implements Serializable {
     // Article Information
     private String word_count;
     private String veracity;
-    private ArrayList<String> text;
+    private String text;
 
     /*
      * Create object from database document
@@ -42,10 +42,10 @@ public class Article implements Serializable {
         setAuthors((ArrayList<HashMap<String, String>>) document.get("authors"));
         //setPublication(document.get("publication").toString());
         // Article Information
-        if(document.get("word_count") != null) {
-            setWord_count(document.get("word_count").toString());
-        }else{
+        if(document.get("word_count") == null) {
             setWord_count("");
+        }else{
+            setWord_count(document.get("word_count").toString());
         }
         if(document.get("veracity") == null){
             setVeracity("");
@@ -53,9 +53,9 @@ public class Article implements Serializable {
             setVeracity(document.get("veracity").toString());
         }
         if(document.get("text") == null){
-            setText(new ArrayList<String>());
+            setText("");
         }else{
-            setText((ArrayList<String>) document.get("text"));
+            setText(document.get("text").toString());
         }
     }
 
@@ -106,7 +106,7 @@ public class Article implements Serializable {
                 setWord_count("");
             }
             setVeracity("");
-            setText(new ArrayList<String>());
+            setText("");
         }catch(JSONException error){
             Log.e("JSON error", "error reading JSON: " + error.getMessage());
         }
@@ -152,7 +152,7 @@ public class Article implements Serializable {
         // Article Information
         setWord_count((String) bundle.getSerializable("word_count"));
         setVeracity((String) bundle.getSerializable("veracity"));
-        setText((ArrayList) bundle.getSerializable("text"));
+        setText((String) bundle.getSerializable("text"));
     }
     public void saveInstanceState(Bundle bundle) {
         // Fill in data
@@ -186,7 +186,7 @@ public class Article implements Serializable {
     public String getApp() { return app; }
     public String getPublication() { return publication; }
     public String getPublication_veracity() { return publication_veracity; }
-    public ArrayList<String> getText() { return text; }
+    public String getText() { return text; }
 
     // Sets
     public void setResolved_url(String resolved_url) { this.resolved_url = resolved_url; }
@@ -198,5 +198,5 @@ public class Article implements Serializable {
     public void setApp(String app) { this.app = app; }
     public void setPublication(String publication) { this.publication = publication; }
     public void setPublication_veracity(String publication_veracity) { this.publication_veracity = publication_veracity; }
-    public void setText(ArrayList<String> text) { this.text = text; }
+    public void setText(String text) { this.text = text; }
 }

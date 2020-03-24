@@ -177,7 +177,7 @@ public class ArticleActivity extends AppCompatActivity {
                 item.setEnabled(false);
 
                 // Get articles and create async task
-                analyser at = new analyser(article);
+                analyser at = new analyser(article, db, user);
                 at.fetch_article(this, new Observer<Boolean>() {
                     // Called when "request_app_data" has a response
                     @Override
