@@ -83,10 +83,6 @@ public class ArticleFragment extends Fragment {
             }
         });
 
-        // Progress bar
-        ProgressBar progressBar = root.findViewById(R.id.loading_article);
-        progressBar.setVisibility(View.INVISIBLE);
-
         return root;
     }
 

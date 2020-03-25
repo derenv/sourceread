@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +33,7 @@ import derenvural.sourceread_prototype.ui.login.LoginActivity;
 public class ArticleActivity extends AppCompatActivity {
     // Android
     private AppBarConfiguration mAppBarConfiguration;
+    private ProgressBar progressBar;
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
@@ -49,16 +52,20 @@ public class ArticleActivity extends AppCompatActivity {
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
         // Navigation Drawer
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        final NavigationView navigationView = findViewById(R.id.nav_view);
+        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_article, R.id.nav_home,
                 R.id.nav_about, R.id.nav_settings)
                 .setDrawerLayout(drawer)
                 .build();
-        final NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        // Progress bar
+        progressBar = findViewById(R.id.loading_article);
+        progressBar.setVisibility(View.INVISIBLE);
 
         // Add custom navigation listener to catch different activities
         final Activity this_activity = this;
@@ -73,21 +80,22 @@ public class ArticleActivity extends AppCompatActivity {
                     case R.id.nav_article:
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
+                        drawer.closeDrawers();
                         break;
                     case R.id.nav_about:
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
+                        drawer.closeDrawers();
                         break;
                     case R.id.nav_settings:
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
+                        drawer.closeDrawers();
                         break;
                 }
                 return false;
             }
         });
-
-
 
         // Initialize Firebase Authentication
         mAuth = FirebaseAuth.getInstance();
@@ -204,6 +212,7 @@ public class ArticleActivity extends AppCompatActivity {
 
                 // Disable menu button
                 item.setEnabled(false);
+                progressBar.setVisibility(View.VISIBLE);
 
                 // Get articles and create async task
                 analyser at = new analyser(article, db, user);
@@ -215,6 +224,7 @@ public class ArticleActivity extends AppCompatActivity {
                             // Re-enable menu button
                             Log.d("JSOUP", "done!");
                             item.setEnabled(true);
+                            progressBar.setVisibility(View.INVISIBLE);
                         }
                     }
                 });

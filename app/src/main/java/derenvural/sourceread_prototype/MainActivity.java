@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
@@ -35,6 +36,7 @@ import derenvural.sourceread_prototype.ui.login.LoginActivity;
 public class MainActivity extends AppCompatActivity {
     // Android
     private AppBarConfiguration mAppBarConfiguration;
+    private ProgressBar progressBar;
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Progress Bar
+        progressBar = findViewById(R.id.loading_main);
+        progressBar.setVisibility(View.VISIBLE);
 
         // Floating Action Button
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -133,10 +139,12 @@ public class MainActivity extends AppCompatActivity {
                     // Request access tokens
                     user.request_access_tokens(this, httph, app_name);
                     //TODO: reactivate interface & disable worm
+                    progressBar.setVisibility(View.INVISIBLE);
                 }else{
                     // Attempt population again
                     user.populate(this, this, db, httph);
                     //TODO: reactivate interface & disable worm
+                    progressBar.setVisibility(View.INVISIBLE);
                 }
             }else{
                 // TODO: other deep links
@@ -153,13 +161,16 @@ public class MainActivity extends AppCompatActivity {
                 if(previous_activity.equals("login")) {
                     user.populate(this, this, db, httph);
                     //TODO: reactivate interface & disable worm
+                    progressBar.setVisibility(View.INVISIBLE);
                 }else if(previous_activity.equals("article")) {
                     //TODO: reactivate interface & disable worm
+                    progressBar.setVisibility(View.INVISIBLE);
                 }
             }else {
                 // Attempt population
                 user.populate(this, this, db, httph);
                 //TODO: reactivate interface & disable worm
+                progressBar.setVisibility(View.INVISIBLE);
             }
         }
     }
