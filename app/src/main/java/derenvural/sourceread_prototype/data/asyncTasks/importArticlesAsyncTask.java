@@ -84,12 +84,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        // Cut token out of html response
-                        Log.d("API", "Request Response received");
-
                         try{
-                            Log.d("API response status", response.getString("status"));
-
                             if(!response.getString("status").equals("2")) {
                                 // Get articles from JSON
                                 JSONObject articles_json = response.getJSONObject("list");

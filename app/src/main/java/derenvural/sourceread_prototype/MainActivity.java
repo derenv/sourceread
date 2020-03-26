@@ -131,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        //TODO: disable interface & enable worm
-
         // Get intent data
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
