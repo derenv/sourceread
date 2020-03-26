@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -37,12 +39,15 @@ public class MainActivity extends AppCompatActivity {
     // Android
     private AppBarConfiguration mAppBarConfiguration;
     private ProgressBar progressBar;
+    private DrawerLayout drawer;
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
     private httpHandler httph;
     // User
     public LoggedInUser user;
+    // Variables
+    private boolean interfaceEnabled;
 
     public LoggedInUser getUser() { return user; }
 
@@ -57,22 +62,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Progress Bar
         progressBar = findViewById(R.id.loading_main);
-        progressBar.setVisibility(View.VISIBLE);
 
-        // Floating Action Button
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Import articles from user accounts
-                Toast.makeText(view.getContext(), "Importing articles...", Toast.LENGTH_SHORT).show();
-                user.import_articles(httph, db);
-            }
-        });
-
-        // Navigation Drawer
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        // Navigation
+        drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -83,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        // Disable interface
+        deactivate_interface();
 
         // Initialize Firebase Authentication
         mAuth = FirebaseAuth.getInstance();
@@ -100,6 +97,29 @@ public class MainActivity extends AppCompatActivity {
             // handle app links
             handleIntent(getIntent());
         }
+    }
+
+    public void setDrawerEnabled(boolean enabled) {
+        int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED :
+                DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
+
+        drawer.setDrawerLockMode(lockMode);
+        interfaceEnabled = enabled;
+    }
+
+    private void deactivate_interface(){
+        progressBar.setVisibility(View.VISIBLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        setDrawerEnabled(false);
+    }
+
+    public void activate_interface(){
+        progressBar.setVisibility(View.INVISIBLE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        setDrawerEnabled(true);
     }
 
     private void login_redirect(){
@@ -136,15 +156,11 @@ public class MainActivity extends AppCompatActivity {
 
                 // Fetch user from local persistence
                 if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
-                    // Request access tokens
-                    user.request_access_tokens(this, httph, app_name);
-                    //TODO: reactivate interface & disable worm
-                    progressBar.setVisibility(View.INVISIBLE);
+                    // Request access tokens (interface reactivated on response)
+                    user.access_tokens(this, httph, app_name);
                 }else{
                     // Attempt population again
-                    user.populate(this, this, db, httph);
-                    //TODO: reactivate interface & disable worm
-                    progressBar.setVisibility(View.INVISIBLE);
+                    user.populate(this, db, httph);
                 }
             }else{
                 // TODO: other deep links
@@ -159,18 +175,14 @@ public class MainActivity extends AppCompatActivity {
                 user.loadInstanceState(extras);
 
                 if(previous_activity.equals("login")) {
-                    user.populate(this, this, db, httph);
-                    //TODO: reactivate interface & disable worm
-                    progressBar.setVisibility(View.INVISIBLE);
+                    user.populate(this, db, httph);
                 }else if(previous_activity.equals("article")) {
-                    //TODO: reactivate interface & disable worm
-                    progressBar.setVisibility(View.INVISIBLE);
+                    // Reactivate interface & disable worm
+                    activate_interface();
                 }
             }else {
                 // Attempt population
-                user.populate(this, this, db, httph);
-                //TODO: reactivate interface & disable worm
-                progressBar.setVisibility(View.INVISIBLE);
+                user.populate(this, db, httph);
             }
         }
     }
@@ -184,21 +196,30 @@ public class MainActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_refresh_articles:
-                Toast.makeText(this, "Refreshing articles...", Toast.LENGTH_SHORT).show();
-                // TODO: REFRESH ARTICLES
-                return true;
-            case R.id.action_refresh_apps:
-                Toast.makeText(this, "Refreshing apps...", Toast.LENGTH_SHORT).show();
-                // TODO: refresh apps using authenticate functions
-                return true;
-            case R.id.action_logout_user:
-                Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
-                logout();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(interfaceEnabled){
+            switch (item.getItemId()) {
+                case R.id.action_import_articles:
+                    // loading worm and "importing.."
+                    deactivate_interface();
+
+                    // Import articles from user accounts
+                    Toast.makeText(this, "Importing articles..", Toast.LENGTH_SHORT).show();
+                    user.import_articles(httph, db);
+
+                    return true;
+                case R.id.action_refresh_apps:
+                    Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
+                    // TODO: refresh apps using authenticate functions
+                    return true;
+                case R.id.action_logout_user:
+                    Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
+                    logout();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        }else{
+            return false;
         }
     }
 

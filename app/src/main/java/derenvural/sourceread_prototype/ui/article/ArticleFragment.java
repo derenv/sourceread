@@ -56,11 +56,13 @@ public class ArticleFragment extends Fragment {
         articleViewModel.getAuthors().observe(getViewLifecycleOwner(), new Observer<ArrayList<HashMap<String,String>>>() {
             @Override
             public void onChanged(@Nullable ArrayList<HashMap<String,String>> s) {
-                String q = "Authors:\n'"+s.get(0).get("name")+"'";
-                for(HashMap<String,String> t: s.subList(1,s.size())){
-                    q = q + "\n'" + t.get("name")+"'";
+                if(s != null) {
+                    String q = "Authors:\n'" + s.get(0).get("name") + "'";
+                    for (HashMap<String, String> t : s.subList(1, s.size())) {
+                        q = q + "\n'" + t.get("name") + "'";
+                    }
+                    authorView.setText(q);
                 }
-                authorView.setText(q);
             }
         });
 

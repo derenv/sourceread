@@ -217,12 +217,11 @@ public class ArticleActivity extends AppCompatActivity {
                 // Get articles and create async task
                 analyser at = new analyser(article, db, user);
                 at.fetch_article(this, new Observer<Boolean>() {
-                    // Called when "request_app_data" has a response
+                    // Called when "fetch_article" has a response
                     @Override
                     public void onChanged(Boolean done) {
                         if (done) {
-                            // Re-enable menu button
-                            Log.d("JSOUP", "done!");
+                            // Re-enable menu button & disable progress bar
                             item.setEnabled(true);
                             progressBar.setVisibility(View.INVISIBLE);
                         }

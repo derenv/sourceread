@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_refresh_articles"
+        android:id="@+id/action_import_articles"
         android:orderInCategory="1"
-        android:title="@string/action_refresh_articles"
+        android:title="@string/action_import_articles"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_refresh_apps"

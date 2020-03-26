@@ -99,7 +99,7 @@ public class fdatabase {
     /*
      * Update an article document in database
      * */
-    public void update_article_field(Article article, LoggedInUser user, String field) {
+    public void update_article_field(Article article, LoggedInUser user, final String field) {
         // Create a Map to fill
         Map<String, Object> docData = article.map_data();
 
@@ -114,7 +114,7 @@ public class fdatabase {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         // Get database id
-                        Log.d("DB", "updated article - "+id);
+                        Log.d("DB", "updated article - '"+id+"' field - '"+field+"'");
                     }
                 });
 
@@ -157,84 +157,29 @@ public class fdatabase {
     /*
      * Request all user data
      * */
-    public void request_user_data(final LoggedInUser user){
+    public void request_user_data(OnCompleteListener end){
+        // Get reference to user document in 'users' collection
         DocumentReference user_request = get_current_user_request();
-        user_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    // Get list of articles
-                    DocumentSnapshot document = task.getResult();
-                    user.setVeracity((String) document.get("veracity"));
-                    user.setAppIDs((HashMap<String, Object>) document.get("apps"));
-                    user.setArticleIDs((ArrayList<String>) document.get("articles"));
-                } else {
-                    // Log error
-                    Log.e("DB", "read failed: ", task.getException());
-                }
-            }
-        });
+
+        // Execute database read with onCompleteListener
+        user_request.get().addOnCompleteListener(end);
     }
     /*
      * Request all app data
      * */
-    public void request_app_data(final LoggedInUser user){
-        final ArrayList<HashMap<String, Object>> apps = new ArrayList<HashMap<String, Object>>();
-        for(final String app_name : user.getAppIDs().getValue().keySet()) {
-            DocumentReference app_request = get_app_request(app_name);
-            app_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        // Get list of articles
-                        DocumentSnapshot document = task.getResult();
+    public void request_app_data(String app_name, OnCompleteListener end){
+        // Get reference to app document in 'apps' collection
+        DocumentReference app_request = get_app_request(app_name);
 
-                        // Populate hash map
-                        HashMap<String, Object> this_app = new HashMap<String, Object>();
-                        this_app.put("name", app_name);
-                        this_app.put("description", document.get("description").toString());
-                        this_app.put("key", document.get("key").toString());
-                        this_app.put("timestamp", user.getAppIDs().getValue().get(app_name));
-                        this_app.put("requests", document.get("requests"));
-
-                        // Add to list
-                        apps.add(this_app);
-                        user.setApps(apps);
-                    } else {
-                        // Log error
-                        Log.e("DB", "read failed: ", task.getException());
-                    }
-                }
-            });
-        }
+        // Execute database read with onCompleteListener
+        app_request.get().addOnCompleteListener(end);
     }
     /*
      * Request all app data
      * */
-    public void request_article_data(final LoggedInUser user){
-        final ArrayList<Article> articles = new ArrayList<Article>();
-        for(final String article : user.getArticleIDs().getValue()) {
-            DocumentReference article_request = get_article_request(article);
-            article_request.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        // Get list of articles
-                        DocumentSnapshot document = task.getResult();
-
-                        // Populate object
-                        Article this_article = new Article(document, article);
-
-                        // Add to list
-                        articles.add(this_article);
-                        user.setArticles(articles);
-                    } else {
-                        // Log error
-                        Log.e("DB", "read failed: ", task.getException());
-                    }
-                }
-            });
-        }
+    public void request_article_data(String article, OnCompleteListener end){
+        DocumentReference article_request = get_article_request(article);
+        article_request.get().addOnCompleteListener(end);
     }
 
     /*

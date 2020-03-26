@@ -30,6 +30,10 @@ public class StatisticsFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+        //TODO: loading worm "calculating.."
+
+
         return root;
     }
 }

@@ -28,6 +28,7 @@ public class Article implements Serializable {
     private String word_count;
     private String veracity;
     private String text;
+    //TODO: excerpt (for card)
 
     /*
      * Create object from database document

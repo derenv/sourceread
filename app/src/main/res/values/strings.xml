@@ -27,7 +27,7 @@
     <!--MENU-->
     <string name="action_analyse_article">Analyse Article</string>
     <string name="action_refresh_apps">Refresh Apps</string>
-    <string name="action_refresh_articles">Refresh Articles</string>
+    <string name="action_import_articles">Import Articles</string>
     <string name="action_logout_user">Log Out</string>
 
     <!--HOME/APPS FRAGMENTS-->

@@ -1,10 +1,6 @@
-package derenvural.sourceread_prototype.data.scraper;
+package derenvural.sourceread_prototype.data.asyncTasks;
 
-import android.os.AsyncTask;
 import android.util.Log;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -12,7 +8,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
@@ -22,7 +17,7 @@ import derenvural.sourceread_prototype.data.login.LoggedInUser;
  * user-agent list:
  * http://www.useragentstring.com/pages/useragentstring.php?name=Firefox
  * */
-public class scraper extends AsyncTask<Void, Void, Void> {
+public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
     // Query data
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0";
     private final static String REFERRER = "http://www.google.com";
@@ -30,13 +25,13 @@ public class scraper extends AsyncTask<Void, Void, Void> {
     // Database & user
     private fdatabase db;
     private LoggedInUser user;
-    // Data
-    private MutableLiveData<Boolean> done = new MutableLiveData<Boolean>();
-    private MutableLiveData<Article> article = new MutableLiveData<Article>();
 
-    public scraper(Article article, fdatabase db, LoggedInUser user){
-        setDone(false);
-        setArticle(article);
+    public scraperAsyncTask(Article article, fdatabase db, LoggedInUser user){
+        super();
+        // Data
+        setData(article);
+
+        // Tools
         this.db = db;
         this.user = user;
     }
@@ -45,24 +40,29 @@ public class scraper extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
 
-        // Save text to database
-        Article article = getArticle().getValue();
-        db.update_article_field(article, user, "text");
+        // Fetch data
+        Article article = getData().getValue();
 
-        // Test output
-        Log.d("JSOUP", "==START==");
-        Log.d("JSOUP", article.getText());
-        Log.d("JSOUP", "==END==");
+        if(article != null && !article.getText().equals("")) {
+            // Save text to database
+            db.update_article_field(article, user, "text");
 
-        // Analyse article
-        Log.d("JSOUP", "analysing now..");
-        article.analyse();
+            // Test output
+            Log.d("JSOUP", "==START==");
+            Log.d("JSOUP", article.getText());
+            Log.d("JSOUP", "==END==");
 
-        // Save analysis to database
-        db.update_article_field(article, user, "veracity");
+            // Analyse article
+            Log.d("JSOUP", "analysing now..");
+            article.analyse();
+
+            // Save analysis to database
+            db.update_article_field(article, user, "veracity");
+        }
 
         // End task
-        postArticle(article);
+        Log.d("JSOUP", "done!");
+        postData(article);
         postDone(true);
     }
 
@@ -89,7 +89,8 @@ public class scraper extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params){
-        Article article = getArticle().getValue();
+        // Fetch data
+        Article article = getData().getValue();
 
         try {
             // Attempt scrape
@@ -129,17 +130,7 @@ public class scraper extends AsyncTask<Void, Void, Void> {
         }
 
         // Set live data with article (with found text on success OR empty text on failure)
-        postArticle(article);
+        postData(article);
         return null;
     }
-
-    // Get
-    public LiveData<Article> getArticle(){ return article; }
-    public LiveData<Boolean> getDone(){ return done; }
-
-    // Set
-    public void setArticle(Article article){ this.article.setValue(article); }
-    public void setDone(Boolean done){ this.done.setValue(done); }
-    public void postArticle(Article article){ this.article.postValue(article); }
-    public void postDone(Boolean done){ this.done.postValue(done); }
 }

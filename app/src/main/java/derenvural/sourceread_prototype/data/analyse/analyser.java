@@ -6,21 +6,22 @@ import androidx.lifecycle.Observer;
 import derenvural.sourceread_prototype.data.article.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
-import derenvural.sourceread_prototype.data.scraper.scraper;
+import derenvural.sourceread_prototype.data.asyncTasks.scraperAsyncTask;
 
 public class analyser {
-    private scraper scraper_task;
+    private scraperAsyncTask task;
 
     public analyser(Article article, fdatabase db, LoggedInUser user){
-         scraper_task = new scraper(article, db, user);
+        // Create async task
+        task = new scraperAsyncTask(article, db, user);
     }
 
-    public void fetch_article(LifecycleOwner context, Observer observer){
+    public void fetch_article(LifecycleOwner owner, Observer observer){
         // execute async task
-        scraper_task.execute();
+        task.execute();
 
         // Check for task finish
-        scraper_task.getDone().observe(context, observer);
+        task.getDone().observe(owner, observer);
     }
 
     /* TODO: create various analyses to run
