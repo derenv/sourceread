@@ -1,8 +1,5 @@
 package derenvural.sourceread_prototype.ui.home;
 
-import android.view.View;
-import android.widget.ProgressBar;
-
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
@@ -41,7 +38,7 @@ public class HomeViewModel extends ViewModel {
     public LiveData<ArrayList<Article>> getCards() { return mCards; }
 
     // Check how many articles connected & verify quantity
-    public void check_articles(LifecycleOwner context, LoggedInUser user, final ProgressBar progressBar) {
+    public void check_articles(LifecycleOwner context, LoggedInUser user) {
         // Populate articles
         // Get current apps
         if(user.getArticles().getValue() != null && user.getArticles().getValue().size() != 0) {
@@ -55,9 +52,6 @@ public class HomeViewModel extends ViewModel {
         user.getArticles().observe(context, new Observer<ArrayList<Article>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Article> articles) {
-                // Update UI
-                progressBar.setVisibility(View.GONE);
-
                 //check articles returned
                 if (articles == null) {
                     return;

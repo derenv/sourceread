@@ -187,12 +187,11 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         // Get login URL
         HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
         String app_login_url = requests.get("login");
-        Log.d("HTTP login url request", app_login_url);
 
         // Insert request token
         String url = app_login_url.replaceAll("REPLACEME", token);
-        Log.d("HTTP login url request", url);
 
+        // Fetch non-null context
         if (context!=null) {
             Context main = context.get();
 

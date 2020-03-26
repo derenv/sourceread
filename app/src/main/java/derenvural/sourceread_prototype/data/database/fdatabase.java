@@ -8,12 +8,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import derenvural.sourceread_prototype.data.article.Article;
@@ -33,24 +30,6 @@ public class fdatabase {
         db = FirebaseFirestore.getInstance();
     }
 
-    /*
-     * Write an article id field to database
-    public void write_article_id(final String new_id){
-        // Make update attempt
-        DocumentReference user_request = get_current_user_request();
-        user_request.update("articles", FieldValue.arrayUnion(new_id)).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Log.d("DB saved article ID", new_id);
-                }else{
-                    // Log error
-                    Log.e("DB", "write failed: ", task.getException());
-                }
-            }
-        });
-    }
-     * */
     /*
      * Write an article id field to database
      * */
@@ -87,13 +66,6 @@ public class fdatabase {
                 }
             }
         });
-    }
-
-    /*
-     * Write an user veracity field to database
-     * */
-    public void write_user_veracity(LoggedInUser user){
-        //
     }
 
     /*
@@ -145,7 +117,6 @@ public class fdatabase {
 
                     // Update user db entry
                     add_user_field("articles", id);
-                    //write_article_id(id);
                 }else{
                     // Log error
                     Log.e("DB", "write failed - ", task.getException());

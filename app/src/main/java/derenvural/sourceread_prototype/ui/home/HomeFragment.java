@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -28,7 +27,6 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
-    private ProgressBar progressBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -46,10 +44,6 @@ public class HomeFragment extends Fragment {
         // specify an adapter
         mAdapter = new ArticleAdapter(getActivity(), homeViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
-
-        // Progress bar
-        progressBar = root.findViewById(R.id.loading_home);
-        progressBar.setVisibility(View.VISIBLE);
 
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_home);
@@ -85,7 +79,7 @@ public class HomeFragment extends Fragment {
     }
 
     /*
-     * Fetch api tokens, auth tokens, and user token
+     * Fetch articles
      * */
     public void update(){
         if(getActivity().getClass() == MainActivity.class) {
@@ -93,13 +87,13 @@ public class HomeFragment extends Fragment {
             MainActivity main = (MainActivity) getActivity();
 
             // Add observer to articles
-            homeViewModel.check_articles(main, main.getUser(), progressBar);
+            homeViewModel.check_articles(main, main.getUser());
         }else if(getActivity().getClass() == ArticleActivity.class){
             // Request articles
             ArticleActivity articleActivity = (ArticleActivity) getActivity();
 
             // Add observer to articles
-            homeViewModel.check_articles(articleActivity, articleActivity.getUser(), progressBar);
+            homeViewModel.check_articles(articleActivity, articleActivity.getUser());
         }
     }
 }

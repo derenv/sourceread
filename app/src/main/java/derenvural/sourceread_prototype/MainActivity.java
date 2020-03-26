@@ -203,8 +203,7 @@ public class MainActivity extends AppCompatActivity {
                     deactivate_interface();
 
                     // Import articles from user accounts
-                    Toast.makeText(this, "Importing articles..", Toast.LENGTH_SHORT).show();
-                    user.import_articles(httph, db);
+                    user.import_articles(this, httph, db);
 
                     return true;
                 case R.id.action_refresh_apps:

@@ -3,6 +3,7 @@ package derenvural.sourceread_prototype.data.login;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userPopulateAsyncTask;
 import derenvural.sourceread_prototype.data.database.fdatabase;
@@ -141,7 +143,7 @@ public class LoggedInUser implements Serializable {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
-                    Log.d("USER", "done!");
+                    Log.d("TASK", "user data population task done!");
                 }
             }
         });
@@ -159,7 +161,7 @@ public class LoggedInUser implements Serializable {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
-                    Log.d("USER", "done!");
+                    Log.d("TASK", "access tokens task done!");
 
                     // Reactivate the UI
                     main.activate_interface();
@@ -168,87 +170,26 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void import_articles(httpHandler httph, final fdatabase db){
+    public void import_articles(final MainActivity main, httpHandler httph, final fdatabase db){
         for (final HashMap<String, Object> app : getApps().getValue()) {
-            final LoggedInUser user = this;
+            // Create async task
+            importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db, app);
 
-            // Get get URL
-            HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
-            String url = requests.get("articles");
+            // execute async task
+            task.execute();
 
-            // Fetch access token
-            String app_key = app.get("key").toString();
-            String access_token = getAccessTokens().getValue().get(app.get("name"));
+            // Check for task finish
+            task.getDone().observe(main, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean done) {
+                    if (done) {
+                        Log.d("TASK", "articles import task done!");
 
-            // Add JSON parameters
-            HashMap<String, String> parameters = new HashMap<String, String>();
-            parameters.put("consumer_key", app_key);
-            parameters.put("access_token", access_token);
-            parameters.put("sort", "newest");
-            parameters.put("detailType", "complete");
-            parameters.put("contentType", "article");
-            parameters.put("state", "all");
-
-            // Fetch timestamp
-            for(String app_name: getAppIDs().getValue().keySet()){
-                if(getAppIDs().getValue() != null && !getAppIDs().getValue().get(app_name).equals("")){
-                    long previous_request = Long.parseLong(getAppIDs().getValue().get(app_name).toString());
-
-                    // Catch for first time import
-                    if(previous_request != 0) {
-                        parameters.put("since", Long.toString(previous_request));
+                        // Reactivate the UI
+                        main.activate_interface();
                     }
                 }
-            }
-
-            // Request access token by http request to URL
-            httph.make_volley_request(url, parameters,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            // Cut token out of html response
-                            Log.d("API", "Request Response received");
-
-                            try{
-                                Log.d("API response status", response.getString("status"));
-
-                                // Get articles from JSON
-                                JSONObject articles_json = response.getJSONObject("list");
-                                if(articles_json.length() != 0){
-                                    ArrayList<Article> articles = new ArrayList<Article>();
-                                    for (Iterator<String> it = articles_json.keys(); it.hasNext();){
-                                        // Add article information to user object for display
-                                        Article current_article = new Article(articles_json.getJSONObject(it.next()), app.get("name").toString());
-                                        articles.add(current_article);
-
-                                        // Analyse articles
-                                        current_article.analyse();
-
-                                        // Add new article to database
-                                        db.write_new_article(current_article, user);
-                                    }
-                                }
-
-                                // Create map object containing timestamp with correct format
-                                long request_stamp = Instant.now().getEpochSecond();
-                                Map<String, Object> new_stamp = new HashMap<>();
-                                new_stamp.put(app.get("name").toString(), request_stamp);
-
-                                // store timestamp
-                                //String app_name, String field, Object new_data)
-                                db.update_user_field("apps", new_stamp);
-                            }catch(JSONException error){
-                                Log.e("JSON error", "error reading JSON: " + error.getMessage());
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.e("API error", "api get failed: " + error.getMessage());
-                        }
-                    }
-            );
+            });
         }
     }
 

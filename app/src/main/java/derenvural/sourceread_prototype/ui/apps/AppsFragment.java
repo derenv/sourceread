@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -27,7 +26,6 @@ public class AppsFragment extends Fragment {
     private AppsViewModel appsViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
-    private ProgressBar progressBar;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -45,9 +43,6 @@ public class AppsFragment extends Fragment {
         // specify an adapter
         mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
-
-        // Progress bar
-        progressBar = root.findViewById(R.id.loading_apps);
 
         // link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_apps);
@@ -89,7 +84,6 @@ public class AppsFragment extends Fragment {
         MainActivity main = (MainActivity) getActivity();
 
         // Add observer to articles
-        progressBar.setVisibility(View.VISIBLE);
-        appsViewModel.check_apps(main, main.getUser(), progressBar);
+        appsViewModel.check_apps(main, main.getUser());
     }
 }
