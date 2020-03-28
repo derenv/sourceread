@@ -39,7 +39,6 @@ public class ArticleActivity extends AppCompatActivity {
     // User
     private LoggedInUser user;
     // Article data
-    private ArticleViewModel articleViewModel;
     private Article article;
 
     public LoggedInUser getUser() { return user; }
@@ -48,7 +47,6 @@ public class ArticleActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article);
-        articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
         // Navigation Drawer
         final DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -111,30 +109,39 @@ public class ArticleActivity extends AppCompatActivity {
         }
     }
 
+    /*
+     * Redirect to login activity
+     */
     private void login_redirect(){
-        // Redirect to login page
+        // Create intent
         Intent new_activity = new Intent(this, LoginActivity.class);
+
+        // Add any flags to intent
         new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Start next activity and end this one
         startActivity(new_activity);
         finish();
     }
 
+    /*
+     * Redirect to main activity
+     */
     private void main_redirect(){
-        // Redirect to login page
+        // Create intent
         Intent main_activity = new Intent(this, MainActivity.class);
 
-        // Get user for passing
-        LoggedInUser user_data = getUser();
-
         // Create bundle with serialised object
+        LoggedInUser user_data = getUser();
         Bundle bundle = new Bundle();
         user_data.saveInstanceState(bundle);
 
-        // Add title & bundle to intent
+        // Add title, bundle and any flags to intent
         main_activity.putExtra("activity","article");
         main_activity.putExtras(bundle);
         main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+        // Start next activity and end this one
         startActivity(main_activity);
         finish();
     }
@@ -144,25 +151,29 @@ public class ArticleActivity extends AppCompatActivity {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             String previous_activity = intent.getStringExtra("activity");
-            if(previous_activity.equals("")){
-                // switch to article not default
+            if(previous_activity.equals("main")){
+                // Fetch serialised article
+                article = new Article();
+                article.loadInstanceState(extras);
+                loadArticle();
+
+                // Fetch serialised user
+                user = new LoggedInUser(mAuth.getCurrentUser());
+                user.loadInstanceState(extras);
+                loadUser();
+            }else{
+                logout();
+                login_redirect();
             }
-
-            // Fetch serialised article
-            article = new Article();
-            article.loadInstanceState(extras);
-            loadArticle();
-
-            // Fetch serialised user
-            user = new LoggedInUser(mAuth.getCurrentUser());
-            user.loadInstanceState(extras);
-            loadUser();
         }else{
             main_redirect();
         }
     }
 
     public void loadArticle(){
+        // Find viewmodel
+        ArticleViewModel articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
+
         // Add to viewmodel
         articleViewModel.setTitle(article.getTitle());
         articleViewModel.setUrl(article.getResolved_url());
@@ -172,7 +183,7 @@ public class ArticleActivity extends AppCompatActivity {
     }
 
     public void loadUser(){
-        //TODO: add to viewmodel
+        //TODO: add any user to viewmodel
     }
 
     private void logout(){

@@ -5,19 +5,46 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class AppViewModel extends ViewModel {
-
-    private MutableLiveData<String> mText;
+    private MutableLiveData<String> mImage;
+    private MutableLiveData<String> mName;
+    private MutableLiveData<String> mDescription;
+    private MutableLiveData<Long> mTimestamp;
 
     public AppViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("");
+        mImage = new MutableLiveData<>();
+        mImage.setValue("");
+
+        mName = new MutableLiveData<>();
+        mName.setValue("");
+
+        mDescription = new MutableLiveData<>();
+        mDescription.setValue("");
+
+        mTimestamp = new MutableLiveData<>();
+        mTimestamp.setValue(0l);
     }
 
-    public void setText(String s) {
-        mText.setValue(s);
+    // SET
+    public void setName(String s) { mName.setValue(s); }
+    public void setDescription(String s) {
+        mDescription.setValue(s);
+    }
+    public void setTimestamp(Long s) { mTimestamp.setValue(s); }
+    public void setImage(String s) {
+        mImage.setValue(s);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    // GET
+    public LiveData<String> getName() {
+        return mName;
+    }
+    public LiveData<String> getDescription() {
+        return mDescription;
+    }
+    public LiveData<Long> getTimestamp() {
+        return mTimestamp;
+    }
+    public LiveData<String> getImage() {
+        return mImage;
     }
 }

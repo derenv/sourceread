@@ -35,8 +35,8 @@
 
     <!--LOGIN-->
     <!--==TITLES & PROMPTS-->
-    <string name="title_activity_article">Sign in</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_article">Article</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <!--==BUTTON ACTIONS-->

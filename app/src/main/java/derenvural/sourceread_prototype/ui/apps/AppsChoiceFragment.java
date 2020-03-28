@@ -73,32 +73,15 @@ public class AppsChoiceFragment extends Fragment {
         return root;
     }
 
+    /*
+     * Start process of adding chosen app
+     * */
     private void startAppActivity(String title){
         // Get app for passing
         for (App app : appChoiceViewModel.getCards().getValue()) {
             if (app.getTitle().equals(title)) {
                 // TODO: add selected app
-
-                // Fetch user data
-                MainActivity main = (MainActivity) getActivity();
                 Toast.makeText(getContext(), "Adding '"+title+"' app..", Toast.LENGTH_SHORT).show();
-                /*
-                // create app redirect intent
-                Intent app_activity = new Intent(main, AppActivity.class);
-
-                // Create bundle with serialised object
-                Bundle bundle = new Bundle();
-                app.saveInstanceState(bundle);
-                main.getUser().saveInstanceState(bundle);
-
-                // Add title & bundle to intent
-                app_activity.putExtra("activity", "main");
-                app_activity.putExtras(bundle);
-                app_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                // Start app activity and close main activity
-                main.startActivity(app_activity);
-                main.finish();*/
             }
         }
     }
@@ -111,7 +94,6 @@ public class AppsChoiceFragment extends Fragment {
         final MainActivity main = (MainActivity) getActivity();
         main.deactivate_interface();
 
-        // Request articles
         // Create async task
         final importAppsAsyncTask task = new importAppsAsyncTask(new ArrayList<App>(), main.getDatabase(), main.getUser());
 

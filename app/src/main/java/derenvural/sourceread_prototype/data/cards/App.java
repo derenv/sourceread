@@ -14,12 +14,18 @@ public class App extends Card {
     private long timestamp;
     private HashMap<String, String> requests;
 
+    // Constructors
     public App(String name, long timestamp) {
         super(null, name,"");
         setTitle(name);
         setTimestamp(timestamp);
     }
+    public App(Bundle bundle) {
+        super(null, "","");
+        loadInstanceState(bundle);
+    }
 
+    // Database constructors
     public void CreateApp(DocumentSnapshot document) {
         setTitle(document.getId());
         setText(document.get("description").toString());
@@ -28,7 +34,23 @@ public class App extends Card {
         setAccessToken("");
         setRequests((HashMap<String, String>) document.get("requests"));
     }
+    public Map<String, Object> map_data(){
+        // Create a Map to fill
+        Map<String, Object> docData = new HashMap<>();
 
+        // Fill in data
+        docData.put("name", getTitle());
+        docData.put("description", getText());
+        docData.put("key", getKey());
+        docData.put("request_token", getRequestToken());
+        docData.put("access_token", getAccessToken());
+        docData.put("timestamp", getTimestamp());
+        docData.put("requests", getRequests());
+
+        return docData;
+    }
+
+    // Serialization constructors
     public void loadInstanceState(Bundle bundle) {
         setTitle((String) bundle.getSerializable("name"));
         setText((String) bundle.getSerializable("description"));
@@ -46,22 +68,6 @@ public class App extends Card {
         bundle.putSerializable("access_token", getAccessToken());
         bundle.putSerializable("timestamp", getTimestamp());
         bundle.putSerializable("requests", getRequests());
-    }
-
-    public Map<String, Object> map_data(){
-        // Create a Map to fill
-        Map<String, Object> docData = new HashMap<>();
-
-        // Fill in data
-        docData.put("name", getTitle());
-        docData.put("description", getText());
-        docData.put("key", getKey());
-        docData.put("request_token", getRequestToken());
-        docData.put("access_token", getAccessToken());
-        docData.put("timestamp", getTimestamp());
-        docData.put("requests", getRequests());
-
-        return docData;
     }
 
     // SET

@@ -1,19 +1,16 @@
 package derenvural.sourceread_prototype.ui.apps;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -90,6 +87,9 @@ public class AppsFragment extends Fragment {
         return root;
     }
 
+    /*
+     * Start either app view or choose app fragments
+     * */
     private void startAppActivity(String title){
         // Fetch user data
         MainActivity main = (MainActivity) getActivity();
@@ -97,27 +97,13 @@ public class AppsFragment extends Fragment {
         // Get app for passing
         if(title.equals("Add new App")){
             // Navigate to list of choices
-            main.fragment_redirect(R.id.nav_appschoice);
+            main.choice_fragment_redirect();
         }else {
+            // Find selected app's data
             for (App app : appsViewModel.getCards().getValue()) {
                 if (app.getTitle().equals(title)) {
-                    /*
-                    // create app redirect intent
-                    Intent app_activity = new Intent(main, AppActivity.class);
-
-                    // Create bundle with serialised object
-                    Bundle bundle = new Bundle();
-                    app.saveInstanceState(bundle);
-                    main.getUser().saveInstanceState(bundle);
-
-                    // Add title & bundle to intent
-                    app_activity.putExtra("activity", "main");
-                    app_activity.putExtras(bundle);
-                    app_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                    // Start app activity and close main activity
-                    main.startActivity(app_activity);
-                    main.finish();*/
+                    // Navigate to page showing data on selected app
+                    main.app_fragment_redirect(app);
                 }
             }
         }
