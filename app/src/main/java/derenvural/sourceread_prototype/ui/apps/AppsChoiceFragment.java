@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -80,6 +81,7 @@ public class AppsChoiceFragment extends Fragment {
 
                 // Fetch user data
                 MainActivity main = (MainActivity) getActivity();
+                Toast.makeText(getContext(), "Adding '"+title+"' app..", Toast.LENGTH_SHORT).show();
                 /*
                 // create app redirect intent
                 Intent app_activity = new Intent(main, AppActivity.class);

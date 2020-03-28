@@ -96,9 +96,7 @@ public class AppsFragment extends Fragment {
 
         // Get app for passing
         if(title.equals("Add new App")){
-            // TODO: add a new app
-            Toast.makeText(getContext(), "Adding new app..", Toast.LENGTH_SHORT).show();
-
+            // Navigate to list of choices
             main.fragment_redirect(R.id.nav_appschoice);
         }else {
             for (App app : appsViewModel.getCards().getValue()) {

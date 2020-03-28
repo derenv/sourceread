@@ -50,11 +50,11 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
                     // For each app found
                     for(DocumentSnapshot document: documents){
                         // Create base object
-                        App new_app = new App(document.get("name").toString(), 0);
+                        App new_app = new App(document.getId(), 0);
 
                         // If already added get timestamp
                         for(App app: user.getApps().getValue()){
-                            if(app.getTitle().equals(document.get("name"))){
+                            if(app.getTitle().equals(document.getId())){
                                 new_app = new App(app.getTitle(), app.getTimestamp());
                                 break;
                             }

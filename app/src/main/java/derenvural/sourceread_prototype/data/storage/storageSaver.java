@@ -17,10 +17,6 @@ import static android.content.Context.MODE_PRIVATE;
 public class storageSaver {
     public static boolean write(Context context, String uid, LoggedInUser user){
         try {
-            // Find directory
-            String fileName = context.getFilesDir().getAbsolutePath() + "/" + uid;
-            Log.d("SAVE path", "path: "+fileName);
-
             // Create streams
             FileOutputStream fos = context.openFileOutput(uid, MODE_PRIVATE);
             ObjectOutputStream os = new ObjectOutputStream(fos);
@@ -34,7 +30,7 @@ public class storageSaver {
 
             return true;
         }catch(IOException error){
-            Log.e("SAVE error", "failed: " + error.getMessage());
+            Log.e("STORAGE", "save failed: " + error.getMessage());
             return false;
         }
     }
@@ -43,7 +39,6 @@ public class storageSaver {
             // Find directory
             File directory = context.getFilesDir();
             File file = new File(directory.getAbsolutePath() + "/" + uid);
-            Log.d("LOAD path", "path: "+file.getAbsolutePath());
 
             if(file.exists()){
                 // Create streams
@@ -62,10 +57,10 @@ public class storageSaver {
                 throw new IOException("No object exists! check write/read permissions?");
             }
         }catch(IOException error){
-            Log.e("LOAD error", "failed: " + error.getMessage());
+            Log.e("STORAGE", "load failed: " + error.getMessage());
             return false;
         }catch(ClassNotFoundException error){
-            Log.e("LOAD error", "failed: " + error.getMessage());
+            Log.e("STORAGE", "load failed: " + error.getMessage());
             return false;
         }
     }
