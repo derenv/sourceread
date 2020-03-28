@@ -36,7 +36,7 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
     protected Void doInBackground(Void... params){
 
         // Fetch user
-        final ArrayList<App> apps = getData().getValue();
+        final ArrayList<App> blacklist = getData().getValue();
 
         // Request all apps
         db.request_apps(new OnCompleteListener<QuerySnapshot>() {
@@ -52,17 +52,18 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
                         // Create base object
                         App new_app = new App(document.getId(), 0);
 
-                        // If already added get timestamp
-                        for(App app: user.getApps().getValue()){
+                        // Check not blacklisted (ie already connected)
+                        boolean blacklisted = false;
+                        for(App app: blacklist){
                             if(app.getTitle().equals(document.getId())){
-                                new_app = new App(app.getTitle(), app.getTimestamp());
+                                blacklisted = true;
                                 break;
                             }
                         }
-
-                        // Build rest of data from document and add to result
-                        new_app.CreateApp(document);
-                        apps.add(new_app);
+                        if(!blacklisted){
+                            new_app.CreateApp(document);
+                            apps.add(new_app);
+                        }
                     }
 
                     // End task

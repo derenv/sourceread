@@ -103,7 +103,8 @@ public class AppsFragment extends Fragment {
             for (App app : appsViewModel.getCards().getValue()) {
                 if (app.getTitle().equals(title)) {
                     // Navigate to page showing data on selected app
-                    main.app_fragment_redirect(app);
+                    main.app_fragment_redirect(app, redirectType.VIEW);
+                    break;
                 }
             }
         }

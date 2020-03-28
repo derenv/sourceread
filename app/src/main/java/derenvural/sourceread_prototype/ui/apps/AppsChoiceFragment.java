@@ -80,8 +80,12 @@ public class AppsChoiceFragment extends Fragment {
         // Get app for passing
         for (App app : appChoiceViewModel.getCards().getValue()) {
             if (app.getTitle().equals(title)) {
-                // TODO: add selected app
-                Toast.makeText(getContext(), "Adding '"+title+"' app..", Toast.LENGTH_SHORT).show();
+                // Fetch user data
+                MainActivity main = (MainActivity) getActivity();
+
+                // Navigate to page showing data on selected app
+                main.app_fragment_redirect(app, redirectType.ADD);
+                break;
             }
         }
     }
@@ -95,7 +99,7 @@ public class AppsChoiceFragment extends Fragment {
         main.deactivate_interface();
 
         // Create async task
-        final importAppsAsyncTask task = new importAppsAsyncTask(new ArrayList<App>(), main.getDatabase(), main.getUser());
+        final importAppsAsyncTask task = new importAppsAsyncTask(main.getUser().getApps().getValue(), main.getDatabase(), main.getUser());
 
         // execute async task
         task.execute();

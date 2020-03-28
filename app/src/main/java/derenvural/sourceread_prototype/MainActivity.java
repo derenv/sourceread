@@ -33,6 +33,7 @@ import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.app.AppViewModel;
+import derenvural.sourceread_prototype.ui.apps.redirectType;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -130,10 +131,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new_activity);
         finish();
     }
-    public void app_fragment_redirect(App app){
+    public void app_fragment_redirect(App app, redirectType type){
         // Create bundle with app
         Bundle appBundle = new Bundle();
         app.saveInstanceState(appBundle);
+        appBundle.putSerializable("type",type);
 
         // Navigate to app details fragment
         Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_app, appBundle);

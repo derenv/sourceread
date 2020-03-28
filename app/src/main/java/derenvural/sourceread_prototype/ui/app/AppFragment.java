@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,15 +17,25 @@ import androidx.lifecycle.ViewModelProviders;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.ui.apps.redirectType;
 
 public class AppFragment extends Fragment {
     private AppViewModel appViewModel;
+    private Button connectButton;
+    private Button importButton;
+    private Button deleteButton;
+    private TextView timestampView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         // get view model
         appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_app, container, false);
+
+        // Find buttons
+        connectButton = root.findViewById(R.id.button_connect);
+        importButton = root.findViewById(R.id.button_import);
+        deleteButton = root.findViewById(R.id.button_delete);
 
         // link name text to view-model data
         final TextView nameView = root.findViewById(R.id.text_app_name);
@@ -44,7 +56,7 @@ public class AppFragment extends Fragment {
         });
 
         // link timestamp value to view-model data
-        final TextView timestampView = root.findViewById(R.id.text_app_time);
+        timestampView = root.findViewById(R.id.text_app_time);
         appViewModel.getTimestamp().observe(getViewLifecycleOwner(), new Observer<Long>() {
             @Override
             public void onChanged(@Nullable Long s) {
@@ -68,10 +80,10 @@ public class AppFragment extends Fragment {
     }
 
     /*
-     * Fetch app from bundle and set data
+     * Fetch app from bundle and set data, then fetch view type from bundle
      * */
     private void update(){
-        // Fetch bundle from arguments
+        // Fetch app from bundle
         Bundle appBundle = getArguments();
         App app = new App(appBundle);
 
@@ -80,5 +92,69 @@ public class AppFragment extends Fragment {
         appViewModel.setDescription(app.getText());
         appViewModel.setTimestamp(app.getTimestamp());
         appViewModel.setImage(app.getImage());
+
+        // Get type (view or add)
+        redirectType type = (redirectType) appBundle.getSerializable("type");
+        if(type == redirectType.VIEW) {
+            // TODO: cleanup timestamp format for display
+            //
+
+            // show 'import', 'delete' & 'disconnect' buttons
+            importButton.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.VISIBLE);
+            connectButton.setText("Disconnect");
+            connectButton.setVisibility(View.VISIBLE);
+
+            // add 'import' onclick event
+            importButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: attempt to import all articles from app
+                    Toast.makeText(getActivity(), "Importing all articles..", Toast.LENGTH_SHORT).show();
+                }
+            });
+            // add 'delete' onclick event
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: attempt to delete all articles imported from app
+                    Toast.makeText(getActivity(), "Deleting all articles imported from "+appViewModel.getName().getValue()+"..", Toast.LENGTH_SHORT).show();
+                }
+            });
+            // add 'disconnect' onclick event
+            connectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: attempt to remove app
+                    Toast.makeText(getActivity(), "Disconnecting app..", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else if(type == redirectType.ADD) {
+            // disable timestamp field
+            timestampView.setVisibility(View.INVISIBLE);
+
+            // show 'connect' button
+            connectButton.setText("Connect");
+            connectButton.setVisibility(View.VISIBLE);
+
+            // add 'connect' onclick event
+            connectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //TODO: attempt to login to pocket
+                    Toast.makeText(getActivity(), "Attempting to connect app..", Toast.LENGTH_SHORT).show();
+
+                    //if success
+                    // popup asking if import all
+
+                    // if yes
+                    //  import all from app
+                    // elif no
+                    //  nada
+                    //elif failure
+                    //  show an error message
+                }
+            });
+        }
     }
 }

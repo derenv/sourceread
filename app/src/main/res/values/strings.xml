@@ -32,6 +32,8 @@
 
     <!--HOME/APPS FRAGMENTS-->
     <string name="card_image_description">Image for card in list</string>
+    <string name="button_import_all">Import all articles</string>
+    <string name="button_delete_all">Delete all imported articles</string>
 
     <!--LOGIN-->
     <!--==TITLES & PROMPTS-->
