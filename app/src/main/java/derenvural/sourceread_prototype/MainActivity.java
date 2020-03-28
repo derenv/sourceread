@@ -127,6 +127,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new_activity);
         finish();
     }
+    public void fragment_redirect(int id){
+        Navigation.findNavController(this,R.id.nav_host_fragment).navigate(id);
+        drawer.closeDrawers();
+    }
 
     private void handleIntent(Intent intent) {
         // Get intent data

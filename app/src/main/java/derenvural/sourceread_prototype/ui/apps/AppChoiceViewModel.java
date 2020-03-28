@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.ui.appsChoice;
+package derenvural.sourceread_prototype.ui.apps;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

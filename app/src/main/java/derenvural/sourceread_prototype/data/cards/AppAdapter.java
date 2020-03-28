@@ -8,20 +8,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
 
-public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
-    private static ArrayList<App> mDataHolders;
-    private static Context context;
+public class AppAdapter extends CardAdapter<App> {
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class AppViewHolder extends RecyclerView.ViewHolder {
+    public static class AppViewHolder extends CardViewHolder {
         // data items
         public ImageView vImage;
         public TextView vTitle;
@@ -34,50 +31,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
             vText = v.findViewById(R.id.card_text);
 
             // Add click listener for fragment transition
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View vx) {
-                    // Find article card clicked
-                    TextView current = vx.findViewById(vTitle.getId());
-
-                    // Start app activity with app object
-                    //startAppActivity(current.getText().toString());
-                }
-            });
+            v.setOnClickListener(listener);
         }
-        /*
-        private void startAppActivity(String title){
-            // Get app for passing
-            for(App app: mDataHolders) {
-                if(app.getTitle().equals(title)){
-                    // create app redirect intent
-                    Intent app_activity = new Intent(context, AppActivity.class);
-
-                    // Fetch user data
-                    MainActivity main = (MainActivity) context;
-
-                    // Create bundle with serialised object
-                    Bundle bundle = new Bundle();
-                    app.saveInstanceState(bundle);
-                    main.getUser().saveInstanceState(bundle);
-
-                    // Add title & bundle to intent
-                    app_activity.putExtra("activity", "main");
-                    app_activity.putExtras(bundle);
-                    app_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                    // Start app activity and close main activity
-                    main.startActivity(app_activity);
-                    main.finish();
-                }
-            }
-        }*/
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public AppAdapter(Context context, ArrayList<App> newCards) {
-        this.context = context;
-
-        this.mDataHolders = newCards;
+    public AppAdapter(Context context, ArrayList<App> newCards, View.OnClickListener listener) {
+        super(context, newCards, listener);
     }
 
     // Create new views (invoked by the layout manager)
@@ -90,7 +50,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(AppViewHolder holder, int position) {
+    public void onBindViewHolder(CardViewHolder holder, int position) {
         if(mDataHolders.get(position).getTitle().equals("pocket")) {
             holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
         }else if(mDataHolders.get(position).getTitle().equals("instapaper")) {

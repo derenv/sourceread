@@ -14,10 +14,10 @@ import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
 
-public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
-    private ArrayList<Card> mDataHolders;
-    private Context context;
-    private static View.OnClickListener listener;
+public class CardAdapter<T> extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
+    protected ArrayList<T> mDataHolders;
+    protected static Context context;
+    protected static View.OnClickListener listener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -40,7 +40,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CardAdapter(Context context, ArrayList<Card> newCards, View.OnClickListener listener) {
+    public CardAdapter(Context context, ArrayList<T> newCards, View.OnClickListener listener) {
         this.context = context;
         this.mDataHolders = newCards;
         CardAdapter.listener = listener;
@@ -57,10 +57,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(CardViewHolder holder, int position) {
-        // Load article icon
+        // Load default icon
         holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
-        holder.vTitle.setText(mDataHolders.get(position).getTitle());
-        holder.vText.setText(mDataHolders.get(position).getText());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

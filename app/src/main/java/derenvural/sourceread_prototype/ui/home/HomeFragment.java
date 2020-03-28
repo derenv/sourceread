@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,8 +41,20 @@ public class HomeFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        // Specify card listener
+        final View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View vx) {
+                // Find article card clicked
+                TextView current = vx.findViewById(R.id.card_title);
+
+                // Start article activity with article object
+                startArticleActivity(current.getText().toString());
+            }
+        };
+
         // specify an adapter
-        mAdapter = new ArticleAdapter(getActivity(), homeViewModel.getCards().getValue());
+        mAdapter = new ArticleAdapter(getActivity(), homeViewModel.getCards().getValue(), listener);
         recyclerView.setAdapter(mAdapter);
 
         // link message text to view-model data
@@ -58,7 +71,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChanged(@Nullable ArrayList<Article> updatedList) {
                 // Reset adapter
-                mAdapter = new ArticleAdapter(getActivity(), updatedList);
+                mAdapter = new ArticleAdapter(getActivity(), updatedList, listener);
                 recyclerView.setAdapter(mAdapter);
 
                 // If list still empty, display appropriate text and hide loading bar
@@ -75,6 +88,33 @@ public class HomeFragment extends Fragment {
         update();
 
         return root;
+    }
+
+    private void startArticleActivity(String title){
+        // Get article for passing
+        for(Article article: homeViewModel.getCards().getValue()) {
+            if(article.getTitle().equals(title)){
+                // Fetch user data
+                MainActivity main = (MainActivity) getActivity();
+
+                // create article redirect intent
+                Intent article_activity = new Intent(main, ArticleActivity.class);
+
+                // Create bundle with serialised object
+                Bundle bundle = new Bundle();
+                article.saveInstanceState(bundle);
+                main.getUser().saveInstanceState(bundle);
+
+                // Add title & bundle to intent
+                article_activity.putExtra("activity", "main");
+                article_activity.putExtras(bundle);
+                article_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                // Start article activity and close main activity
+                main.startActivity(article_activity);
+                main.finish();
+            }
+        }
     }
 
     /*

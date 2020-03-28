@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.ui.appsChoice;
+package derenvural.sourceread_prototype.ui.apps;
 
 import android.os.Bundle;
 
@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -40,8 +41,19 @@ public class AppsChoiceFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        // Specify card listener
+        final View.OnClickListener listener = new View.OnClickListener() {
+            @Override public void onClick(View vx) {
+                // Find article card clicked
+                TextView current = vx.findViewById(R.id.card_title);
+
+                // Start app activity with app object
+                startAppActivity(current.getText().toString());
+            }
+        };
+
         // specify an adapter
-        mAdapter = new AppAdapter(getActivity(), appChoiceViewModel.getCards().getValue());
+        mAdapter = new AppAdapter(getActivity(), appChoiceViewModel.getCards().getValue(), listener);
         recyclerView.setAdapter(mAdapter);
 
         // link cards to view-model data
@@ -49,7 +61,7 @@ public class AppsChoiceFragment extends Fragment {
             @Override
             public void onChanged(@Nullable ArrayList<App> updatedList) {
                 // Reset adapter
-                mAdapter = new AppAdapter(getActivity(), updatedList);
+                mAdapter = new AppAdapter(getActivity(), updatedList, listener);
                 recyclerView.setAdapter(mAdapter);
             }
         });
@@ -58,6 +70,35 @@ public class AppsChoiceFragment extends Fragment {
         update();
 
         return root;
+    }
+
+    private void startAppActivity(String title){
+        // Get app for passing
+        for (App app : appChoiceViewModel.getCards().getValue()) {
+            if (app.getTitle().equals(title)) {
+                // TODO: add selected app
+
+                // Fetch user data
+                MainActivity main = (MainActivity) getActivity();
+                /*
+                // create app redirect intent
+                Intent app_activity = new Intent(main, AppActivity.class);
+
+                // Create bundle with serialised object
+                Bundle bundle = new Bundle();
+                app.saveInstanceState(bundle);
+                main.getUser().saveInstanceState(bundle);
+
+                // Add title & bundle to intent
+                app_activity.putExtra("activity", "main");
+                app_activity.putExtras(bundle);
+                app_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                // Start app activity and close main activity
+                main.startActivity(app_activity);
+                main.finish();*/
+            }
+        }
     }
 
     /*
