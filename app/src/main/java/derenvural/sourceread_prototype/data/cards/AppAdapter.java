@@ -1,8 +1,6 @@
 package derenvural.sourceread_prototype.data.cards;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,23 +12,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
-public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder> {
-    private static ArrayList<Article> mDataHolders;
+public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> {
+    private static ArrayList<App> mDataHolders;
     private static Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ArticleViewHolder extends RecyclerView.ViewHolder {
+    public static class AppViewHolder extends RecyclerView.ViewHolder {
         // data items
         public ImageView vImage;
         public TextView vTitle;
         public TextView vText;
-        public ArticleViewHolder(View v) {
+        public AppViewHolder(View v) {
             super(v);
             // Create view references
             vImage = v.findViewById(R.id.card_image);
@@ -43,42 +39,42 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
                     // Find article card clicked
                     TextView current = vx.findViewById(vTitle.getId());
 
-                    // Start article activity with article object
-                    startArticleActivity(current.getText().toString());
+                    // Start app activity with app object
+                    //startAppActivity(current.getText().toString());
                 }
             });
         }
-
-        private void startArticleActivity(String title){
-            // Get article for passing
-            for(Article article: mDataHolders) {
-                if(article.getTitle().equals(title)){
-                    // create article redirect intent
-                    Intent article_activity = new Intent(context, ArticleActivity.class);
+        /*
+        private void startAppActivity(String title){
+            // Get app for passing
+            for(App app: mDataHolders) {
+                if(app.getTitle().equals(title)){
+                    // create app redirect intent
+                    Intent app_activity = new Intent(context, AppActivity.class);
 
                     // Fetch user data
                     MainActivity main = (MainActivity) context;
 
                     // Create bundle with serialised object
                     Bundle bundle = new Bundle();
-                    article.saveInstanceState(bundle);
+                    app.saveInstanceState(bundle);
                     main.getUser().saveInstanceState(bundle);
 
                     // Add title & bundle to intent
-                    article_activity.putExtra("activity", "main");
-                    article_activity.putExtras(bundle);
-                    article_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    app_activity.putExtra("activity", "main");
+                    app_activity.putExtras(bundle);
+                    app_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-                    // Start article activity and close main activity
-                    main.startActivity(article_activity);
+                    // Start app activity and close main activity
+                    main.startActivity(app_activity);
                     main.finish();
                 }
             }
-        }
+        }*/
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ArticleAdapter(Context context, ArrayList<Article> newCards) {
+    public AppAdapter(Context context, ArrayList<App> newCards) {
         this.context = context;
 
         this.mDataHolders = newCards;
@@ -86,19 +82,28 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ArticleV
 
     // Create new views (invoked by the layout manager)
     @Override
-    public ArticleAdapter.ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public AppAdapter.AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(context).inflate(R.layout.list_row, parent, false);
-        return new ArticleViewHolder(v);
+        return new AppViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ArticleViewHolder holder, int position) {
-        // Load article icon
-        holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+    public void onBindViewHolder(AppViewHolder holder, int position) {
+        if(mDataHolders.get(position).getTitle().equals("pocket")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }else if(mDataHolders.get(position).getTitle().equals("instapaper")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
+        }else if(mDataHolders.get(position).getTitle().equals("evernote")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }else if(mDataHolders.get(position).getTitle().equals("wallabag")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
+        }else if(mDataHolders.get(position).getTitle().equals("pinboard")) {
+            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
+        }
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
-        holder.vText.setText(mDataHolders.get(position).getResolved_url());
+        holder.vText.setText(mDataHolders.get(position).getText());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

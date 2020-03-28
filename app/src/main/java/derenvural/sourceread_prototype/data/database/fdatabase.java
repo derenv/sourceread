@@ -7,13 +7,14 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
 
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class fdatabase {
@@ -77,7 +78,7 @@ public class fdatabase {
 
         // Get ID of article
         for(int i=0;i<user.getArticles().getValue().size();i++){
-            if(user.getArticles().getValue().get(i).getResolved_title().equals(article.getResolved_title())){
+            if(user.getArticles().getValue().get(i).getTitle().equals(article.getTitle())){
                 final String id = user.getArticleIDs().getValue().get(i);
 
                 // Make update attempt
@@ -146,11 +147,21 @@ public class fdatabase {
         app_request.get().addOnCompleteListener(end);
     }
     /*
-     * Request all app data
+     * Request all article data
      * */
     public void request_article_data(String article, OnCompleteListener end){
         DocumentReference article_request = get_article_request(article);
         article_request.get().addOnCompleteListener(end);
+    }
+    /*
+     * Request all app data
+     * */
+    public void request_apps(OnCompleteListener end){
+        // Get reference to app document in 'apps' collection
+        CollectionReference apps_request = get_apps_request();
+
+        // Execute database read with onCompleteListener
+        apps_request.get().addOnCompleteListener(end);
     }
 
     /*
@@ -173,6 +184,13 @@ public class fdatabase {
     public DocumentReference get_app_request(@NonNull String app_id){
         if(mAuth.getUid() != null) {
             return db.collection("apis").document(app_id);
+        }else{
+            return null;
+        }
+    }
+    public CollectionReference get_apps_request(){
+        if(mAuth.getUid() != null) {
+            return db.collection("apis");
         }else{
             return null;
         }

@@ -18,12 +18,11 @@ import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class HomeFragment extends Fragment {
-
     private HomeViewModel homeViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;

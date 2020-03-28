@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.article;
+package derenvural.sourceread_prototype.data.cards;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,17 +8,15 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class Article implements Serializable {
+public class Article extends Card {
     // Identifiers
     private String resolved_url;
     private String resolved_id;
-    private String resolved_title;
     private String app;
     // External Information
     private ArrayList<HashMap<String, String>> authors;
@@ -34,10 +32,12 @@ public class Article implements Serializable {
      * Create object from database document
      * */
     public Article(DocumentSnapshot document, String api_id) {
+        //FIXME: add excerpt as 3rd param
+        super(null, document.get("title").toString(),document.get("title").toString());
         // Identifiers
         setResolved_url(document.get("url").toString());
         setResolved_id(api_id);
-        setResolved_title(document.get("title").toString());
+        setTitle(document.get("title").toString());
         setApp(document.get("app").toString());
         // External Information
         setAuthors((ArrayList<HashMap<String, String>>) document.get("authors"));
@@ -63,58 +63,57 @@ public class Article implements Serializable {
     /*
      * Create object from JSON object
      * */
-    public Article(JSONObject article, String app_name){
+    public Article(JSONObject article, String app_name) throws JSONException{
+        //FIXME: add excerpt as 3rd param
+        super(null, article.getString("title"),article.getString("title"));
+
         // ((Safe))
         setApp(app_name);
 
-        try{
-            // Identifiers
-            Log.d("API url", article.getString("resolved_url"));
-            setResolved_url(article.getString("resolved_url"));
-            Log.d("API id", article.getString("resolved_id"));
-            setResolved_id(article.getString("resolved_id"));
-            Log.d("API title", article.getString("resolved_title"));
-            setResolved_title(article.getString("resolved_title"));
-            // External Information
-            Log.d("API authors", article.getString("authors"));
-            if(article.getString("authors") != null) {
-                // Parse authors into HashMap
-                JSONObject authors_json = article.getJSONObject("authors");
-                ArrayList<HashMap<String, String>> authors = new ArrayList<HashMap<String, String>>();
+        // Identifiers
+        Log.d("API url", article.getString("resolved_url"));
+        setResolved_url(article.getString("resolved_url"));
+        Log.d("API id", article.getString("resolved_id"));
+        setResolved_id(article.getString("resolved_id"));
+        Log.d("API title", article.getString("resolved_title"));
+        setTitle(article.getString("resolved_title"));
+        // External Information
+        Log.d("API authors", article.getString("authors"));
+        if(article.getString("authors") != null) {
+            // Parse authors into HashMap
+            JSONObject authors_json = article.getJSONObject("authors");
+            ArrayList<HashMap<String, String>> authors = new ArrayList<HashMap<String, String>>();
 
-                // Parse authors into HashMap
-                for (Iterator<String> it = authors_json.keys(); it.hasNext();) {
-                    // Get current author
-                    JSONObject author_json = authors_json.getJSONObject(it.next());
+            // Parse authors into HashMap
+            for (Iterator<String> it = authors_json.keys(); it.hasNext();) {
+                // Get current author
+                JSONObject author_json = authors_json.getJSONObject(it.next());
 
-                    // Create HashMap
-                    HashMap<String, String> author = new HashMap<String, String>();
-                    author.put("name", author_json.getString("name"));
-                    author.put("url", author_json.getString("url"));
+                // Create HashMap
+                HashMap<String, String> author = new HashMap<String, String>();
+                author.put("name", author_json.getString("name"));
+                author.put("url", author_json.getString("url"));
 
-                    // Add to list
-                    authors.add(author);
-                }
-                setAuthors(authors);
-            }else{
-                setAuthors(new ArrayList<HashMap<String, String>>());
+                // Add to list
+                authors.add(author);
             }
-            // Article Information
-            Log.d("API word count", article.getString("word_count"));
-            if(article.getString("word_count") != null) {
-                setWord_count(article.getString("word_count"));
-            }else{
-                setWord_count("");
-            }
-            setVeracity("");
-            setText("");
-        }catch(JSONException error){
-            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+            setAuthors(authors);
+        }else{
+            setAuthors(new ArrayList<HashMap<String, String>>());
         }
+        // Article Information
+        Log.d("API word count", article.getString("word_count"));
+        if(article.getString("word_count") != null) {
+            setWord_count(article.getString("word_count"));
+        }else{
+            setWord_count("");
+        }
+        setVeracity("");
+        setText("");
     }
 
     public Article() {
-
+        super(null,"","");
     }
 
     public Map<String, Object> map_data(){
@@ -125,7 +124,7 @@ public class Article implements Serializable {
         // Identifiers
         docData.put("url", getResolved_url());
         docData.put("id", getResolved_id());
-        docData.put("title", getResolved_title());
+        docData.put("title", getTitle());
         docData.put("app", getApp());
         // External Information
         docData.put("authors", getAuthors());
@@ -144,7 +143,7 @@ public class Article implements Serializable {
         // Identifiers
         setResolved_url((String) bundle.getSerializable("url"));
         setResolved_id((String) bundle.getSerializable("id"));
-        setResolved_title((String) bundle.getSerializable("title"));
+        setTitle((String) bundle.getSerializable("title"));
         setApp((String) bundle.getSerializable("app"));
         // External Information
         setAuthors((ArrayList) bundle.getSerializable("authors"));
@@ -160,7 +159,7 @@ public class Article implements Serializable {
         // Identifiers
         bundle.putSerializable("url", getResolved_url());
         bundle.putSerializable("id", getResolved_id());
-        bundle.putSerializable("title", getResolved_title());
+        bundle.putSerializable("title", getTitle());
         bundle.putSerializable("app", getApp());
         // External Information
         bundle.putSerializable("authors", getAuthors());
@@ -180,7 +179,6 @@ public class Article implements Serializable {
     // Gets
     public String getResolved_url() { return resolved_url; }
     public String getResolved_id() { return resolved_id; }
-    public String getResolved_title() { return resolved_title; }
     public ArrayList<HashMap<String, String>> getAuthors() { return authors; }
     public String getWord_count() { return word_count; }
     public String getVeracity() { return veracity; }
@@ -192,7 +190,6 @@ public class Article implements Serializable {
     // Sets
     public void setResolved_url(String resolved_url) { this.resolved_url = resolved_url; }
     public void setResolved_id(String resolved_id) { this.resolved_id = resolved_id; }
-    public void setResolved_title(String resolved_title) { this.resolved_title = resolved_title; }
     public void setAuthors(ArrayList<HashMap<String, String>> authors) { this.authors = authors; }
     public void setWord_count(String word_count) { this.word_count = word_count; }
     public void setVeracity(String veracity) { this.veracity = veracity; }

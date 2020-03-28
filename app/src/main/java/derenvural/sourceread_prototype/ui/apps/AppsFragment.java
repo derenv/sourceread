@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
-import derenvural.sourceread_prototype.data.cards.Card;
-import derenvural.sourceread_prototype.data.cards.CardAdapter;
+import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.AppAdapter;
 import derenvural.sourceread_prototype.R;
 
 public class AppsFragment extends Fragment {
@@ -41,7 +41,7 @@ public class AppsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
+        mAdapter = new AppAdapter(getActivity(), appsViewModel.getCards().getValue());
         recyclerView.setAdapter(mAdapter);
 
         // link message text to view-model data
@@ -49,24 +49,24 @@ public class AppsFragment extends Fragment {
         appsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-            textView.setText(s);
+                textView.setText(s);
             }
         });
 
         // link cards to view-model data
-        appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Card>>() {
+        appsViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<App>>() {
             @Override
-            public void onChanged(@Nullable ArrayList<Card> updatedList) {
-            // Reset adapter
-            mAdapter = new CardAdapter(getActivity(), appsViewModel.getCards().getValue());
-            recyclerView.setAdapter(mAdapter);
+            public void onChanged(@Nullable ArrayList<App> updatedList) {
+                // Reset adapter
+                mAdapter = new AppAdapter(getActivity(), appsViewModel.getCards().getValue());
+                recyclerView.setAdapter(mAdapter);
 
-            // If list still empty, display appropriate text and hide loading bar
-            if(mAdapter.getItemCount() <= 0) {
-                appsViewModel.setText(getString(R.string.apps_placeholder));
-            } else {
-                appsViewModel.setText("");
-            }
+                // If list still empty, display appropriate text
+                if(mAdapter.getItemCount() <= 0) {
+                    appsViewModel.setText(getString(R.string.apps_placeholder));
+                } else {
+                    appsViewModel.setText("");
+                }
             }
         });
 
@@ -77,7 +77,7 @@ public class AppsFragment extends Fragment {
     }
 
     /*
-     * Fetch api tokens, auth tokens, and user token
+     * Fetch saved apps
      * */
     public void update(){
         // Request articles

@@ -1,11 +1,8 @@
 package derenvural.sourceread_prototype;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.util.Log;
 import android.view.MenuItem;
@@ -49,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     // Variables
     private boolean interfaceEnabled;
 
+    public fdatabase getDatabase() { return db; }
     public LoggedInUser getUser() { return user; }
 
     @Override
@@ -99,22 +97,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void setDrawerEnabled(boolean enabled) {
+    // Interface methods
+    private void setDrawerEnabled(boolean enabled) {
         int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED :
                 DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 
         drawer.setDrawerLockMode(lockMode);
         interfaceEnabled = enabled;
     }
-
-    private void deactivate_interface(){
+    public void deactivate_interface(){
         progressBar.setVisibility(View.VISIBLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
         setDrawerEnabled(false);
     }
-
     public void activate_interface(){
         progressBar.setVisibility(View.INVISIBLE);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -122,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         setDrawerEnabled(true);
     }
 
+    // Redirects
     private void login_redirect(){
         // Redirect to login page
         Intent new_activity = new Intent(this, LoginActivity.class);
@@ -134,20 +132,18 @@ public class MainActivity extends AppCompatActivity {
         // Get intent data
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
-        Log.d("DEEP-LINK","checking for deep-link..");
 
         // Check if intent comes from deep-link or activity
         if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
             // Fetch deep-link type
             String link_type = appLinkData.getLastPathSegment();
-            Log.d("DEEP-LINK value", appLinkData.toString());
-            Log.d("DEEP-LINK type", link_type);
+            Log.d("ACTIVITY","value - "+appLinkData.toString()+"   type - " + link_type);
 
             // Whitelist deep-links
             if(link_type.equals("successful_login")){
                 // Get app name
                 String app_name = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
-                Log.d("DEEP-LINK app",app_name);
+                Log.d("ACTIVITY","app - "+app_name);
 
                 // Create blank user for populating
                 user = new LoggedInUser(mAuth.getCurrentUser());
@@ -164,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
                 // TODO: other deep links
             }
         }else{
+            Log.d("ACTIVITY","no deep-link");
+
             // Fetch the bundle & check if it has extras
             String previous_activity = intent.getStringExtra("activity");
             Bundle extras = intent.getExtras();

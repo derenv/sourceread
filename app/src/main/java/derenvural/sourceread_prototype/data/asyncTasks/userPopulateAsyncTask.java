@@ -18,7 +18,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
@@ -60,53 +61,49 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                     HashMap<String, Object> found_apps = (HashMap<String, Object>) document.get("apps");
                     ArrayList<String> found_articles = (ArrayList<String>) document.get("articles");
 
-                    // Add to user
-                    user.setAppIDs(found_apps);
+                    // Create empty app objects with name & timestamp
+                    ArrayList<App> apps = new ArrayList<App>();
+                    for(String app_name: found_apps.keySet()){
+                        apps.add(new App(app_name, Long.parseLong(found_apps.get(app_name).toString())));
+                    }
+
+                    // Add analysis & article ID's to user
                     user.setArticleIDs(found_articles);
                     user.setVeracity((String) document.get("veracity"));
 
                     // Request app data
-                    if (found_apps.size() > 0) {
-                        for(final String app_name : found_apps.keySet()) {
-                            db.request_app_data(app_name, new OnCompleteListener<DocumentSnapshot>() {
+                    if (apps.size() > 0) {
+                        for(final App app : apps) {
+                            db.request_app_data(app.getTitle(), new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     if (task.isSuccessful()) {
-                                        // Get list of articles
+                                        // Get app
                                         DocumentSnapshot document = task.getResult();
 
-                                        // Populate hash map
-                                        final HashMap<String, Object> this_app = new HashMap<String, Object>();
-                                        this_app.put("name", app_name);
-                                        this_app.put("description", document.get("description").toString());
-                                        this_app.put("key", document.get("key").toString());
-                                        this_app.put("timestamp", user.getAppIDs().getValue().get(app_name));
-                                        this_app.put("requests", document.get("requests"));
+                                        // Create app object
+                                        app.CreateApp(document);
 
                                         // Add to list
-                                        user.addApp(this_app);
+                                        user.addApp(app);
 
                                         // Ask for request token for authentication
-                                        request_token(this_app, new Response.Listener<JSONObject>() {
+                                        request_token(app, new Response.Listener<JSONObject>() {
                                             @Override
                                             public void onResponse(JSONObject response) {
                                                 // Cut token out of html response
                                                 Log.d("API", "Request Response recieved");
 
                                                 try {
-                                                    // Create new hash-map
-                                                    HashMap<String, String> new_request_token = new HashMap<String, String>();
-                                                    new_request_token.put(this_app.get("name").toString(), response.getString("code"));
-
                                                     // Add new request token
-                                                    user.addRequestToken(new_request_token);
+                                                    app.setRequestToken(response.getString("code"));
 
                                                     // End task
                                                     postData(user);
                                                     postDone(true);
 
                                                     // Open app in browser for authentication Creates callback
-                                                    open_app(this_app, response.getString("code"));
+                                                    open_app(app, response.getString("code"));
                                                 }catch(JSONException error){
                                                     Log.e("JSON error", "error reading JSON: " + error.getMessage());
                                                 }
@@ -153,10 +150,10 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         return null;
     }
 
-    public void request_token(HashMap<String, Object> app, Response.Listener<JSONObject> responseListener){
+    public void request_token(App app, Response.Listener<JSONObject> responseListener){
         // Get request token request URL for current app
-        HashMap<String, Object> app_requests = (HashMap<String, Object>) app.get("requests");
-        String url = app_requests.get("request").toString();
+        HashMap<String, String> app_requests = app.getRequests();
+        String url = app_requests.get("request");
 
         // Cut out redirect URL from url
         String[] fullUrl = url.split("\\?");
@@ -164,7 +161,7 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         String redirect_uri = fullUrl[1];
 
         // Fetch app key
-        String app_key = app.get("key").toString();
+        String app_key = app.getKey();
 
         // Add JSON parameters
         HashMap<String, String> parameters = new HashMap<String, String>();
@@ -183,9 +180,9 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         );
     }
 
-    public void open_app(HashMap<String, Object> app, String token){
+    public void open_app(App app, String token){
         // Get login URL
-        HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
+        HashMap<String, String> requests = app.getRequests();
         String app_login_url = requests.get("login");
 
         // Insert request token

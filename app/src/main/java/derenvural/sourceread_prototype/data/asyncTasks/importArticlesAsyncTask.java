@@ -17,7 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
@@ -27,11 +28,11 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
     private fdatabase db;
     private httpHandler httph;
     // Data
-    private HashMap<String, Object> app;
+    private App app;
     // Activity
     private final WeakReference<Context> context;
 
-    public importArticlesAsyncTask(Context context, LoggedInUser user, httpHandler httph, fdatabase db, HashMap<String, Object> app){
+    public importArticlesAsyncTask(Context context, LoggedInUser user, httpHandler httph, fdatabase db, App app){
         super();
         // Activity
         this.context = new WeakReference<>(context);;
@@ -51,12 +52,11 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         final LoggedInUser user = getData().getValue();
 
         // Get get URL
-        HashMap<String, String> requests = (HashMap<String, String>) app.get("requests");
-        String url = requests.get("articles");
+        String url = app.getRequests().get("articles");
 
         // Fetch access token
-        String app_key = app.get("key").toString();
-        String access_token = user.getAccessTokens().getValue().get(app.get("name"));
+        String app_key = app.getKey();
+        String access_token = app.getAccessToken();
 
         // Add JSON parameters
         HashMap<String, String> parameters = new HashMap<String, String>();
@@ -68,15 +68,9 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
         parameters.put("state", "all");
 
         // Fetch timestamp
-        for(String app_name: user.getAppIDs().getValue().keySet()){
-            if(user.getAppIDs().getValue() != null && !user.getAppIDs().getValue().get(app_name).equals("")){
-                long previous_request = Long.parseLong(user.getAppIDs().getValue().get(app_name).toString());
-
-                // Catch for first time import
-                if(previous_request != 0) {
-                    parameters.put("since", Long.toString(previous_request));
-                }
-            }
+        if(app.getTimestamp() != 0){
+            // Catch for first time import
+            parameters.put("since", Long.toString(app.getTimestamp()));
         }
 
         // Request access token by http request to URL
@@ -92,7 +86,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                     ArrayList<Article> articles = new ArrayList<Article>();
                                     for (Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
                                         // Add article information to user object for display
-                                        Article current_article = new Article(articles_json.getJSONObject(it.next()), app.get("name").toString());
+                                        Article current_article = new Article(articles_json.getJSONObject(it.next()), app.getTitle());
                                         articles.add(current_article);
 
                                         // Add new article to database
@@ -103,10 +97,10 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                 // Create map object containing timestamp with correct format
                                 long request_stamp = Instant.now().getEpochSecond();
                                 Map<String, Object> new_stamp = new HashMap<>();
-                                new_stamp.put(app.get("name").toString(), request_stamp);
+                                new_stamp.put(app.getTitle(), request_stamp);
 
                                 // store timestamp
-                                //String app_name, String field, Object new_data)
+                                app.setTimestamp(request_stamp);
                                 db.update_user_field("apps", new_stamp);
 
                                 // Fetch non-null context

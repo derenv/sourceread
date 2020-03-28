@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -18,6 +17,7 @@ import derenvural.sourceread_prototype.R;
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
     private ArrayList<Card> mDataHolders;
     private Context context;
+    private static View.OnClickListener listener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -35,24 +35,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
             vText = v.findViewById(R.id.card_text);
 
             // Add click listener for fragment transition
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View vx) {
-                // CardView item clicked
-                TextView current = vx.findViewById(vTitle.getId());
-                Toast.makeText(vx.getContext(), "Item in list: "+current.getText(), Toast.LENGTH_SHORT).show();
-
-                // TODO: Transition to fragment for app OR article
-                //
-                }
-            });
+            v.setOnClickListener(listener);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CardAdapter(Context context, ArrayList<Card> newCards) {
+    public CardAdapter(Context context, ArrayList<Card> newCards, View.OnClickListener listener) {
         this.context = context;
-
         this.mDataHolders = newCards;
+        CardAdapter.listener = listener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -66,20 +57,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.CardViewHolder
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(CardViewHolder holder, int position) {
-        if(mDataHolders.get(position).getTitle().equals("pocket")) {
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
-        }else if(mDataHolders.get(position).getTitle().equals("instapaper")) {
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
-        }else if(mDataHolders.get(position).getTitle().equals("evernote")) {
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
-        }else if(mDataHolders.get(position).getTitle().equals("wallabag")) {
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder2);
-        }else if(mDataHolders.get(position).getTitle().equals("pinboard")) {
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
-        }else{
-            // Load article icon
-            holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
-        }
+        // Load article icon
+        holder.vImage.setImageResource(R.drawable.ic_card_placeholder1);
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
         holder.vText.setText(mDataHolders.get(position).getText());
     }

@@ -3,29 +3,20 @@ package derenvural.sourceread_prototype.data.login;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseUser;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import derenvural.sourceread_prototype.MainActivity;
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userPopulateAsyncTask;
@@ -38,14 +29,10 @@ public class LoggedInUser implements Serializable {
     private MutableLiveData<String> displayName = new MutableLiveData<String>();
     private MutableLiveData<String> email = new MutableLiveData<String>();
     // App data
-    private MutableLiveData<ArrayList<HashMap<String, Object>>> apps = new MutableLiveData<ArrayList<HashMap<String, Object>>>();
-    private MutableLiveData<HashMap<String, Object>> appIDs = new MutableLiveData<HashMap<String, Object>>();
+    private MutableLiveData<ArrayList<App>> apps = new MutableLiveData<ArrayList<App>>();
     // Article data
     private MutableLiveData<ArrayList<Article>> articles = new MutableLiveData<ArrayList<Article>>();
     private MutableLiveData<ArrayList<String>> articleIDs = new MutableLiveData<ArrayList<String>>();
-    // Tokens/Keys
-    private MutableLiveData<HashMap<String, String>> requestTokens = new MutableLiveData<HashMap<String, String>>();
-    private MutableLiveData<HashMap<String, String>> accessTokens = new MutableLiveData<HashMap<String, String>>();
     // Statistical data
     private MutableLiveData<String> veracity = new MutableLiveData<String>();
     // Serialisation
@@ -66,13 +53,9 @@ public class LoggedInUser implements Serializable {
         setEmail((String) outState.getSerializable("email"));
         // App data
         setApps((ArrayList) outState.getSerializable("apps"));
-        setAppIDs((HashMap) outState.getSerializable("appids"));
         // Article data
         setArticles((ArrayList) outState.getSerializable("articles"));
         setArticleIDs((ArrayList) outState.getSerializable("articleids"));
-        // Tokens/Keys
-        setRequestTokens((HashMap) outState.getSerializable("request"));
-        setAccessTokens((HashMap) outState.getSerializable("access"));
         // Statistical data
         setVeracity((String) outState.getSerializable("veracity"));
     }
@@ -83,13 +66,9 @@ public class LoggedInUser implements Serializable {
         bundle.putSerializable("email", getEmail().getValue());
         // App data
         bundle.putSerializable("apps", getApps().getValue());
-        bundle.putSerializable("appids", getAppIDs().getValue());
         // Article data
         bundle.putSerializable("articles", getArticles().getValue());
         bundle.putSerializable("articleids", getArticleIDs().getValue());
-        // Tokens/Keys
-        bundle.putSerializable("request", getRequestTokens().getValue());
-        bundle.putSerializable("access", getAccessTokens().getValue());
         // Statistical data
         bundle.putSerializable("veracity", getVeracity().getValue());
     }
@@ -101,13 +80,9 @@ public class LoggedInUser implements Serializable {
         stream.writeObject(getEmail().getValue());
         // App data
         stream.writeObject(getApps().getValue());
-        stream.writeObject(getAppIDs().getValue());
         // Article data
         stream.writeObject(getArticles().getValue());
         stream.writeObject(getArticleIDs().getValue());
-        // Tokens/Keys
-        stream.writeObject(getRequestTokens().getValue());
-        stream.writeObject(getAccessTokens().getValue());
         // Statistical data
         stream.writeObject(getVeracity().getValue());
     }
@@ -119,13 +94,9 @@ public class LoggedInUser implements Serializable {
         setEmail((String) stream.readObject());
         // App data
         setApps((ArrayList) stream.readObject());
-        setAppIDs((HashMap) stream.readObject());
         // Article data
         setArticles((ArrayList) stream.readObject());
         setArticleIDs((ArrayList) stream.readObject());
-        // Tokens/Keys
-        setRequestTokens((HashMap) stream.readObject());
-        setAccessTokens((HashMap) stream.readObject());
         // Statistical data
         setVeracity((String) stream.readObject());
     }
@@ -171,7 +142,7 @@ public class LoggedInUser implements Serializable {
     }
 
     public void import_articles(final MainActivity main, httpHandler httph, final fdatabase db){
-        for (final HashMap<String, Object> app : getApps().getValue()) {
+        for (final App app : getApps().getValue()) {
             // Create async task
             importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db, app);
 
@@ -193,29 +164,7 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-    // Array and hashmap addition
-    public void addAccessToken(String app_name, String new_access_token) {
-        // Get previous request tokens
-        HashMap<String, String> access_tokens = getAccessTokens().getValue();
-        if (access_tokens == null) {
-            access_tokens = new HashMap<String, String>();
-        }
-
-        // Add new request token
-        access_tokens.put(app_name, new_access_token);
-        setAccessTokens(access_tokens);
-    }
-    public void addRequestToken(HashMap<String, String> new_request_token) {
-        // Get previous request tokens
-        HashMap<String, String> request_tokens = getRequestTokens().getValue();
-        if (request_tokens == null) {
-            request_tokens = new HashMap<String, String>();
-        }
-
-        // Add new request token
-        request_tokens.putAll(new_request_token);
-        setRequestTokens(request_tokens);
-    }
+    // ArrayList item addition
     public void addArticleID(String new_id) {
         // Get previous article ids
         ArrayList<String> old_ids = getArticleIDs().getValue();
@@ -238,11 +187,11 @@ public class LoggedInUser implements Serializable {
         old_articles.add(new_article);
         setArticles(old_articles);
     }
-    public void addApp(HashMap<String, Object> new_app){
+    public void addApp(App new_app){
         // Get previous apps
-        ArrayList<HashMap<String, Object>> apps = getApps().getValue();
+        ArrayList<App> apps = getApps().getValue();
         if (apps == null) {
-            apps = new ArrayList<HashMap<String, Object>>();
+            apps = new ArrayList<App>();
         }
 
         // Add new app
@@ -250,27 +199,21 @@ public class LoggedInUser implements Serializable {
         setApps(apps);
     }
 
-    // Sets
+    // SET
     public void setUserId(String userId) { this.userId.setValue(userId); }
     public void setDisplayName(String displayName) { this.displayName.setValue(displayName); }
     public void setEmail(String email) { this.email.setValue(email); }
-    public void setApps(ArrayList<HashMap<String, Object>> apps) { this.apps.setValue(apps); }
-    public void setAppIDs(HashMap<String, Object> appIDs) { this.appIDs.setValue(appIDs); }
+    public void setApps(ArrayList<App> apps) { this.apps.setValue(apps); }
     public void setArticles(ArrayList<Article> articles) { this.articles.setValue(articles); }
     public void setArticleIDs(ArrayList<String> articles) { this.articleIDs.setValue(articles); }
-    public void setRequestTokens(HashMap<String, String> requestTokens) { this.requestTokens.setValue(requestTokens); }
-    public void setAccessTokens(HashMap<String, String> accessTokens) { this.accessTokens.setValue(accessTokens); }
     public void setVeracity(String veracity) { this.veracity.setValue(veracity); }
 
-    // Gets
+    // GET
     public LiveData<String> getUserId() { return userId; }
     public LiveData<String> getDisplayName() { return displayName; }
     public LiveData<String> getEmail() { return email; }
-    public LiveData<ArrayList<HashMap<String, Object>>> getApps() { return apps; }
-    public LiveData<HashMap<String, Object>> getAppIDs() { return appIDs; }
+    public LiveData<ArrayList<App>> getApps() { return apps; }
     public LiveData<ArrayList<Article>> getArticles() { return articles; }
     public LiveData<ArrayList<String>> getArticleIDs() { return articleIDs; }
-    public LiveData<HashMap<String, String>> getRequestTokens() { return requestTokens; }
-    public LiveData<HashMap<String, String>> getAccessTokens() { return accessTokens; }
     public LiveData<String> getVeracity() { return veracity; }
 }

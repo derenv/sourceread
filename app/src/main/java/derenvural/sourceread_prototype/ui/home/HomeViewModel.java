@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class HomeViewModel extends ViewModel {

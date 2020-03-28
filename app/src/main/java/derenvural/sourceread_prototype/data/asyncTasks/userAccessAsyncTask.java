@@ -8,8 +8,10 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
@@ -33,12 +35,13 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
     protected Void doInBackground(Void... params){
         // Fetch user
         final LoggedInUser user = getData().getValue();
+        final ArrayList<App> apps = user.getApps().getValue();
 
         // Find app
-        for (HashMap<String, Object> app : user.getApps().getValue()) {
-            if(app.get("name").equals(app_name)) {
+        for (final App app : apps) {
+            if(app.getTitle().equals(app_name)) {
                 // Get login URL
-                String url = ((HashMap<String, String>) app.get("requests")).get("access");
+                String url = app.getRequests().get("access");
 
                 // Cut out redirect URL from url
                 String[] fullUrl = url.split("\\?");
@@ -46,13 +49,13 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                 String redirect_uri = fullUrl[1];
 
                 // Fetch app key & request token
-                String app_key = app.get("key").toString();
-                String request_token = user.getRequestTokens().getValue().get(app_name);
+                String app_key = app.getKey();
+                String request_token = app.getRequestToken();
 
                 HashMap<String, String> parameters = new HashMap<String, String>();
-                parameters.put("consumer_key",app_key);
-                parameters.put("code",request_token);
-                parameters.put("redirect_uri",redirect_uri);
+                parameters.put("consumer_key", app_key);
+                parameters.put("code", request_token);
+                parameters.put("redirect_uri", redirect_uri);
 
                 // Request access token by http request to URL
                 httph.make_volley_request(url, parameters,
@@ -64,9 +67,10 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
 
                                 try{
                                     // Add new access token to map
-                                    user.addAccessToken(app_name, response.getString("access_token"));
+                                    app.setAccessToken(response.getString("access_token"));
 
                                     // Set display nameset
+                                    user.setApps(apps);
                                     user.setDisplayName(response.getString("username"));
 
                                     // End task
@@ -84,6 +88,7 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                             }
                         }
                 );
+                break;
             }
         }
 

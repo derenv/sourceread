@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 

@@ -3,7 +3,6 @@ package derenvural.sourceread_prototype.ui.article;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.analyse.analyser;
-import derenvural.sourceread_prototype.data.article.Article;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
@@ -165,7 +164,7 @@ public class ArticleActivity extends AppCompatActivity {
 
     public void loadArticle(){
         // Add to viewmodel
-        articleViewModel.setTitle(article.getResolved_title());
+        articleViewModel.setTitle(article.getTitle());
         articleViewModel.setUrl(article.getResolved_url());
         articleViewModel.setAuthors(article.getAuthors());
         articleViewModel.setWordCount(article.getWord_count());
