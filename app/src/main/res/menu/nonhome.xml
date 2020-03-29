@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/menu_article">
-    <item
-        android:id="@+id/action_analyse_article"
-        android:orderInCategory="1"
-        android:title="@string/action_analyse_article"
-        app:showAsAction="always" />
+    android:id="@+id/menu_non_home">
     <item
         android:id="@+id/action_logout_user"
-        android:orderInCategory="2"
+        android:orderInCategory="1"
         android:title="@string/action_logout_user"
         app:showAsAction="never" />
 </menu>

@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +9,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.lifecycle.ViewModelProviders;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -32,8 +33,8 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
-import derenvural.sourceread_prototype.ui.app.AppViewModel;
 import derenvural.sourceread_prototype.ui.apps.redirectType;
+import derenvural.sourceread_prototype.ui.home.menuStyle;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ProgressBar progressBar;
     private DrawerLayout drawer;
+    private Menu mainMenu;
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     public LoggedInUser user;
     // Variables
     private boolean interfaceEnabled;
+    private menuStyle menustyle;
 
     public fdatabase getDatabase() { return db; }
     public LoggedInUser getUser() { return user; }
@@ -57,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        menustyle = menuStyle.VISIBLE;
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -79,6 +84,61 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        final Activity this_activity = this;
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                int id = item.getItemId();
+                switch (id) {
+                    case R.id.nav_home: {
+                        // Change to correct menu
+                        menustyle = menuStyle.VISIBLE;
+
+                        // Change fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_home);
+                        break;
+                    }
+                    case R.id.nav_statistics: {
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
+                        // Change fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_statistics);
+                        break;
+                    }
+                    case R.id.nav_apps: {
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
+                        // Change fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_apps);
+                        break;
+                    }
+                    case R.id.nav_about: {
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
+                        // Change fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
+                        break;
+                    }
+                    case R.id.nav_settings: {
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
+                        // Change fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
+                        break;
+                    }
+                }
+
+                //close navigation drawer
+                invalidateOptionsMenu();
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
 
         // Disable interface
         deactivate_interface();
@@ -197,17 +257,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             }else {
                 // Attempt population
-                user.populate(this, db, httph);
             }
+            user.populate(this, db, httph);
         }
     }
 
     // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        mainMenu = menu;
+        if(menustyle == menuStyle.INVISIBLE){
+            // Inflate the menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.nonhome, mainMenu);
+
+            return true;
+        }else if(menustyle == menuStyle.VISIBLE){
+            // Inflate the menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.main, mainMenu);
+
+            return true;
+        }
+
+        return false;
     }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {

@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -27,12 +28,14 @@ import derenvural.sourceread_prototype.data.analyse.analyser;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
+import derenvural.sourceread_prototype.ui.home.menuStyle;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class ArticleActivity extends AppCompatActivity {
     // Android
     private AppBarConfiguration mAppBarConfiguration;
     private ProgressBar progressBar;
+    private Menu mainMenu;
     // Services
     private FirebaseAuth mAuth;
     private fdatabase db;
@@ -40,6 +43,8 @@ public class ArticleActivity extends AppCompatActivity {
     private LoggedInUser user;
     // Article data
     private Article article;
+    // Variables
+    private menuStyle menustyle;
 
     public LoggedInUser getUser() { return user; }
 
@@ -47,6 +52,8 @@ public class ArticleActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article);
+
+        menustyle = menuStyle.VISIBLE;
 
         // Navigation Drawer
         final DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -75,22 +82,32 @@ public class ArticleActivity extends AppCompatActivity {
                         main_redirect();
                         break;
                     case R.id.nav_article:
+                        // Change to correct menu
+                        menustyle = menuStyle.VISIBLE;
+
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
-                        drawer.closeDrawers();
                         break;
                     case R.id.nav_about:
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
-                        drawer.closeDrawers();
                         break;
                     case R.id.nav_settings:
+                        // Change to correct menu
+                        menustyle = menuStyle.INVISIBLE;
+
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
-                        drawer.closeDrawers();
                         break;
                 }
-                return false;
+
+                //close navigation drawer
+                invalidateOptionsMenu();
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
             }
         });
 
@@ -210,9 +227,20 @@ public class ArticleActivity extends AppCompatActivity {
     // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.article, menu);
-        return true;
+        mainMenu = menu;
+        if(menustyle == menuStyle.INVISIBLE){
+            // Inflate the menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.nonhome, mainMenu);
+
+            return true;
+        }else if(menustyle == menuStyle.VISIBLE){
+            // Inflate the menu; this adds items to the action bar if it is present.
+            getMenuInflater().inflate(R.menu.article, mainMenu);
+
+            return true;
+        }
+
+        return false;
     }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
