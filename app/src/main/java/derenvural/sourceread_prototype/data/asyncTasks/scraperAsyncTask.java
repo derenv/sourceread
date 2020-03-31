@@ -2,6 +2,12 @@ package derenvural.sourceread_prototype.data.asyncTasks;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -11,7 +17,6 @@ import java.io.IOException;
 
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 /* Scrapes content from webpages
  * user-agent list:
@@ -24,16 +29,14 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
     private final static int TIMEOUT = 24000;
     // Database & user
     private fdatabase db;
-    private LoggedInUser user;
 
-    public scraperAsyncTask(Article article, fdatabase db, LoggedInUser user){
+    public scraperAsyncTask(Article article, fdatabase db){
         super();
         // Data
         setData(article);
 
         // Tools
         this.db = db;
-        this.user = user;
     }
 
     @Override
@@ -41,11 +44,21 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
         super.onPostExecute(aVoid);
 
         // Fetch data
-        Article article = getData().getValue();
+        final Article article = getData().getValue();
 
         if(article != null && !article.getText().equals("")) {
             // Save text to database
-            db.update_article_field(article, user, "text");
+            db.update_article_field(article, "text", new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        Log.d("DB", "updated article - '"+article.getDatabase_id()+"' field - 'text'");
+                    }else{
+                        // Log error
+                        Log.e("DB", "update failed: ", task.getException());
+                    }
+                }
+            });
 
             // Test output
             Log.d("JSOUP", "==START==");
@@ -57,7 +70,17 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
             article.analyse();
 
             // Save analysis to database
-            db.update_article_field(article, user, "veracity");
+            db.update_article_field(article, "veracity", new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        Log.d("DB", "updated article - '"+article.getDatabase_id()+"' field - 'veracity'");
+                    }else{
+                        // Log error
+                        Log.e("DB", "update failed: ", task.getException());
+                    }
+                }
+            });
         }
 
         // End task
@@ -76,11 +99,11 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
                     .followRedirects(true)
                     .execute();
         } catch (IOException error) {
-            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
+            Log.e("JSOUP", "error scraping web-page: " + error.getMessage());
             error.printStackTrace();
         } catch (StackOverflowError | OutOfMemoryError error) {
             // catch memory errors from badly written pages
-            Log.e("JSOUP error", "error scraping web-page: " + error.getMessage());
+            Log.e("JSOUP", "error scraping web-page: " + error.getMessage());
             error.printStackTrace();
         }
 
@@ -96,10 +119,10 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
             // Attempt scrape
             Connection.Response response = getResponse(article.getResolved_url());
             if(response == null){
-                Log.e("JSOUP error", "error scraping web-page code");
+                Log.e("JSOUP", "error scraping web-page code");
             }else if(response.statusCode() != 200) {
-                Log.e("JSOUP error", "error response scraping web-page code: " + response.statusCode());
-                Log.e("JSOUP error", "error response scraping web-page message: " + response.statusMessage());
+                Log.e("JSOUP", "error response scraping web-page code: " + response.statusCode());
+                Log.e("JSOUP", "error response scraping web-page message: " + response.statusMessage());
             }
 
             // Fetch paragraph elements of page
@@ -124,7 +147,7 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
             // Add text to article
             article.setText(text);
         } catch (IOException error) {
-            Log.e("JSOUP error", "unknown error scraping web-page: " + error.getMessage());
+            Log.e("JSOUP", "unknown error scraping web-page: " + error.getMessage());
             error.printStackTrace();
             article.setText("");
         }

@@ -11,10 +11,13 @@ import androidx.lifecycle.Observer;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
+import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
@@ -22,6 +25,7 @@ import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userPopulateAsyncTask;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
+import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class LoggedInUser implements Serializable {
     // Basic data
@@ -32,7 +36,6 @@ public class LoggedInUser implements Serializable {
     private MutableLiveData<ArrayList<App>> apps = new MutableLiveData<ArrayList<App>>();
     // Article data
     private MutableLiveData<ArrayList<Article>> articles = new MutableLiveData<ArrayList<Article>>();
-    private MutableLiveData<ArrayList<String>> articleIDs = new MutableLiveData<ArrayList<String>>();
     // Statistical data
     private MutableLiveData<String> veracity = new MutableLiveData<String>();
     // Serialisation
@@ -55,7 +58,6 @@ public class LoggedInUser implements Serializable {
         setApps((ArrayList) outState.getSerializable("apps"));
         // Article data
         setArticles((ArrayList) outState.getSerializable("articles"));
-        setArticleIDs((ArrayList) outState.getSerializable("articleids"));
         // Statistical data
         setVeracity((String) outState.getSerializable("veracity"));
     }
@@ -68,12 +70,11 @@ public class LoggedInUser implements Serializable {
         bundle.putSerializable("apps", getApps().getValue());
         // Article data
         bundle.putSerializable("articles", getArticles().getValue());
-        bundle.putSerializable("articleids", getArticleIDs().getValue());
         // Statistical data
         bundle.putSerializable("veracity", getVeracity().getValue());
     }
 
-    public void writeObject(java.io.ObjectOutputStream stream) throws IOException {
+    public void writeObject(ObjectOutputStream stream) throws IOException {
         // Basic data
         stream.writeObject(getUserId().getValue());
         stream.writeObject(getDisplayName().getValue());
@@ -82,12 +83,11 @@ public class LoggedInUser implements Serializable {
         stream.writeObject(getApps().getValue());
         // Article data
         stream.writeObject(getArticles().getValue());
-        stream.writeObject(getArticleIDs().getValue());
         // Statistical data
         stream.writeObject(getVeracity().getValue());
     }
 
-    public void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         // Basic data
         setUserId((String) stream.readObject());
         setDisplayName((String) stream.readObject());
@@ -96,7 +96,6 @@ public class LoggedInUser implements Serializable {
         setApps((ArrayList) stream.readObject());
         // Article data
         setArticles((ArrayList) stream.readObject());
-        setArticleIDs((ArrayList) stream.readObject());
         // Statistical data
         setVeracity((String) stream.readObject());
     }
@@ -141,41 +140,50 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void import_articles(final MainActivity main, httpHandler httph, final fdatabase db){
-        for (final App app : getApps().getValue()) {
-            // Create async task
-            importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db, app);
+    public void importArticles(final MainActivity main, httpHandler httph, fdatabase db, App app){
+        // Create async task
+        importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db, app);
 
-            // execute async task
-            task.execute();
+        // execute async task
+        task.execute();
 
-            // Check for task finish
-            task.getDone().observe(main, new Observer<Boolean>() {
-                @Override
-                public void onChanged(Boolean done) {
-                    if (done) {
-                        Log.d("TASK", "articles import task done!");
+        // Check for task finish
+        task.getDone().observe(main, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    Log.d("TASK", "articles import task done!");
 
-                        // Reactivate the UI
-                        main.activate_interface();
-                    }
+                    // Reactivate the UI
+                    main.activate_interface();
                 }
-            });
-        }
+            }
+        });
+    }
+
+    public void deleteArticle(final ArticleActivity aa, fdatabase db, final Article article){
+        // Create async task
+        deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db, article);
+
+        // execute async task
+        task.execute();
+
+        // Check for task finish
+        task.getDone().observe(aa, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    Log.d("TASK", "article '"+article.getTitle()+"' deletion task done!");
+
+                    // Reactivate the UI & redirect to main (no article for fragment to display)
+                    aa.activate_interface();
+                    aa.main_redirect();
+                }
+            }
+        });
     }
 
     // ArrayList item addition
-    public void addArticleID(String new_id) {
-        // Get previous article ids
-        ArrayList<String> old_ids = getArticleIDs().getValue();
-        if(old_ids == null){
-            old_ids = new ArrayList<String>();
-        }
-
-        // Add new article id
-        old_ids.add(new_id);
-        setArticleIDs(old_ids);
-    }
     public void addArticle(Article new_article){
         // Get previous articles
         ArrayList<Article> old_articles = getArticles().getValue();
@@ -205,7 +213,6 @@ public class LoggedInUser implements Serializable {
     public void setEmail(String email) { this.email.setValue(email); }
     public void setApps(ArrayList<App> apps) { this.apps.setValue(apps); }
     public void setArticles(ArrayList<Article> articles) { this.articles.setValue(articles); }
-    public void setArticleIDs(ArrayList<String> articles) { this.articleIDs.setValue(articles); }
     public void setVeracity(String veracity) { this.veracity.setValue(veracity); }
 
     // GET
@@ -214,6 +221,5 @@ public class LoggedInUser implements Serializable {
     public LiveData<String> getEmail() { return email; }
     public LiveData<ArrayList<App>> getApps() { return apps; }
     public LiveData<ArrayList<Article>> getArticles() { return articles; }
-    public LiveData<ArrayList<String>> getArticleIDs() { return articleIDs; }
     public LiveData<String> getVeracity() { return veracity; }
 }

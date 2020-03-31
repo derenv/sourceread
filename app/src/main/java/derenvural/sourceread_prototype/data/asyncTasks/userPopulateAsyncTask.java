@@ -59,7 +59,7 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                     // Get list of data
                     DocumentSnapshot document = task.getResult();
                     HashMap<String, Object> found_apps = (HashMap<String, Object>) document.get("apps");
-                    ArrayList<String> found_articles = (ArrayList<String>) document.get("articles");
+                    HashMap<String, String> found_articles = (HashMap<String, String>) document.get("articles");
 
                     // Create empty app objects with name & timestamp
                     ArrayList<App> apps = new ArrayList<App>();
@@ -68,7 +68,6 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                     }
 
                     // Add analysis & article ID's to user
-                    user.setArticleIDs(found_articles);
                     user.setVeracity((String) document.get("veracity"));
 
                     // Request app data
@@ -119,9 +118,9 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                     }
 
                     // Request article data
-                    if (found_articles.size() > 0) {
-                        for(final String article : user.getArticleIDs().getValue()) {
-                            db.request_article_data(article, new OnCompleteListener<DocumentSnapshot>() {
+                    if (found_articles.keySet().size() > 0) {
+                        for(final String article_id : found_articles.keySet()) {
+                            db.request_article_data(article_id, new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     if (task.isSuccessful()) {
@@ -129,7 +128,7 @@ public class userPopulateAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                         DocumentSnapshot document = task.getResult();
 
                                         // Populate object
-                                        Article this_article = new Article(document, article);
+                                        Article this_article = new Article(document);
 
                                         // Add to list
                                         user.addArticle(this_article);

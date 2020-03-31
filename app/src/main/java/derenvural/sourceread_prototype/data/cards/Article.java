@@ -17,6 +17,7 @@ public class Article extends Card {
     // Identifiers
     private String resolved_url;
     private String resolved_id;
+    private String database_id;
     private String app;
     // External Information
     private ArrayList<HashMap<String, String>> authors;
@@ -31,12 +32,13 @@ public class Article extends Card {
     /*
      * Create object from database document
      * */
-    public Article(DocumentSnapshot document, String api_id) {
+    public Article(DocumentSnapshot document) {
         //FIXME: add excerpt as 3rd param
         super(null, document.get("title").toString(),document.get("title").toString());
         // Identifiers
         setResolved_url(document.get("url").toString());
-        setResolved_id(api_id);
+        setResolved_id(document.get("id").toString());
+        setDatabase_id(document.getId());
         setTitle(document.get("title").toString());
         setApp(document.get("app").toString());
         // External Information
@@ -65,21 +67,17 @@ public class Article extends Card {
      * */
     public Article(JSONObject article, String app_name) throws JSONException{
         //FIXME: add excerpt as 3rd param
-        super(null, article.getString("title"),article.getString("title"));
+        super(null, article.getString("resolved_title"),article.getString("excerpt"));
 
         // ((Safe))
         setApp(app_name);
 
         // Identifiers
-        Log.d("API url", article.getString("resolved_url"));
         setResolved_url(article.getString("resolved_url"));
-        Log.d("API id", article.getString("resolved_id"));
         setResolved_id(article.getString("resolved_id"));
-        Log.d("API title", article.getString("resolved_title"));
         setTitle(article.getString("resolved_title"));
         // External Information
-        Log.d("API authors", article.getString("authors"));
-        if(article.getString("authors") != null) {
+        if(article.getJSONObject("authors") != null) {
             // Parse authors into HashMap
             JSONObject authors_json = article.getJSONObject("authors");
             ArrayList<HashMap<String, String>> authors = new ArrayList<HashMap<String, String>>();
@@ -102,7 +100,6 @@ public class Article extends Card {
             setAuthors(new ArrayList<HashMap<String, String>>());
         }
         // Article Information
-        Log.d("API word count", article.getString("word_count"));
         if(article.getString("word_count") != null) {
             setWord_count(article.getString("word_count"));
         }else{
@@ -143,6 +140,7 @@ public class Article extends Card {
         // Identifiers
         setResolved_url((String) bundle.getSerializable("url"));
         setResolved_id((String) bundle.getSerializable("id"));
+        setDatabase_id((String) bundle.getSerializable("did"));
         setTitle((String) bundle.getSerializable("title"));
         setApp((String) bundle.getSerializable("app"));
         // External Information
@@ -159,6 +157,7 @@ public class Article extends Card {
         // Identifiers
         bundle.putSerializable("url", getResolved_url());
         bundle.putSerializable("id", getResolved_id());
+        bundle.putSerializable("did", getDatabase_id());
         bundle.putSerializable("title", getTitle());
         bundle.putSerializable("app", getApp());
         // External Information
@@ -179,6 +178,7 @@ public class Article extends Card {
     // Gets
     public String getResolved_url() { return resolved_url; }
     public String getResolved_id() { return resolved_id; }
+    public String getDatabase_id() { return database_id; }
     public ArrayList<HashMap<String, String>> getAuthors() { return authors; }
     public String getWord_count() { return word_count; }
     public String getVeracity() { return veracity; }
@@ -190,6 +190,7 @@ public class Article extends Card {
     // Sets
     public void setResolved_url(String resolved_url) { this.resolved_url = resolved_url; }
     public void setResolved_id(String resolved_id) { this.resolved_id = resolved_id; }
+    public void setDatabase_id(String database_id) { this.database_id = database_id; }
     public void setAuthors(ArrayList<HashMap<String, String>> authors) { this.authors = authors; }
     public void setWord_count(String word_count) { this.word_count = word_count; }
     public void setVeracity(String veracity) { this.veracity = veracity; }

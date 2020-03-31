@@ -4,60 +4,33 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class ArticleViewModel extends ViewModel {
-    private MutableLiveData<String> mTitle;
-    private MutableLiveData<String> mUrl;
-    private MutableLiveData<ArrayList<HashMap<String,String>>> mAuthors;
-    private MutableLiveData<String> mWordCount;
-    private MutableLiveData<String> mVeracity;
+    private MutableLiveData<Article> mArticle;
+    private MutableLiveData<LoggedInUser> mUser;
 
     public ArticleViewModel(){
-        mTitle = new MutableLiveData<String>();
-        setTitle("");
-        mUrl = new MutableLiveData<String>();
-        setUrl("");
-        mAuthors = new MutableLiveData<ArrayList<HashMap<String,String>>>();
-        setAuthors(new ArrayList<HashMap<String,String>>());
-        mWordCount = new MutableLiveData<String>();
-        setWordCount("");
-        mVeracity = new MutableLiveData<String>();
-        setVeracity("");
+        mArticle = new MutableLiveData<Article>();
+        setArticle(null);
+        mUser = new MutableLiveData<LoggedInUser>();
+        setUser(null);
     }
 
     // SET
-    public void setTitle(String s) {
-        mTitle.setValue(s);
+    public void setArticle(Article s) {
+        mArticle.setValue(s);
     }
-    public void setUrl(String s) {
-        mUrl.setValue(s);
-    }
-    public void setAuthors(ArrayList<HashMap<String,String>> s) {
-        mAuthors.setValue(s);
-    }
-    public void setWordCount(String s) {
-        mWordCount.setValue(s);
-    }
-    public void setVeracity(String s) {
-        mVeracity.setValue(s);
+    public void setUser(LoggedInUser s) {
+        mUser.setValue(s);
     }
 
     // GET
-    public LiveData<String> getTitle() {
-        return mTitle;
+    public LiveData<Article> getArticle() {
+        return mArticle;
     }
-    public LiveData<String> getUrl() {
-        return mUrl;
-    }
-    public LiveData<ArrayList<HashMap<String,String>>> getAuthors() {
-        return mAuthors;
-    }
-    public LiveData<String> getWordCount() {
-        return mWordCount;
-    }
-    public LiveData<String> getVeracity() {
-        return mVeracity;
+    public LiveData<LoggedInUser> getUser() {
+        return mUser;
     }
 }

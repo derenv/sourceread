@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean interfaceEnabled;
     private menuStyle menustyle;
 
+    public httpHandler getHttpHandler() { return httph; }
     public fdatabase getDatabase() { return db; }
     public LoggedInUser getUser() { return user; }
 
@@ -257,8 +258,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }else {
                 // Attempt population
+                user.populate(this, db, httph);
             }
-            user.populate(this, db, httph);
         }
     }
 
@@ -289,7 +290,9 @@ public class MainActivity extends AppCompatActivity {
                     deactivate_interface();
 
                     // Import articles from user accounts
-                    user.import_articles(this, httph, db);
+                    for(App app: user.getApps().getValue()) {
+                        user.importArticles(this, httph, db, app);
+                    }
 
                     return true;
                 case R.id.action_refresh_apps:

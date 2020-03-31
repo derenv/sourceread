@@ -59,14 +59,14 @@ public class AppsViewModel extends ViewModel {
                     Log.d("DB", "# Saved Apps: " + apps.size());
                     ArrayList<App> cards = new ArrayList<App>();
                     cards.addAll(apps);
-                    App add_card = new App("Add new App",0);
+                    App add_card = new App("Add new App",0l);
                     add_card.setText("(Click me!)");
                     cards.add(add_card);
                     setCards(cards);
                 }else{
                     // Add 'add app' card to list
                     ArrayList<App> cards = new ArrayList<App>();
-                    App add_card = new App("Add new App",0);
+                    App add_card = new App("Add new App",0l);
                     add_card.setText("(Click me!)");
                     cards.add(add_card);
                     setCards(cards);

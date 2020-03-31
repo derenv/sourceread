@@ -11,11 +11,11 @@ public class App extends Card {
     private String key;
     private String request_token;
     private String access_token;
-    private long timestamp;
+    private Long timestamp;
     private HashMap<String, String> requests;
 
     // Constructors
-    public App(String name, long timestamp) {
+    public App(String name, Long timestamp) {
         super(null, name,"");
         setTitle(name);
         setTimestamp(timestamp);
@@ -57,7 +57,7 @@ public class App extends Card {
         setKey((String) bundle.getSerializable("key"));
         setRequestToken((String) bundle.getSerializable("request_token"));
         setAccessToken((String) bundle.getSerializable("access_token"));
-        setTimestamp((long) bundle.getSerializable("timestamp"));
+        setTimestamp((Long) bundle.getSerializable("timestamp"));
         setRequests((HashMap<String, String>) bundle.getSerializable("requests"));
     }
     public void saveInstanceState(Bundle bundle) {
@@ -74,13 +74,13 @@ public class App extends Card {
     public void setKey(String key) { this.key = key; }
     public void setRequestToken(String request_token) { this.request_token = request_token; }
     public void setAccessToken(String access_token) { this.access_token = access_token; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
     public void setRequests(HashMap<String, String> requests) { this.requests = requests; }
 
     // GET
     public String getKey() { return key; }
     public String getRequestToken() { return request_token; }
     public String getAccessToken() { return access_token; }
-    public long getTimestamp() { return timestamp; }
+    public Long getTimestamp() { return timestamp; }
     public HashMap<String, String> getRequests() { return requests; }
 }

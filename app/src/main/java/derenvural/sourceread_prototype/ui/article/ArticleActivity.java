@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -33,8 +34,10 @@ import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
 public class ArticleActivity extends AppCompatActivity {
     // Android
+    private ArticleViewModel articleViewModel;
     private AppBarConfiguration mAppBarConfiguration;
     private ProgressBar progressBar;
+    private DrawerLayout drawer;
     private Menu mainMenu;
     // Services
     private FirebaseAuth mAuth;
@@ -44,19 +47,25 @@ public class ArticleActivity extends AppCompatActivity {
     // Article data
     private Article article;
     // Variables
+    private boolean interfaceEnabled;
     private menuStyle menustyle;
 
     public LoggedInUser getUser() { return user; }
+    public fdatabase getDatabase() { return db; }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article);
 
+        // Find viewmodel
+        articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
+
+
         menustyle = menuStyle.VISIBLE;
 
         // Navigation Drawer
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_article, R.id.nav_home,
@@ -126,6 +135,28 @@ public class ArticleActivity extends AppCompatActivity {
         }
     }
 
+    // Interface methods
+    private void setDrawerEnabled(boolean enabled) {
+        int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED :
+                DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
+
+        drawer.setDrawerLockMode(lockMode);
+        interfaceEnabled = enabled;
+    }
+    public void deactivate_interface(){
+        progressBar.setVisibility(View.VISIBLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        setDrawerEnabled(false);
+    }
+    public void activate_interface(){
+        progressBar.setVisibility(View.INVISIBLE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        setDrawerEnabled(true);
+    }
+
     /*
      * Redirect to login activity
      */
@@ -144,7 +175,7 @@ public class ArticleActivity extends AppCompatActivity {
     /*
      * Redirect to main activity
      */
-    private void main_redirect(){
+    public void main_redirect(){
         // Create intent
         Intent main_activity = new Intent(this, MainActivity.class);
 
@@ -172,12 +203,12 @@ public class ArticleActivity extends AppCompatActivity {
                 // Fetch serialised article
                 article = new Article();
                 article.loadInstanceState(extras);
-                loadArticle();
+                articleViewModel.setArticle(article);
 
                 // Fetch serialised user
                 user = new LoggedInUser(mAuth.getCurrentUser());
                 user.loadInstanceState(extras);
-                loadUser();
+                articleViewModel.setUser(user);
             }else{
                 logout();
                 login_redirect();
@@ -185,22 +216,6 @@ public class ArticleActivity extends AppCompatActivity {
         }else{
             main_redirect();
         }
-    }
-
-    public void loadArticle(){
-        // Find viewmodel
-        ArticleViewModel articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
-
-        // Add to viewmodel
-        articleViewModel.setTitle(article.getTitle());
-        articleViewModel.setUrl(article.getResolved_url());
-        articleViewModel.setAuthors(article.getAuthors());
-        articleViewModel.setWordCount(article.getWord_count());
-        articleViewModel.setVeracity(article.getVeracity());
-    }
-
-    public void loadUser(){
-        //TODO: add any user to viewmodel
     }
 
     private void logout(){
@@ -244,35 +259,39 @@ public class ArticleActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_analyse_article:
-                Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
+        if(interfaceEnabled){
+            switch (item.getItemId()) {
+                case R.id.action_analyse_article:
+                    Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
 
-                // Disable menu button
-                item.setEnabled(false);
-                progressBar.setVisibility(View.VISIBLE);
+                    // Disable menu button
+                    item.setEnabled(false);
+                    progressBar.setVisibility(View.VISIBLE);
 
-                // Get articles and create async task
-                analyser at = new analyser(article, db, user);
-                at.fetch_article(this, new Observer<Boolean>() {
-                    // Called when "fetch_article" has a response
-                    @Override
-                    public void onChanged(Boolean done) {
-                        if (done) {
-                            // Re-enable menu button & disable progress bar
-                            item.setEnabled(true);
-                            progressBar.setVisibility(View.INVISIBLE);
+                    // Get articles and create async task
+                    analyser at = new analyser(article, db);
+                    at.fetch_article(this, new Observer<Boolean>() {
+                        // Called when "fetch_article" has a response
+                        @Override
+                        public void onChanged(Boolean done) {
+                            if (done) {
+                                // Re-enable menu button & disable progress bar
+                                item.setEnabled(true);
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
                         }
-                    }
-                });
+                    });
 
-                return true;
-            case R.id.action_logout_user:
-                Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
-                logout();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+                    return true;
+                case R.id.action_logout_user:
+                    Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
+                    logout();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        }else{
+            return false;
         }
     }
 

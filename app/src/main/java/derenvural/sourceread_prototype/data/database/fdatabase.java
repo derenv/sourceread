@@ -1,21 +1,18 @@
 package derenvural.sourceread_prototype.data.database;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.Article;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class fdatabase {
     // Objects
@@ -31,101 +28,67 @@ public class fdatabase {
         db = FirebaseFirestore.getInstance();
     }
 
+    // WRITE METHODS
     /*
-     * Write an article id field to database
+     * Write (add a new) entry to user document field in database
      * */
-    public void add_user_field(String field, Object new_data){
-        // Make update attempt
+    public void add_user_field(String field, Object new_data, OnCompleteListener end){
+        // Get reference to user document in 'users' collection
         DocumentReference user_request = get_current_user_request();
-        user_request.update(field, FieldValue.arrayUnion(new_data)).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Log.d("DB insert", "done");
-                }else{
-                    // Log error
-                    Log.e("DB", "write failed: ", task.getException());
-                }
-            }
-        });
-    }
 
+        // Execute database update with onCompleteListener
+        user_request.update(field, new_data).addOnCompleteListener(end);
+    }
     /*
-     * Write a user field to database
+     * Write (overwrite) user document field in database
      * */
-    public void update_user_field(String field, Object new_data) {
-        // Make update attempt
+    public void update_user_field(String field, Object new_data, OnCompleteListener end) {
+        // Get reference to user document in 'users' collection
         DocumentReference user_request = get_current_user_request();
-        user_request.update(field, new_data).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Log.d("DB update","done");
-                }else{
-                    // Log error
-                    Log.e("DB", "write failed: ", task.getException());
-                }
-            }
-        });
-    }
 
+        // Execute database update with onCompleteListener
+        user_request.update(field, new_data).addOnCompleteListener(end);
+    }
     /*
-     * Update an article document in database
+     * Write (overwrite) article document field in database
      * */
-    public void update_article_field(Article article, LoggedInUser user, final String field) {
-        // Create a Map to fill
+    public void update_article_field(final Article article, final String field, OnCompleteListener end) {
+        // Create a Map of the object
         Map<String, Object> docData = article.map_data();
 
-        // Get ID of article
-        for(int i=0;i<user.getArticles().getValue().size();i++){
-            if(user.getArticles().getValue().get(i).getTitle().equals(article.getTitle())){
-                final String id = user.getArticleIDs().getValue().get(i);
+        // Get reference to article document in 'articles' collection
+        DocumentReference article_request = get_article_request(article.getDatabase_id());
 
-                // Make update attempt
-                DocumentReference article_request = get_article_request(id);
-                article_request.update(field, docData.get(field)).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        // Get database id
-                        Log.d("DB", "updated article - '"+id+"' field - '"+field+"'");
-                    }
-                });
-
-                break;
-            }
-        }
+        // Execute database update with onCompleteListener
+        article_request.update(field, docData.get(field)).addOnCompleteListener(end);
     }
-
     /*
-     * Write an article document to database
+     * Write (new initial) article document to database collection
      * */
-    public void write_new_article(final Article article, final LoggedInUser user) {
-        // Create a Map to fill
+    public void write_new_article(final Article article, OnCompleteListener end) {
+        // Create a Map of the object
         Map<String, Object> docData = article.map_data();
 
-        // make write attempt
-        db.collection("articles").add(docData).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentReference> task) {
-                if (task.isSuccessful()) {
-                    // Get database id
-                    String id = task.getResult().getId();
-                    Log.d("DB", "saved article - "+id);
+        // Get reference to 'articles' collection
+        CollectionReference articles_request = get_articles_request();
 
-                    // Add to user object
-                    user.addArticleID(id);
-                    user.addArticle(article);
+        // Execute database write with onCompleteListener
+        articles_request.add(docData).addOnCompleteListener(end);
+    }
+    /*
+     * Delete a user document from database
+     * */
+    public void delete_user(OnCompleteListener end) {
+        // Get reference to article document in 'articles' collection
+        DocumentReference user_request = get_current_user_request();
 
-                    // Update user db entry
-                    add_user_field("articles", id);
-                }else{
-                    // Log error
-                    Log.e("DB", "write failed - ", task.getException());
-                }
-            }
-        });
+        // Execute database delete with onCompleteListener
+        user_request.delete().addOnCompleteListener(end);
     }
 
+
+
+    // READ METHODS
     /*
      * Request all user data
      * */
@@ -150,7 +113,10 @@ public class fdatabase {
      * Request all article data
      * */
     public void request_article_data(String article, OnCompleteListener end){
+        // Get reference to article document in 'articles' collection
         DocumentReference article_request = get_article_request(article);
+
+        // Execute database read with onCompleteListener
         article_request.get().addOnCompleteListener(end);
     }
     /*
@@ -163,6 +129,19 @@ public class fdatabase {
         // Execute database read with onCompleteListener
         apps_request.get().addOnCompleteListener(end);
     }
+    /*
+     * Check document in database exists
+     * */
+    public void request_articles(OnCompleteListener end){
+        // Get reference to 'articles' collection
+        CollectionReference articles_request = get_articles_request();
+
+        // Execute database query with onCompleteListener
+        articles_request.get().addOnCompleteListener(end);
+    }
+
+
+
 
     /*
      * Methods for forming valid DocumentReference requests
@@ -177,6 +156,13 @@ public class fdatabase {
     public DocumentReference get_article_request(@NonNull String article_id){
         if(mAuth.getUid() != null) {
             return db.collection("articles").document(article_id);
+        }else{
+            return null;
+        }
+    }
+    public CollectionReference get_articles_request(){
+        if(mAuth.getUid() != null) {
+            return db.collection("articles");
         }else{
             return null;
         }
