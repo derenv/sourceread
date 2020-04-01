@@ -1,20 +1,27 @@
 package derenvural.sourceread_prototype.data.login;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
@@ -22,7 +29,6 @@ import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
-import derenvural.sourceread_prototype.data.asyncTasks.userPopulateAsyncTask;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
@@ -100,31 +106,12 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
-    //Population Methods
-    public void populate(MainActivity main, fdatabase db, httpHandler httph) {
-        // Create async task
-        userPopulateAsyncTask task = new userPopulateAsyncTask((Context) main, this, db, httph);
-
-        // execute async task
-        task.execute();
-
-        // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean done) {
-                if (done) {
-                    Log.d("TASK", "user data population task done!");
-                }
-            }
-        });
-    }
-
     public void access_tokens(final MainActivity main, httpHandler httph, String app_name){
         // Create async task
-        userAccessAsyncTask task = new userAccessAsyncTask(this, httph, app_name);
+        final userAccessAsyncTask task = new userAccessAsyncTask(httph, app_name);
 
         // execute async task
-        task.execute();
+        task.execute(this);
 
         // Check for task finish
         task.getDone().observe(main, new Observer<Boolean>() {
@@ -133,6 +120,9 @@ public class LoggedInUser implements Serializable {
                 if (done) {
                     Log.d("TASK", "access tokens task done!");
 
+                    // Set display nameset
+                    setApps(task.getData().getValue());
+
                     // Reactivate the UI
                     main.activate_interface();
                 }
@@ -140,40 +130,142 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void importArticles(final MainActivity main, httpHandler httph, fdatabase db, App app){
+    public void importArticles(final MainActivity main, httpHandler httph, final fdatabase db, final App app){
         // Create async task
-        importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db, app);
+        final importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db);
 
         // execute async task
-        task.execute();
+        task.execute(app);
 
         // Check for task finish
         task.getDone().observe(main, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
+                    // Retrieve data
+                    setArticles(task.getData().getValue());
+
                     Log.d("TASK", "articles import task done!");
 
-                    // Reactivate the UI
-                    main.activate_interface();
+                    // Create map object containing timestamp with correct format
+                    final long request_stamp = Instant.now().getEpochSecond();
+                    HashMap<String, Object> new_stamp = new HashMap<String, Object>();
+                    new_stamp.put(app.getTitle(), request_stamp);
+
+                    // Store timestamp in database & user object
+                    db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
+                            if (stamp_task.isSuccessful()) {
+                                // Store timestamp in user object
+                                ArrayList<App> old_apps = getApps().getValue();
+                                ArrayList<App> new_apps = new ArrayList<App>();
+                                for(App this_app : old_apps) {
+                                    if (this_app.getTitle().equals(app.getTitle())) {
+                                        // store timestamp
+                                        this_app.setTimestamp(request_stamp);
+                                        new_apps.add(this_app);
+                                    }else{
+                                        new_apps.add(this_app);
+                                    }
+                                }
+                                setApps(new_apps);
+
+                                // Notify user
+                                Log.d("DB","update done");
+                                Toast.makeText(main, "All your articles from "+app.getTitle()+" imported!", Toast.LENGTH_SHORT).show();
+
+                                // Reactivate the UI
+                                main.activate_interface();
+                            }else{
+                                // Log error
+                                Log.e("DB", "write failed: ", stamp_task.getException());
+                            }
+                        }
+                    });
                 }
             }
         });
     }
 
-    public void deleteArticle(final ArticleActivity aa, fdatabase db, final Article article){
+    public void deleteAllArticles(final MainActivity main, final fdatabase db, final String app_name){
+        // Build list of articles to remove
+        ArrayList<Article> articles = new ArrayList<Article>();
+        for(Article article : getArticles().getValue()){
+            if(article.getApp().equals(app_name)) {
+                articles.add(article);
+            }
+        }
+
         // Create async task
-        deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db, article);
+        final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
 
         // execute async task
-        task.execute();
+        task.execute(articles);
+
+        // Check for task finish
+        task.getDone().observe(main, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    Log.d("TASK", "article deletion task done!");
+
+                    // Retrieve data
+                    setArticles(task.getData().getValue());
+
+                    // Replace timestamp with invalid
+                    ArrayList<App> old_apps = getApps().getValue();
+                    ArrayList<App> new_apps = new ArrayList<App>();
+                    for(App this_app : old_apps){
+                        if(this_app.getTitle().equals(app_name)){
+                            // Store timestamp in user object
+                            this_app.setTimestamp(0l);
+                            new_apps.add(this_app);
+
+                            // Store timestamp in database
+                            Map<String, Object> new_stamp = new HashMap<>();
+                            new_stamp.put(app_name, 0l);
+                            db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
+                                    if (stamp_task.isSuccessful()) {
+                                        Log.d("DB","update done");
+
+                                        // Reactivate the UI
+                                        Toast.makeText(main, "All articles imported from "+app_name+" deleted!", Toast.LENGTH_SHORT).show();
+                                        main.activate_interface();
+                                    }else{
+                                        // Log error
+                                        Log.e("DB", "update failed: ", stamp_task.getException());
+                                    }
+                                }
+                            });
+                        }else{
+                            new_apps.add(this_app);
+                        }
+                    }
+                    setApps(new_apps);
+                }
+            }
+        });
+    }
+
+    public void deleteArticle(final ArticleActivity aa, fdatabase db, final ArrayList<Article> articles){
+        // Create async task
+        final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
+
+        // execute async task
+        task.execute(articles);
 
         // Check for task finish
         task.getDone().observe(aa, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
-                    Log.d("TASK", "article '"+article.getTitle()+"' deletion task done!");
+                    Log.d("TASK", "article deletion task done!");
+
+                    // Retrieve data
+                    setArticles(task.getData().getValue());
 
                     // Reactivate the UI & redirect to main (no article for fragment to display)
                     aa.activate_interface();

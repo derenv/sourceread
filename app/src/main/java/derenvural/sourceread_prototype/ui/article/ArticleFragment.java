@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import derenvural.sourceread_prototype.R;
@@ -46,7 +47,9 @@ public class ArticleFragment extends Fragment {
                 // Attempt to delete article from database
                 aa.deactivate_interface();
                 Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
-                user.deleteArticle(aa, aa.getDatabase(), article);
+                ArrayList<Article> articles = new ArrayList<Article>();
+                articles.add(article);
+                user.deleteArticle(aa, aa.getDatabase(), articles);
             }
         });
 

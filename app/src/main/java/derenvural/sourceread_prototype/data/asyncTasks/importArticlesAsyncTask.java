@@ -32,23 +32,22 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
-public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
+public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<Article>> {
     // Tools
     private fdatabase db;
     private httpHandler httph;
     // Data
-    private App app;
+    private LoggedInUser user;
     // Activity
     private final WeakReference<Context> context;
 
-    public importArticlesAsyncTask(Context context, LoggedInUser user, httpHandler httph, fdatabase db, App app){
+    public importArticlesAsyncTask(Context context, LoggedInUser user, httpHandler httph, fdatabase db){
         super();
         // Activity
         this.context = new WeakReference<>(context);;
 
         // Data
-        setData(user);
-        this.app = app;
+        this.user = user;
 
         // Tools
         this.db = db;
@@ -56,9 +55,9 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
     }
 
     @Override
-    protected Void doInBackground(Void... params){
-        // Fetch user
-        final LoggedInUser user = getData().getValue();
+    protected ArrayList<Article> doInBackground(App... params){
+        // Fetch app
+        final App app = params[0];
 
         // Get get URL
         String url = app.getRequests().get("articles");
@@ -81,6 +80,9 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
             // Catch for first time import
             parameters.put("since", Long.toString(app.getTimestamp()));
         }
+
+        // List of articles
+        final ArrayList<Article> articles = new ArrayList<Article>();
 
         // Request access token by http request to URL
         httph.make_volley_request(url, parameters,
@@ -105,8 +107,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                                 }
 
                                                 // Check each article
-                                                ArrayList<Article> articles = new ArrayList<Article>();
-                                                for (Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
+                                                for (final Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
                                                     try{
                                                         // Add article information to user object for display
                                                         final Article current_article = new Article(articles_json.getJSONObject(it.next()), app.getTitle());
@@ -128,10 +129,16 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                                                     @Override
                                                                     public void onComplete(@NonNull Task<Void> old_task) {
                                                                         if (old_task.isSuccessful()) {
-                                                                            Log.d("DB insert", "done");
+                                                                            Log.d("DB", "insert done");
+
+                                                                            if(!it.hasNext()){
+                                                                                // End task
+                                                                                postData(articles);
+                                                                                postDone(true);
+                                                                            }
                                                                         }else{
                                                                             // Log error
-                                                                            Log.e("DB", "write failed: ", old_task.getException());
+                                                                            Log.e("DB", "insert failed: ", old_task.getException());
                                                                         }
                                                                     }
                                                                 });
@@ -158,10 +165,16 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                                                             @Override
                                                                             public void onComplete(@NonNull Task<Void> new_task) {
                                                                                 if (new_task.isSuccessful()) {
-                                                                                    Log.d("DB insert", "done");
+                                                                                    Log.d("DB", "insert done");
+
+                                                                                    if(!it.hasNext()){
+                                                                                        // End task
+                                                                                        postData(articles);
+                                                                                        postDone(true);
+                                                                                    }
                                                                                 }else{
                                                                                     // Log error
-                                                                                    Log.e("DB", "write failed: ", new_task.getException());
+                                                                                    Log.e("DB", "insert failed: ", new_task.getException());
                                                                                 }
                                                                             }
                                                                         });
@@ -173,28 +186,11 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                                             });
                                                         }
                                                     }catch(JSONException error){
-                                                        Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                                                        Log.e("JSON", "error reading JSON: " + error.getMessage());
                                                     }
                                                 }
 
-                                                // Create map object containing timestamp with correct format
-                                                long request_stamp = Instant.now().getEpochSecond();
-                                                Map<String, Object> new_stamp = new HashMap<>();
-                                                new_stamp.put(app.getTitle(), request_stamp);
-
-                                                // store timestamp
-                                                app.setTimestamp(request_stamp);
-                                                db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
-                                                        if (stamp_task.isSuccessful()) {
-                                                            Log.d("DB update","done");
-                                                        }else{
-                                                            // Log error
-                                                            Log.e("DB", "write failed: ", stamp_task.getException());
-                                                        }
-                                                    }
-                                                });
+                                                // write all new articles to the db
 
                                                 // Fetch non-null context
                                                 if (context!=null) {
@@ -203,13 +199,11 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                                     // Notify user
                                                     Toast.makeText(main, "Articles imported!", Toast.LENGTH_SHORT).show();
                                                 }
-
-                                                // End task
-                                                postData(user);
-                                                postDone(true);
                                             }else{
                                                 // Log error
                                                 Log.e("DB", "read failed - ", check_task.getException());
+                                                postData(articles);
+                                                postDone(true);
                                             }
                                         }
                                     });
@@ -224,22 +218,26 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                 }
 
                                 // End task
-                                postData(user);
+                                postData(articles);
                                 postDone(true);
                             }
                         }catch(JSONException error){
-                            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                            Log.e("JSON", "error reading JSON: " + error.getMessage());
+                            postData(articles);
+                            postDone(true);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("API error", "api get failed: " + error.getMessage());
+                        Log.e("API", "error - api get failed: " + error.getMessage());
+                        postData(articles);
+                        postDone(true);
                     }
                 }
         );
 
-        return null;
+        return articles;
     }
 }

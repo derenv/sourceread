@@ -10,42 +10,51 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
-public class deleteArticleAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
+public class deleteArticleAsyncTask extends sourcereadAsyncTask<ArrayList<Article>, ArrayList<Article>> {
     // Tools
     private fdatabase db;
     // Data
-    private Article article;
+    private LoggedInUser user;
 
-    public deleteArticleAsyncTask(LoggedInUser user, fdatabase db, Article article){
+    public deleteArticleAsyncTask(LoggedInUser user, fdatabase db){
         super();
         // Data
-        setData(user);
-        this.article = article;
+        setData(new ArrayList<Article>());
+        this.user = user;
 
         // Tools
         this.db = db;
     }
 
     @Override
-    protected Void doInBackground(Void... params){
-        // Fetch user
-        final LoggedInUser user = getData().getValue();
+    protected ArrayList<Article> doInBackground(ArrayList<Article>... params){
+        // Fetch parameters
+        ArrayList<Article> blacklist = params[0];
 
-        // Delete article from user object article list & create new list to be written to database
+        // Create new list to be written to database
         HashMap<String,String> new_articles_ids = new HashMap<String,String>();
-        ArrayList<Article> new_articles = new ArrayList<Article>();
-        for(Article a: user.getArticles().getValue()){
-            if(!a.getTitle().equals(article.getTitle())) {
-                new_articles.add(a);
-                new_articles_ids.put(a.getDatabase_id(), a.getApp());
+        boolean validArticle;
+        final ArrayList<Article> newlist = new ArrayList<Article>();
+        for(Article white: Objects.requireNonNull(user.getArticles().getValue())){
+            validArticle = true;
+            for(Article black: blacklist) {
+                if (black.getTitle().equals(white.getTitle())) {
+                    validArticle = false;
+                }
+            }
+            if(validArticle){
+                newlist.add(white);
             }
         }
-        user.setArticles(new_articles);
+        for(Article article: newlist) {
+            new_articles_ids.put(article.getDatabase_id(), article.getApp());
+        }
 
         // Call database update method
         db.update_user_field("articles", new_articles_ids, new OnCompleteListener<DocumentSnapshot>() {
@@ -54,7 +63,7 @@ public class deleteArticleAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                 if (task.isSuccessful()) {
                     Log.d("DB","update done");
 
-                    postData(user);
+                    postData(newlist);
                     postDone(true);
                 }else{
                     // Log error
@@ -63,6 +72,6 @@ public class deleteArticleAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
             }
         });
 
-        return null;
+        return newlist;
     }
 }

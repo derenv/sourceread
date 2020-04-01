@@ -22,7 +22,7 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
  * user-agent list:
  * http://www.useragentstring.com/pages/useragentstring.php?name=Firefox
  * */
-public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
+public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
     // Query data
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0";
     private final static String REFERRER = "http://www.google.com";
@@ -30,21 +30,15 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
     // Database & user
     private fdatabase db;
 
-    public scraperAsyncTask(Article article, fdatabase db){
+    public scraperAsyncTask(fdatabase db){
         super();
-        // Data
-        setData(article);
 
-        // Tools
         this.db = db;
     }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-
-        // Fetch data
-        final Article article = getData().getValue();
+    protected void onPostExecute(final Article article) {
+        super.onPostExecute(article);
 
         if(article != null && !article.getText().equals("")) {
             // Save text to database
@@ -111,9 +105,9 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
     }
 
     @Override
-    protected Void doInBackground(Void... params){
+    protected Article doInBackground(Article... params){
         // Fetch data
-        Article article = getData().getValue();
+        Article article = params[0];
 
         try {
             // Attempt scrape
@@ -153,7 +147,6 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article> {
         }
 
         // Set live data with article (with found text on success OR empty text on failure)
-        postData(article);
-        return null;
+        return article;
     }
 }

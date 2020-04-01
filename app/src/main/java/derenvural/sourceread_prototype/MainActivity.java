@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,6 +29,9 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
+import derenvural.sourceread_prototype.data.asyncTasks.populateUserAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
@@ -56,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public httpHandler getHttpHandler() { return httph; }
     public fdatabase getDatabase() { return db; }
     public LoggedInUser getUser() { return user; }
+    public void setUser(LoggedInUser user) { this.user = user; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -234,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                     user.access_tokens(this, httph, app_name);
                 }else{
                     // Attempt population again
-                    user.populate(this, db, httph);
+                    populate(user);
                 }
             }else{
                 // TODO: other deep links
@@ -251,16 +256,57 @@ public class MainActivity extends AppCompatActivity {
                 user.loadInstanceState(extras);
 
                 if(previous_activity.equals("login")) {
-                    user.populate(this, db, httph);
+                    populate(user);
                 }else if(previous_activity.equals("article")) {
                     // Reactivate interface & disable worm
                     activate_interface();
                 }
             }else {
                 // Attempt population
-                user.populate(this, db, httph);
+                populate(user);
             }
         }
+    }
+
+    //Population Methods
+    public void populate(final LoggedInUser user) {
+        // Create async task
+        final populateUserAsyncTask task = new populateUserAsyncTask(this, db, httph);
+        final MainActivity main = this;
+
+        // execute async task
+        task.execute(user);
+
+        // Check for task finish
+        task.getDone().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    setUser(task.getData().getValue());
+
+                    for (App app : getUser().getApps().getValue()) {
+
+                        // Open app in browser for authentication Creates callback
+                        // Get login URL
+                        HashMap<String, String> requests = app.getRequests();
+                        String app_login_url = requests.get("login");
+
+                        // Insert request token
+                        String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
+
+                        // Store this object using local persistence
+                        if (storageSaver.write(main, getUser().getUserId().getValue(), getUser())) {
+                            // Redirect to browser for app login
+                            httph.browser_open(main, url);
+                        } else {
+                            Log.e("HTTP", "login url request failure");
+                        }
+                    }
+
+                    Log.d("TASK", "user data population task done!");
+                }
+            }
+        });
     }
 
     // Menu

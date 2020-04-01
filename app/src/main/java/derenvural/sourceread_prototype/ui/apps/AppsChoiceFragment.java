@@ -23,6 +23,7 @@ import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.asyncTasks.importAppsAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.AppAdapter;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class AppsChoiceFragment extends Fragment {
     private AppChoiceViewModel appChoiceViewModel;
@@ -99,10 +100,10 @@ public class AppsChoiceFragment extends Fragment {
         main.deactivate_interface();
 
         // Create async task
-        final importAppsAsyncTask task = new importAppsAsyncTask(main.getUser().getApps().getValue(), main.getDatabase(), main.getUser());
+        final importAppsAsyncTask task = new importAppsAsyncTask(main.getDatabase());
 
         // execute async task
-        task.execute();
+        task.execute(main.getUser().getApps().getValue());
 
         // Check for task finish
         task.getDone().observe(main, new Observer<Boolean>() {
@@ -112,6 +113,9 @@ public class AppsChoiceFragment extends Fragment {
                     Log.d("TASK", "apps fetched!");
 
                     // Get apps
+                    LoggedInUser user = main.getUser();
+                    user.setApps(task.getData().getValue());
+                    main.setUser(user);
                     appChoiceViewModel.setCards(task.getData().getValue());
 
                     // Reactivate the UI

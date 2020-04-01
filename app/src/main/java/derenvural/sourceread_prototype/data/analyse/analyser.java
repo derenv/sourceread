@@ -10,14 +10,14 @@ import derenvural.sourceread_prototype.data.asyncTasks.scraperAsyncTask;
 public class analyser {
     private scraperAsyncTask task;
 
-    public analyser(Article article, fdatabase db){
+    public analyser(fdatabase db){
         // Create async task
-        task = new scraperAsyncTask(article, db);
+        task = new scraperAsyncTask(db);
     }
 
-    public void fetch_article(LifecycleOwner owner, Observer observer){
+    public void fetch_article(LifecycleOwner owner, Article article, Observer observer){
         // execute async task
-        task.execute();
+        task.execute(article);
 
         // Check for task finish
         task.getDone().observe(owner, observer);

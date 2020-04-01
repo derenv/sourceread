@@ -15,16 +15,15 @@ import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
-public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
+public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser, ArrayList<App>> {
     // Tools
     private httpHandler httph;
     // Data
     private String app_name;
 
-    public userAccessAsyncTask(LoggedInUser user, httpHandler httph, String app_name){
+    public userAccessAsyncTask(httpHandler httph, String app_name){
         super();
         // Data
-        setData(user);
         this.app_name = app_name;
 
         // Tools
@@ -32,10 +31,11 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
     }
 
     @Override
-    protected Void doInBackground(Void... params){
+    protected ArrayList<App> doInBackground(LoggedInUser... params){
         // Fetch user
-        final LoggedInUser user = getData().getValue();
+        final LoggedInUser user = params[0];
         final ArrayList<App> apps = user.getApps().getValue();
+        final ArrayList<App> new_apps = new ArrayList<App>();
 
         // Find app
         for (final App app : apps) {
@@ -69,12 +69,18 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
                                     // Add new access token to map
                                     app.setAccessToken(response.getString("access_token"));
 
-                                    // Set display nameset
-                                    user.setApps(apps);
-                                    user.setDisplayName(response.getString("username"));
+                                    // Store app
+                                    for(App this_app : apps) {
+                                        if (this_app.getTitle().equals(app.getTitle())) {
+                                            // store timestamp
+                                            new_apps.add(app);
+                                        }else{
+                                            new_apps.add(this_app);
+                                        }
+                                    }
 
                                     // End task
-                                    postData(user);
+                                    postData(new_apps);
                                     postDone(true);
                                 }catch(JSONException error){
                                     Log.e("JSON error", "error reading JSON: " + error.getMessage());
@@ -92,6 +98,6 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser> {
             }
         }
 
-        return null;
+        return new_apps;
     }
 }

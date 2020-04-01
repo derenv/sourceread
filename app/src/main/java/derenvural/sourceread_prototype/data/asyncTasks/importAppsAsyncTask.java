@@ -14,29 +14,41 @@ import java.util.List;
 
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
-public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
+public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, ArrayList<App>> {
     // Tools
     private fdatabase db;
     // Data
-    private LoggedInUser user;
+    private boolean listeners_done;
 
-    public importAppsAsyncTask(ArrayList<App> apps, fdatabase db, LoggedInUser user){
+    public importAppsAsyncTask(fdatabase db){
         super();
         // Data
-        setData(apps);
-        this.user = user;
+        listeners_done = false;
 
         // Tools
         this.db = db;
     }
 
     @Override
-    protected Void doInBackground(Void... params){
+    protected void onPostExecute(ArrayList<App> aVoid) {
+        super.onPostExecute(aVoid);
+
+        while (!listeners_done) {
+            //
+            Log.d("TASK", "AWAITING");
+        }
+
+        postData(getData().getValue());
+        postDone(true);
+    }
+
+    @Override
+    protected ArrayList<App> doInBackground(ArrayList<App>... params){
 
         // Fetch user
         final ArrayList<App> blacklist = getData().getValue();
+        final ArrayList<App> apps = new ArrayList<App>();
 
         // Request all apps
         db.request_apps(new OnCompleteListener<QuerySnapshot>() {
@@ -45,7 +57,6 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
                 if (task.isSuccessful()) {
                     // Get list of apps
                     List<DocumentSnapshot> documents = task.getResult().getDocuments();
-                    ArrayList<App> apps = new ArrayList<App>();
 
                     // For each app found
                     for(DocumentSnapshot document: documents){
@@ -68,13 +79,13 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>> {
 
                     // End task
                     postData(apps);
-                    postDone(true);
+                    listeners_done = true;
                 } else {
                     // Log error
                     Log.e("DB", "read failed: ", task.getException());
                 }
             }
         });
-        return null;
+        return apps;
     }
 }

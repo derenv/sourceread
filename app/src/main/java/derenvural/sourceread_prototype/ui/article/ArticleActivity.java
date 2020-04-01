@@ -269,8 +269,8 @@ public class ArticleActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.VISIBLE);
 
                     // Get articles and create async task
-                    analyser at = new analyser(article, db);
-                    at.fetch_article(this, new Observer<Boolean>() {
+                    analyser at = new analyser(db);
+                    at.fetch_article(this, article, new Observer<Boolean>() {
                         // Called when "fetch_article" has a response
                         @Override
                         public void onChanged(Boolean done) {

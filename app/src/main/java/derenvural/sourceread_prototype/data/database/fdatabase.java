@@ -6,10 +6,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.WriteBatch;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.Article;
@@ -63,9 +63,27 @@ public class fdatabase {
         article_request.update(field, docData.get(field)).addOnCompleteListener(end);
     }
     /*
+     * Write (new initial) article documents to database collection
+     * */
+    public void write_new_articles(ArrayList<Article> articles, OnCompleteListener end) {
+        // Create batch db write
+        WriteBatch batch = db.batch();
+        for(Article article : articles) {
+            // Create a Map of the object
+            Map<String, Object> docData = article.map_data();
+
+            // Get reference to 'articles' collection and add new article
+            DocumentReference article_request = get_articles_request().document();
+            batch.set(article_request,docData);
+        }
+
+        // Commit the batch
+        batch.commit().addOnCompleteListener(end);
+    }
+    /*
      * Write (new initial) article document to database collection
      * */
-    public void write_new_article(final Article article, OnCompleteListener end) {
+    public void write_new_article(Article article, OnCompleteListener end) {
         // Create a Map of the object
         Map<String, Object> docData = article.map_data();
 

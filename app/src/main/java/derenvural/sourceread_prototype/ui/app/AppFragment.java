@@ -15,9 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import java.util.ArrayList;
+
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.apps.redirectType;
 
 public class AppFragment extends Fragment {
@@ -67,10 +70,23 @@ public class AppFragment extends Fragment {
     private void update(){
         // Fetch app from bundle
         Bundle appBundle = getArguments();
-        App app = new App(appBundle);
+        final App app = new App(appBundle);
 
-        // Assign values
-        appViewModel.setApp(app);
+        // Link to current state of app
+        MainActivity main = (MainActivity) getActivity();
+        final LoggedInUser user = main.getUser();
+        user.getApps().observe(main, new Observer<ArrayList<App>>() {
+            @Override
+            public void onChanged(ArrayList<App> apps) {
+                for (App this_app : apps) {
+                    if (this_app.getTitle().equals(app.getTitle())) {
+                        // Assign values
+                        appViewModel.setApp(this_app);
+                        break;
+                    }
+                }
+            }
+        });
 
         // Get type (view or add)
         redirectType type = (redirectType) appBundle.getSerializable("type");
@@ -94,15 +110,21 @@ public class AppFragment extends Fragment {
                     // Attempt to import all articles from app
                     Toast.makeText(main, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
                     main.deactivate_interface();
-                    main.getUser().importArticles(main, main.getHttpHandler(), main.getDatabase(), appViewModel.getApp().getValue());
+                    user.importArticles(main, main.getHttpHandler(), main.getDatabase(), appViewModel.getApp().getValue());
+
                 }
             });
             // add 'delete' onclick event
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: attempt to delete all articles imported from app
+                    // Fetch main activity for tool objects
+                    MainActivity main = (MainActivity) getActivity();
+
+                    // Attempt to delete all articles imported from app
                     Toast.makeText(getActivity(), "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                    main.deactivate_interface();
+                    user.deleteAllArticles(main, main.getDatabase(), appViewModel.getApp().getValue().getTitle());
                 }
             });
             // add 'disconnect' onclick event
