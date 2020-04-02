@@ -9,9 +9,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -37,6 +40,7 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
+import derenvural.sourceread_prototype.ui.app.AppFragment;
 import derenvural.sourceread_prototype.ui.apps.redirectType;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
@@ -56,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     // Variables
     private boolean interfaceEnabled;
     private menuStyle menustyle;
+    private boolean appCallback;
 
     public httpHandler getHttpHandler() { return httph; }
     public fdatabase getDatabase() { return db; }
@@ -197,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new_activity);
         finish();
     }
-    public void app_fragment_redirect(App app, redirectType type){
+    public void app_fragment_redirect(@NonNull App app, @NonNull redirectType type){
         // Create bundle with app
         Bundle appBundle = new Bundle();
         app.saveInstanceState(appBundle);
@@ -205,6 +210,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Navigate to app details fragment
         Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_app, appBundle);
+        drawer.closeDrawers();
+    }
+    public void apps_fragment_redirect(){
+        // Navigate to app choice fragment
+        Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_apps);
         drawer.closeDrawers();
     }
     public void choice_fragment_redirect(){
@@ -284,25 +294,28 @@ public class MainActivity extends AppCompatActivity {
                 if (done) {
                     setUser(task.getData().getValue());
 
-                    for (App app : getUser().getApps().getValue()) {
+                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
+                        for (App app : getUser().getApps().getValue()) {
 
-                        // Open app in browser for authentication Creates callback
-                        // Get login URL
-                        HashMap<String, String> requests = app.getRequests();
-                        String app_login_url = requests.get("login");
+                            // Open app in browser for authentication Creates callback
+                            // Get login URL
+                            HashMap<String, String> requests = app.getRequests();
+                            String app_login_url = requests.get("login");
 
-                        // Insert request token
-                        String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
+                            // Insert request token
+                            String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
 
-                        // Store this object using local persistence
-                        if (storageSaver.write(main, getUser().getUserId().getValue(), getUser())) {
-                            // Redirect to browser for app login
-                            httph.browser_open(main, url);
-                        } else {
-                            Log.e("HTTP", "login url request failure");
+                            // Store this object using local persistence
+                            if (storageSaver.write(main, getUser().getUserId().getValue(), getUser())) {
+                                // Redirect to browser for app login
+                                httph.browser_open(main, url);
+                            } else {
+                                Log.e("HTTP", "login url request failure");
+                            }
                         }
+                    }else{
+                        activate_interface();
                     }
-
                     Log.d("TASK", "user data population task done!");
                 }
             }
@@ -332,18 +345,27 @@ public class MainActivity extends AppCompatActivity {
         if(interfaceEnabled){
             switch (item.getItemId()) {
                 case R.id.action_import_articles:
-                    // loading worm and "importing.."
-                    deactivate_interface();
+                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
+                        // loading worm and "importing.."
+                        deactivate_interface();
 
-                    // Import articles from user accounts
-                    for(App app: user.getApps().getValue()) {
-                        user.importArticles(this, httph, db, app);
+                        // Import articles from user accounts
+                        for(App app: user.getApps().getValue()) {
+                            user.importArticles(this, httph, db, app);
+                        }
+                    }else{
+                        Toast.makeText(this, "No apps to import from..", Toast.LENGTH_SHORT).show();
                     }
 
                     return true;
                 case R.id.action_refresh_apps:
-                    Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
-                    // TODO: refresh apps using authenticate functions
+                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
+                        // TODO: refresh apps using authenticate functions
+                        Toast.makeText(this, "Refreshing apps..", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(this, "No apps to refresh..", Toast.LENGTH_SHORT).show();
+                    }
+
                     return true;
                 case R.id.action_logout_user:
                     Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
@@ -357,11 +379,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void setAppCallback(boolean appCallback){this.appCallback = appCallback;}
+
     @Override
     public boolean onSupportNavigateUp() {
+        // Fetch fragment
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+        int fragmentID = navController.getCurrentDestination().getId();
+        if(fragmentID == R.id.nav_app && appCallback){
+            apps_fragment_redirect();
+            return true;
+        }else {
+            return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                    || super.onSupportNavigateUp();
+        }
     }
 
     private void logout(){

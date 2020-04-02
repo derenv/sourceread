@@ -2,6 +2,7 @@ package derenvural.sourceread_prototype.data.login;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,12 +26,15 @@ import java.util.Map;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
+import derenvural.sourceread_prototype.data.asyncTasks.populateAppsAsyncTask;
+import derenvural.sourceread_prototype.data.asyncTasks.writeAppsAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
+import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class LoggedInUser implements Serializable {
@@ -125,6 +129,110 @@ public class LoggedInUser implements Serializable {
 
                     // Reactivate the UI
                     main.activate_interface();
+                }
+            }
+        });
+    }
+
+    public void disconnectApp(final MainActivity main, final fdatabase db, final App app){
+        // create list of all remaining apps in user object
+        ArrayList<App> currentApps = getApps().getValue();
+        ArrayList<App> newApps = new ArrayList<App>();
+        for(App qq : currentApps){
+            if(!qq.getTitle().equals(app.getTitle())){
+                newApps.add(qq);
+            }
+        }
+
+        // Remove app from user object
+        setApps(newApps);
+
+        // Create async task
+        writeAppsAsyncTask task = new writeAppsAsyncTask(db);
+
+        // execute async task
+        task.execute(newApps);
+
+        // Check for task finish
+        task.getDone().observe(main, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    // Notify user
+                    Toast.makeText(main, app.getTitle()+" disconnected!", Toast.LENGTH_LONG).show();
+                    Log.d("TASK", "apps delete task done!");
+
+                    // Reactivate the UI
+                    main.activate_interface();
+
+                    // Redirect to list of apps page
+                    main.apps_fragment_redirect();
+                }
+            }
+        });
+    }
+
+    public void connectApp(final MainActivity main, final fdatabase db, final httpHandler httph, final App app){
+        // create list of all remaining apps in user object
+        ArrayList<App> currentApps = getApps().getValue();
+        if(currentApps == null){
+            currentApps = new ArrayList<App>();
+        }
+        currentApps.add(app);
+
+        // Remove app from user object
+        setApps(currentApps);
+
+        // Create async task
+        final writeAppsAsyncTask writeAppsTask = new writeAppsAsyncTask(db);
+        final LoggedInUser user = this;
+
+        // execute async task
+        writeAppsTask.execute(currentApps);
+
+        // Check for task finish
+        writeAppsTask.getDone().observe(main, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    //Create HashMap<String, Object> of apps
+                    HashMap<String, Long> found_apps = writeAppsTask.getData().getValue();
+
+                    // TODO: Make actual connection to app
+                    final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+
+                    // execute async task
+                    appTask.execute(found_apps);
+
+                    // Check for task finish
+                    appTask.getDone().observe(main, new Observer<Boolean>() {
+                        @Override
+                        public void onChanged(Boolean done) {
+                            if (done) {
+                                // Get apps data
+                                setApps(appTask.getData().getValue());
+                                for(App appToOpen: getApps().getValue()){
+                                    if(appToOpen.getTitle().equals(app.getTitle())){
+                                        // Open app in browser for authentication Creates callback
+                                        // Get login URL
+                                        HashMap<String, String> requests = appToOpen.getRequests();
+                                        String app_login_url = requests.get("login");
+
+                                        // Insert request token
+                                        String url = app_login_url.replaceAll("REPLACEME", appToOpen.getRequestToken());
+
+                                        // Store this object using local persistence
+                                        if (storageSaver.write(main, getUserId().getValue(), user)) {
+                                            // Redirect to browser for app login
+                                            httph.browser_open(main, url);
+                                        } else {
+                                            Log.e("HTTP", "login url request failure");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });

@@ -29,12 +29,15 @@ public class AppFragment extends Fragment {
     private Button importButton;
     private Button deleteButton;
     private TextView timestampView;
+    private MainActivity main;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         // Get view model & root element of fragment
         appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_app, container, false);
+
+        main = (MainActivity) getActivity();
 
         // Find buttons
         connectButton = root.findViewById(R.id.button_connect);
@@ -58,6 +61,9 @@ public class AppFragment extends Fragment {
             }
         });
 
+        // Create callback
+        main.setAppCallback(false);
+
         // Add app to view-model
         update();
 
@@ -71,9 +77,9 @@ public class AppFragment extends Fragment {
         // Fetch app from bundle
         Bundle appBundle = getArguments();
         final App app = new App(appBundle);
+        appViewModel.setApp(app);
 
         // Link to current state of app
-        MainActivity main = (MainActivity) getActivity();
         final LoggedInUser user = main.getUser();
         user.getApps().observe(main, new Observer<ArrayList<App>>() {
             @Override
@@ -94,47 +100,7 @@ public class AppFragment extends Fragment {
             // TODO: cleanup timestamp format for display
             //
 
-            // show 'import', 'delete' & 'disconnect' buttons
-            importButton.setVisibility(View.VISIBLE);
-            deleteButton.setVisibility(View.VISIBLE);
-            connectButton.setText("Disconnect");
-            connectButton.setVisibility(View.VISIBLE);
-
-            // add 'import' onclick event
-            importButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Fetch main activity for tool objects
-                    MainActivity main = (MainActivity) getActivity();
-
-                    // Attempt to import all articles from app
-                    Toast.makeText(main, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                    main.deactivate_interface();
-                    user.importArticles(main, main.getHttpHandler(), main.getDatabase(), appViewModel.getApp().getValue());
-
-                }
-            });
-            // add 'delete' onclick event
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Fetch main activity for tool objects
-                    MainActivity main = (MainActivity) getActivity();
-
-                    // Attempt to delete all articles imported from app
-                    Toast.makeText(getActivity(), "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                    main.deactivate_interface();
-                    user.deleteAllArticles(main, main.getDatabase(), appViewModel.getApp().getValue().getTitle());
-                }
-            });
-            // add 'disconnect' onclick event
-            connectButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO: attempt to remove app
-                    Toast.makeText(getActivity(), "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                }
-            });
+            activateButtons(main, user, app);
         }else if(type == redirectType.ADD) {
             // disable timestamp field
             timestampView.setVisibility(View.INVISIBLE);
@@ -147,20 +113,75 @@ public class AppFragment extends Fragment {
             connectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: attempt to login to pocket
+                    // Attempt to login to pocket
                     Toast.makeText(getActivity(), "Attempting to connect app..", Toast.LENGTH_SHORT).show();
 
-                    //if success
-                    // popup asking if import all
+                    // Set callback on back button click
+                    main.setAppCallback(true);
 
-                    // if yes
-                    //  import all from app
-                    // elif no
-                    //  nada
-                    //elif failure
-                    //  show an error message
+                    // Change buttons
+                    activateButtons(main, user, app);
+
+                    //remove app from user
+                    user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
+                    main.setUser(user);
                 }
             });
         }
+    }
+
+    public void activateButtons(final MainActivity main, final LoggedInUser user, final App app){
+        // Show 'import', 'delete' & 'disconnect' buttons
+        importButton.setVisibility(View.VISIBLE);
+        deleteButton.setVisibility(View.VISIBLE);
+        connectButton.setText("Disconnect");
+        connectButton.setVisibility(View.VISIBLE);
+
+        // Show timestamp
+        timestampView.setVisibility(View.VISIBLE);
+
+        // Add 'import' onclick event
+        importButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Fetch main activity for tool objects
+                MainActivity main = (MainActivity) getActivity();
+
+                // Attempt to import all articles from app
+                Toast.makeText(main, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                main.deactivate_interface();
+                user.importArticles(main, main.getHttpHandler(), main.getDatabase(), appViewModel.getApp().getValue());
+                main.setUser(user);
+            }
+        });
+        // Add 'delete' onclick event
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Fetch main activity for tool objects
+                MainActivity main = (MainActivity) getActivity();
+
+                // Attempt to delete all articles imported from app
+                Toast.makeText(getActivity(), "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                main.deactivate_interface();
+                user.deleteAllArticles(main, main.getDatabase(), appViewModel.getApp().getValue().getTitle());
+                main.setUser(user);
+            }
+        });
+        // Add 'disconnect' onclick event
+        connectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Attempt to remove app
+                Toast.makeText(getActivity(), "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                // Set callback on back button click
+                main.setAppCallback(false);
+
+                // Disconnect app
+                user.disconnectApp(main, main.getDatabase(), app);
+                main.setUser(user);
+            }
+        });
     }
 }

@@ -97,10 +97,10 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                     // Fetch list of old saved articles
                                     db.request_articles(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> check_task) {
-                                            if (check_task.isSuccessful()) {
+                                        public void onComplete(@NonNull Task<QuerySnapshot> checkTask) {
+                                            if (checkTask.isSuccessful()) {
                                                 // Get list of currently stored articles
-                                                List<DocumentSnapshot> documents = check_task.getResult().getDocuments();
+                                                List<DocumentSnapshot> documents = checkTask.getResult().getDocuments();
                                                 ArrayList<String> articleList = new ArrayList<String>();
                                                 for(DocumentSnapshot document: documents){
                                                     articleList.add(document.getId());
@@ -127,8 +127,8 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                                 // Update user db entry
                                                                 db.add_user_field("articles."+id, app.getTitle(), new OnCompleteListener<Void>() {
                                                                     @Override
-                                                                    public void onComplete(@NonNull Task<Void> old_task) {
-                                                                        if (old_task.isSuccessful()) {
+                                                                    public void onComplete(@NonNull Task<Void> oldTask) {
+                                                                        if (oldTask.isSuccessful()) {
                                                                             Log.d("DB", "insert done");
 
                                                                             if(!it.hasNext()){
@@ -138,7 +138,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                                             }
                                                                         }else{
                                                                             // Log error
-                                                                            Log.e("DB", "insert failed: ", old_task.getException());
+                                                                            Log.e("DB", "insert failed: ", oldTask.getException());
                                                                         }
                                                                     }
                                                                 });
@@ -150,10 +150,10 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                             // Add new article to database
                                                             db.write_new_article(current_article, new OnCompleteListener<DocumentReference>() {
                                                                 @Override
-                                                                public void onComplete(@NonNull Task<DocumentReference> write_task) {
-                                                                    if (write_task.isSuccessful()) {
+                                                                public void onComplete(@NonNull Task<DocumentReference> writeTask) {
+                                                                    if (writeTask.isSuccessful()) {
                                                                         // Get database id
-                                                                        String id = write_task.getResult().getId();
+                                                                        String id = writeTask.getResult().getId();
                                                                         Log.d("DB", "saved article - "+id);
 
                                                                         // Add to user object
@@ -163,8 +163,8 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                                         // Update user db entry
                                                                         db.add_user_field("articles."+id, app.getTitle(), new OnCompleteListener<Void>() {
                                                                             @Override
-                                                                            public void onComplete(@NonNull Task<Void> new_task) {
-                                                                                if (new_task.isSuccessful()) {
+                                                                            public void onComplete(@NonNull Task<Void> newTask) {
+                                                                                if (newTask.isSuccessful()) {
                                                                                     Log.d("DB", "insert done");
 
                                                                                     if(!it.hasNext()){
@@ -174,13 +174,13 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                                                     }
                                                                                 }else{
                                                                                     // Log error
-                                                                                    Log.e("DB", "insert failed: ", new_task.getException());
+                                                                                    Log.e("DB", "insert failed: ", newTask.getException());
                                                                                 }
                                                                             }
                                                                         });
                                                                     }else{
                                                                         // Log error
-                                                                        Log.e("DB", "write failed - ", write_task.getException());
+                                                                        Log.e("DB", "write failed - ", writeTask.getException());
                                                                     }
                                                                 }
                                                             });
@@ -201,7 +201,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 }
                                             }else{
                                                 // Log error
-                                                Log.e("DB", "read failed - ", check_task.getException());
+                                                Log.e("DB", "read failed - ", checkTask.getException());
                                                 postData(articles);
                                                 postDone(true);
                                             }

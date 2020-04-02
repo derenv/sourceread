@@ -45,6 +45,12 @@ public class AppsViewModel extends ViewModel {
         // Get current apps
         if(user.getApps().getValue() != null && user.getApps().getValue().size() != 0) {
             setCards(user.getApps().getValue());
+        }else{
+            ArrayList<App> cards = new ArrayList<App>();
+            App add_card = new App("Add new App",0l);
+            add_card.setText("(Click me!)");
+            cards.add(add_card);
+            setCards(cards);
         }
 
         // Add observer for future
@@ -52,10 +58,13 @@ public class AppsViewModel extends ViewModel {
             @Override
             public void onChanged(@Nullable ArrayList<App> apps) {
                 //check apps returned
-                if (apps == null) {
-                    return;
-                }
-                if (apps.size() > 0) {
+                if (apps == null || apps.size() == 0) {
+                    ArrayList<App> cards = new ArrayList<App>();
+                    App add_card = new App("Add new App",0l);
+                    add_card.setText("(Click me!)");
+                    cards.add(add_card);
+                    setCards(cards);
+                } else if (apps.size() > 0) {
                     Log.d("DB", "# Saved Apps: " + apps.size());
                     ArrayList<App> cards = new ArrayList<App>();
                     cards.addAll(apps);

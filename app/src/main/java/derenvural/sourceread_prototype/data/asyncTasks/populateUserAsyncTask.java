@@ -47,7 +47,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                 if (userTask.isSuccessful()) {
                     // Get list of data
                     DocumentSnapshot document = userTask.getResult();
-                    final HashMap<String, Object> found_apps = (HashMap<String, Object>) document.get("apps");
+                    final HashMap<String, Long> found_apps = (HashMap<String, Long>) document.get("apps");
                     HashMap<String, String> found_articles = (HashMap<String, String>) document.get("articles");
 
                     // Add analysis & article ID's to user
@@ -55,44 +55,56 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
 
 
                     // Articles
-                    // Create async task
-                    final populateArticlesAsyncTask articleTask = new populateArticlesAsyncTask(db);
+                    if(found_articles.size() > 0) {
+                        // Create async task
+                        final populateArticlesAsyncTask articleTask = new populateArticlesAsyncTask(db);
 
-                    // execute async task
-                    articleTask.execute(found_articles);
+                        // execute async task
+                        articleTask.execute(found_articles);
 
-                    // Check for task finish
-                    articleTask.getDone().observe(context.get(), new Observer<Boolean>() {
-                        @Override
-                        public void onChanged(Boolean done) {
-                            if (done) {
-                                // Get articles data
-                                user.setArticles(articleTask.getData().getValue());
+                        // Check for task finish
+                        articleTask.getDone().observe(context.get(), new Observer<Boolean>() {
+                            @Override
+                            public void onChanged(Boolean done) {
+                                if (done) {
+                                    // Get articles data
+                                    user.setArticles(articleTask.getData().getValue());
 
-                                // Apps
-                                // Create async task
-                                final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+                                    // Apps
+                                    if(found_apps.size() > 0) {
+                                        // Create async task
+                                        final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
 
-                                // execute async task
-                                appTask.execute(found_apps);
+                                        // execute async task
+                                        appTask.execute(found_apps);
 
-                                // Check for task finish
-                                appTask.getDone().observe(context.get(), new Observer<Boolean>() {
-                                    @Override
-                                    public void onChanged(Boolean done) {
-                                        if (done) {
-                                            // Get apps data
-                                            user.setApps(appTask.getData().getValue());
+                                        // Check for task finish
+                                        appTask.getDone().observe(context.get(), new Observer<Boolean>() {
+                                            @Override
+                                            public void onChanged(Boolean done) {
+                                                if (done) {
+                                                    // Get apps data
+                                                    user.setApps(appTask.getData().getValue());
 
-                                            // End task
-                                            postData(user);
-                                            postDone(true);
-                                        }
+                                                    // End task
+                                                    postData(user);
+                                                    postDone(true);
+                                                }
+                                            }
+                                        });
+                                    }else {
+                                        // End task
+                                        postData(user);
+                                        postDone(true);
                                     }
-                                });
+                                }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        // End task
+                        postData(user);
+                        postDone(true);
+                    }
                 } else {
                     // Log error
                     Log.e("DB", "read failed: ", userTask.getException());

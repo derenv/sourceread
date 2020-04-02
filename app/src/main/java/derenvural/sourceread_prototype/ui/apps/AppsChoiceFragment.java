@@ -2,6 +2,7 @@ package derenvural.sourceread_prototype.ui.apps;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -77,7 +78,7 @@ public class AppsChoiceFragment extends Fragment {
     /*
      * Start process of adding chosen app
      * */
-    private void startAppActivity(String title){
+    private void startAppActivity(@NonNull String title){
         // Get app for passing
         for (App app : appChoiceViewModel.getCards().getValue()) {
             if (app.getTitle().equals(title)) {
@@ -113,9 +114,6 @@ public class AppsChoiceFragment extends Fragment {
                     Log.d("TASK", "apps fetched!");
 
                     // Get apps
-                    LoggedInUser user = main.getUser();
-                    user.setApps(task.getData().getValue());
-                    main.setUser(user);
                     appChoiceViewModel.setCards(task.getData().getValue());
 
                     // Reactivate the UI

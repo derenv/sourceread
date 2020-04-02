@@ -18,36 +18,18 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
 public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, ArrayList<App>> {
     // Tools
     private fdatabase db;
-    // Data
-    private boolean listeners_done;
 
     public importAppsAsyncTask(fdatabase db){
         super();
-        // Data
-        listeners_done = false;
-
         // Tools
         this.db = db;
-    }
-
-    @Override
-    protected void onPostExecute(ArrayList<App> aVoid) {
-        super.onPostExecute(aVoid);
-
-        while (!listeners_done) {
-            //
-            Log.d("TASK", "AWAITING");
-        }
-
-        postData(getData().getValue());
-        postDone(true);
     }
 
     @Override
     protected ArrayList<App> doInBackground(ArrayList<App>... params){
 
         // Fetch user
-        final ArrayList<App> blacklist = getData().getValue();
+        final ArrayList<App> blacklist = params[0];
         final ArrayList<App> apps = new ArrayList<App>();
 
         // Request all apps
@@ -62,16 +44,22 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
                     for(DocumentSnapshot document: documents){
                         // Create base object
                         App new_app = new App(document.getId(), 0l);
+                        // TODO: check for 'valid app' boolean field of document
 
                         // Check not blacklisted (ie already connected)
                         boolean blacklisted = false;
-                        for(App app: blacklist){
-                            if(app.getTitle().equals(document.getId())){
-                                blacklisted = true;
-                                break;
+                        if(blacklist != null && blacklist.size() != 0) {
+                            for (App app : blacklist) {
+                                if (app.getTitle().equals(document.getId())) {
+                                    blacklisted = true;
+                                    break;
+                                }
                             }
-                        }
-                        if(!blacklisted){
+                            if (!blacklisted) {
+                                new_app.CreateApp(document);
+                                apps.add(new_app);
+                            }
+                        }else{
                             new_app.CreateApp(document);
                             apps.add(new_app);
                         }
@@ -79,7 +67,7 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
 
                     // End task
                     postData(apps);
-                    listeners_done = true;
+                    postDone(true);
                 } else {
                     // Log error
                     Log.e("DB", "read failed: ", task.getException());

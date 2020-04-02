@@ -21,7 +21,7 @@ import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 
-public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, Object>, ArrayList<App>> {
+public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, Long>, ArrayList<App>> {
     // Tools
     private fdatabase db;
     private httpHandler httph;
@@ -34,14 +34,14 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, O
     }
 
     @Override
-    protected ArrayList<App> doInBackground(HashMap<String, Object>... params){
+    protected ArrayList<App> doInBackground(HashMap<String, Long>... params){
         // Initiate results list
         final ArrayList<App> result_apps = new ArrayList<App>();
 
         // Create empty app objects with name & timestamp
         ArrayList<App> apps = new ArrayList<App>();
         for(String app_name: params[0].keySet()){
-            apps.add(new App(app_name, Long.parseLong(params[0].get(app_name).toString())));
+            apps.add(new App(app_name, params[0].get(app_name)));
         }
 
         // Iterate through each app
