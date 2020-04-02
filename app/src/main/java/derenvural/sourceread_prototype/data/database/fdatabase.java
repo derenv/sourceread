@@ -145,7 +145,8 @@ public class fdatabase {
         CollectionReference apps_request = get_apps_request();
 
         // Execute database read with onCompleteListener
-        apps_request.get().addOnCompleteListener(end);
+        apps_request.whereEqualTo("validapp", true)
+        .get().addOnCompleteListener(end);
     }
     /*
      * Check document in database exists

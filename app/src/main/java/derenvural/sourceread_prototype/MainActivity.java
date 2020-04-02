@@ -248,8 +248,7 @@ public class MainActivity extends AppCompatActivity {
                     // Request access tokens (interface reactivated on response)
                     user.access_tokens(this, httph, app_name);
                 }else{
-                    // Attempt population again
-                    populate(user);
+                    // TODO: show error
                 }
             }else{
                 // TODO: other deep links

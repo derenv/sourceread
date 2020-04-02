@@ -23,6 +23,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
     private httpHandler httph;
     // Activity
     private final WeakReference<LifecycleOwner> context;
+    private boolean triggered;
 
     public populateUserAsyncTask(LifecycleOwner context, fdatabase db, httpHandler httph){
         super();
@@ -32,6 +33,8 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
         // Tools
         this.db = db;
         this.httph = httph;
+
+        this.triggered = false;
     }
 
     @Override
@@ -66,7 +69,9 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                         articleTask.getDone().observe(context.get(), new Observer<Boolean>() {
                             @Override
                             public void onChanged(Boolean done) {
-                                if (done) {
+                                if (done && !triggered) {
+
+                                    triggered = true;
                                     // Get articles data
                                     user.setArticles(articleTask.getData().getValue());
 
@@ -85,6 +90,10 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                                                 if (done) {
                                                     // Get apps data
                                                     user.setApps(appTask.getData().getValue());
+
+                                                    // Remove all observers
+                                                    appTask.getDone().removeObservers(context.get());
+                                                    articleTask.getDone().removeObservers(context.get());
 
                                                     // End task
                                                     postData(user);

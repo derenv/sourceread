@@ -30,6 +30,7 @@ public class AppsChoiceFragment extends Fragment {
     private AppChoiceViewModel appChoiceViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
+    private TextView placeholder;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,6 +40,9 @@ public class AppsChoiceFragment extends Fragment {
 
         // find view to be linked
         recyclerView = root.findViewById(R.id.card_view);
+
+        // Find placeholder text
+        placeholder = root.findViewById(R.id.text_apps_choice);
 
         // use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -56,16 +60,35 @@ public class AppsChoiceFragment extends Fragment {
         };
 
         // specify an adapter
-        mAdapter = new AppAdapter(getActivity(), appChoiceViewModel.getCards().getValue(), listener);
-        recyclerView.setAdapter(mAdapter);
+        if(appChoiceViewModel.getCards().getValue().size() == 0){
+            appChoiceViewModel.setText("No new apps available!");
+        }else {
+            appChoiceViewModel.setText("");
+            mAdapter = new AppAdapter(getActivity(), appChoiceViewModel.getCards().getValue(), listener);
+            recyclerView.setAdapter(mAdapter);
+        }
 
         // link cards to view-model data
         appChoiceViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<App>>() {
             @Override
             public void onChanged(@Nullable ArrayList<App> updatedList) {
-                // Reset adapter
-                mAdapter = new AppAdapter(getActivity(), updatedList, listener);
-                recyclerView.setAdapter(mAdapter);
+                if(updatedList.size() == 0){
+                    appChoiceViewModel.setText("No new apps available!");
+                }else {
+                    appChoiceViewModel.setText("");
+
+                    // Reset adapter
+                    mAdapter = new AppAdapter(getActivity(), updatedList, listener);
+                    recyclerView.setAdapter(mAdapter);
+                }
+            }
+        });
+
+        // Link placeholder
+        appChoiceViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String text) {
+                placeholder.setText(text);
             }
         });
 
