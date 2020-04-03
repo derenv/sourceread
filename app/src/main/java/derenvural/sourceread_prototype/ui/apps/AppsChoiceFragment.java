@@ -24,7 +24,6 @@ import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.asyncTasks.importAppsAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.AppAdapter;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class AppsChoiceFragment extends Fragment {
     private AppChoiceViewModel appChoiceViewModel;

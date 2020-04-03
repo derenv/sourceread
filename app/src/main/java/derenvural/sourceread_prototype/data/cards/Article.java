@@ -1,7 +1,6 @@
 package derenvural.sourceread_prototype.data.cards;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -37,12 +36,16 @@ public class Article extends Card {
         super(null, document.get("title").toString(),document.get("title").toString());
         // Identifiers
         setResolved_url(document.get("url").toString());
-        setResolved_id(document.get("id").toString());
+        setResolved_id(document.get("appid").toString());
         setDatabase_id(document.getId());
         setTitle(document.get("title").toString());
         setApp(document.get("app").toString());
         // External Information
-        setAuthors((ArrayList<HashMap<String, String>>) document.get("authors"));
+        if(document.get("authors") == null) {
+            setAuthors(new ArrayList<HashMap<String, String>>());
+        }else{
+            setAuthors((ArrayList<HashMap<String, String>>) document.get("authors"));
+        }
         //setPublication(document.get("publication").toString());
         // Article Information
         if(document.get("word_count") == null) {
@@ -60,6 +63,7 @@ public class Article extends Card {
         }else{
             setText(document.get("text").toString());
         }
+
     }
 
     /*
@@ -77,7 +81,7 @@ public class Article extends Card {
         setResolved_id(article.getString("resolved_id"));
         setTitle(article.getString("resolved_title"));
         // External Information
-        if(article.getJSONObject("authors") != null) {
+        if(article.has("authors")) {
             // Parse authors into HashMap
             JSONObject authors_json = article.getJSONObject("authors");
             ArrayList<HashMap<String, String>> authors = new ArrayList<HashMap<String, String>>();
@@ -100,7 +104,7 @@ public class Article extends Card {
             setAuthors(new ArrayList<HashMap<String, String>>());
         }
         // Article Information
-        if(article.getString("word_count") != null) {
+        if(article.has("word_count")) {
             setWord_count(article.getString("word_count"));
         }else{
             setWord_count("");
@@ -120,7 +124,7 @@ public class Article extends Card {
         // Fill in data
         // Identifiers
         docData.put("url", getResolved_url());
-        docData.put("id", getResolved_id());
+        docData.put("appid", getResolved_id());
         docData.put("title", getTitle());
         docData.put("app", getApp());
         // External Information

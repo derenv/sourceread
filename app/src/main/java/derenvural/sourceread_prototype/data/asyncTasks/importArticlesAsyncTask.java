@@ -11,7 +11,6 @@ import com.android.volley.VolleyError;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -19,12 +18,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
@@ -105,100 +102,77 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 for(DocumentSnapshot document: documents){
                                                     articleList.add(document.getId());
                                                 }
+                                                ArrayList<Article> tobewritten = new ArrayList<Article>();
+                                                final ArrayList<String> idstobewritten = new ArrayList<String>();
 
                                                 // Check each article
                                                 for (final Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
                                                     try{
                                                         // Add article information to user object for display
-                                                        final Article current_article = new Article(articles_json.getJSONObject(it.next()), app.getTitle());
+                                                        final String current_id = it.next();
+                                                        final Article current_article = new Article(articles_json.getJSONObject(current_id), app.getTitle());
                                                         articles.add(current_article);
 
                                                         // If an article already exists
                                                         boolean exists = false;
                                                         for(String id : articleList){
                                                             if(id.equals(current_article.getTitle())){
-                                                                // Update user for existing article
+                                                                // Notify user
                                                                 Log.d("DB", "already saved article - "+id);
 
-                                                                // Add to user object
-                                                                current_article.setDatabase_id(id);
-                                                                user.addArticle(current_article);
-
-                                                                // Update user db entry
-                                                                db.add_user_field("articles."+id, app.getTitle(), new OnCompleteListener<Void>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<Void> oldTask) {
-                                                                        if (oldTask.isSuccessful()) {
-                                                                            Log.d("DB", "insert done");
-
-                                                                            if(!it.hasNext()){
-                                                                                // End task
-                                                                                postData(articles);
-                                                                                postDone(true);
-                                                                            }
-                                                                        }else{
-                                                                            // Log error
-                                                                            Log.e("DB", "insert failed: ", oldTask.getException());
-                                                                        }
-                                                                    }
-                                                                });
+                                                                // Add to idstobewritten list and end loop
+                                                                idstobewritten.add(id);
                                                                 exists = true;
                                                                 break;
                                                             }
                                                         }
                                                         if(!exists){
-                                                            // Add new article to database
-                                                            db.write_new_article(current_article, new OnCompleteListener<DocumentReference>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<DocumentReference> writeTask) {
-                                                                    if (writeTask.isSuccessful()) {
-                                                                        // Get database id
-                                                                        String id = writeTask.getResult().getId();
-                                                                        Log.d("DB", "saved article - "+id);
+                                                            // Notify user
+                                                            Log.d("DB", "new article!");
 
-                                                                        // Add to user object
-                                                                        current_article.setDatabase_id(id);
-                                                                        user.addArticle(current_article);
-
-                                                                        // Update user db entry
-                                                                        db.add_user_field("articles."+id, app.getTitle(), new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> newTask) {
-                                                                                if (newTask.isSuccessful()) {
-                                                                                    Log.d("DB", "insert done");
-
-                                                                                    if(!it.hasNext()){
-                                                                                        // End task
-                                                                                        postData(articles);
-                                                                                        postDone(true);
-                                                                                    }
-                                                                                }else{
-                                                                                    // Log error
-                                                                                    Log.e("DB", "insert failed: ", newTask.getException());
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                    }else{
-                                                                        // Log error
-                                                                        Log.e("DB", "write failed - ", writeTask.getException());
-                                                                    }
-                                                                }
-                                                            });
+                                                            // Add to be tobewritten list
+                                                            tobewritten.add(current_article);
                                                         }
                                                     }catch(JSONException error){
                                                         Log.e("JSON", "error reading JSON: " + error.getMessage());
                                                     }
                                                 }
 
-                                                // write all new articles to the db
+                                                // Write all new articles to database
+                                                final ArrayList<String> newIds = db.write_new_articles(tobewritten, new OnCompleteListener<CollectionReference>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<CollectionReference> writeManyTask) {
+                                                        if (writeManyTask.isSuccessful()) {
+                                                            Log.d("DB", "saved new articles!");
+                                                        }else{
+                                                            // Log error
+                                                            Log.e("DB", "write failed: ", writeManyTask.getException());
+                                                        }
+                                                    }
+                                                });
 
-                                                // Fetch non-null context
-                                                if (context!=null) {
-                                                    Context main = context.get();
+                                                // Add all article ID's
+                                                idstobewritten.addAll(newIds);
 
-                                                    // Notify user
-                                                    Toast.makeText(main, "Articles imported!", Toast.LENGTH_SHORT).show();
-                                                }
+                                                // Update user 'articles' field in database
+                                                db.add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task userFieldTask) {
+                                                        if (userFieldTask.isSuccessful()) {
+
+                                                            // Notify user
+                                                            Log.d("DB", "insert done");
+                                                            Toast.makeText(context.get(), "Articles imported!", Toast.LENGTH_SHORT).show();
+
+                                                            // End task
+                                                            postData(articles);
+                                                            postDone(true);
+                                                        }else{
+                                                            // Log error
+                                                            Log.e("DB", "insert failed: ", userFieldTask.getException());
+                                                        }
+                                                    }
+                                                });
                                             }else{
                                                 // Log error
                                                 Log.e("DB", "read failed - ", checkTask.getException());

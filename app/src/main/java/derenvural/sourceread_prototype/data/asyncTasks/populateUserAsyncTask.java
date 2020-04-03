@@ -110,9 +110,36 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                             }
                         });
                     } else {
-                        // End task
-                        postData(user);
-                        postDone(true);
+                        // Apps
+                        if(found_apps.size() > 0) {
+                            // Create async task
+                            final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+
+                            // execute async task
+                            appTask.execute(found_apps);
+
+                            // Check for task finish
+                            appTask.getDone().observe(context.get(), new Observer<Boolean>() {
+                                @Override
+                                public void onChanged(Boolean done) {
+                                    if (done) {
+                                        // Get apps data
+                                        user.setApps(appTask.getData().getValue());
+
+                                        // Remove all observers
+                                        appTask.getDone().removeObservers(context.get());
+
+                                        // End task
+                                        postData(user);
+                                        postDone(true);
+                                    }
+                                }
+                            });
+                        }else {
+                            // End task
+                            postData(user);
+                            postDone(true);
+                        }
                     }
                 } else {
                     // Log error

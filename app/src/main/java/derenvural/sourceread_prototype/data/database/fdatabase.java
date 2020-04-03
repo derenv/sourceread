@@ -1,12 +1,20 @@
 package derenvural.sourceread_prototype.data.database;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
@@ -32,12 +40,19 @@ public class fdatabase {
     /*
      * Write (add a new) entry to user document field in database
      * */
-    public void add_user_field(String field, Object new_data, OnCompleteListener end){
-        // Get reference to user document in 'users' collection
-        DocumentReference user_request = get_current_user_request();
+    public void add_user_fields(String field, ArrayList<String> specifiers, Object new_data, OnCompleteListener end){
+        // Create batch db write
+        WriteBatch batch = db.batch();
+        for(String specifier : specifiers) {
+            // Get reference to user document in 'users' collection
+            DocumentReference user_request = get_current_user_request();
 
-        // Execute database update with onCompleteListener
-        user_request.update(field, new_data).addOnCompleteListener(end);
+            // Execute database update with onCompleteListener
+            batch.update(user_request, field+specifier, new_data);
+        }
+
+        // Commit the batch
+        batch.commit().addOnCompleteListener(end);
     }
     /*
      * Write (overwrite) user document field in database
@@ -65,9 +80,13 @@ public class fdatabase {
     /*
      * Write (new initial) article documents to database collection
      * */
-    public void write_new_articles(ArrayList<Article> articles, OnCompleteListener end) {
-        // Create batch db write
+    public ArrayList<String> write_new_articles(ArrayList<Article> articles, OnCompleteListener end) {
+        // Initiate batch db write
         WriteBatch batch = db.batch();
+
+        // Initiate list of resulting ID's
+        ArrayList<String> newIds = new ArrayList<String>();
+
         for(Article article : articles) {
             // Create a Map of the object
             Map<String, Object> docData = article.map_data();
@@ -75,23 +94,16 @@ public class fdatabase {
             // Get reference to 'articles' collection and add new article
             DocumentReference article_request = get_articles_request().document();
             batch.set(article_request,docData);
+
+            // Store id
+            newIds.add(article_request.getId());
         }
 
         // Commit the batch
         batch.commit().addOnCompleteListener(end);
-    }
-    /*
-     * Write (new initial) article document to database collection
-     * */
-    public void write_new_article(Article article, OnCompleteListener end) {
-        // Create a Map of the object
-        Map<String, Object> docData = article.map_data();
 
-        // Get reference to 'articles' collection
-        CollectionReference articles_request = get_articles_request();
-
-        // Execute database write with onCompleteListener
-        articles_request.add(docData).addOnCompleteListener(end);
+        // Return the new ID's
+        return newIds;
     }
     /*
      * Delete a user document from database
