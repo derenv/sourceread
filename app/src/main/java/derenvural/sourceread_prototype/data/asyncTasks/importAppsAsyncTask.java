@@ -44,7 +44,6 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
                     for(DocumentSnapshot document: documents){
                         // Create base object
                         App new_app = new App(document.getId(), 0l);
-                        // TODO: check for 'valid app' boolean field of document
 
                         // Check not blacklisted (ie already connected)
                         boolean blacklisted = false;

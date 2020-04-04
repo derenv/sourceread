@@ -15,20 +15,30 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.apps.redirectType;
 
 public class AppFragment extends Fragment {
     private AppViewModel appViewModel;
+    // Buttons
     private Button connectButton;
     private Button importButton;
     private Button deleteButton;
+    // Views
     private TextView timestampView;
+    private TextView articlesnoView;
+    // Context
     private MainActivity main;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -36,7 +46,6 @@ public class AppFragment extends Fragment {
         // Get view model & root element of fragment
         appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_app, container, false);
-
         main = (MainActivity) getActivity();
 
         // Find buttons
@@ -48,16 +57,51 @@ public class AppFragment extends Fragment {
         final TextView nameView = root.findViewById(R.id.text_app_name);
         final TextView descriptionView = root.findViewById(R.id.text_app_desc);
         timestampView = root.findViewById(R.id.text_app_time);
+        articlesnoView = root.findViewById(R.id.text_app_articles);
         final ImageView imageView = root.findViewById(R.id.image_app);
         appViewModel.getApp().observe(getViewLifecycleOwner(), new Observer<App>() {
             @Override
             public void onChanged(@Nullable App s) {
+                // Calculcate new stamp
+                if(appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0L)) {
+                    appViewModel.setStamp(null);
+                }else{
+                    Instant stamp = Instant.ofEpochSecond(appViewModel.getApp().getValue().getTimestamp());
+                    appViewModel.setStamp(LocalDateTime.ofInstant(stamp, ZoneId.systemDefault()));
+                }
+
+                // Set text views
                 nameView.setText("App: "+s.getTitle());
                 descriptionView.setText(s.getText());
-                timestampView.setText("Last import: "+s.getTimestamp().toString());
 
                 // STUB
                 imageView.setImageResource(R.drawable.ic_card_placeholder2);
+            }
+        });
+        appViewModel.getArticlesNo().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer s) {
+                if(s == null || s == 0){
+                    String articleNoText = "Imported Articles: \nNone!";
+                    articlesnoView.setText(articleNoText);
+                }else {
+                    String articleNoText = "Imported Articles: \n"+s.toString();
+                    articlesnoView.setText(articleNoText);
+                }
+            }
+        });
+        appViewModel.getStamp().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
+            @Override
+            public void onChanged(@Nullable LocalDateTime s) {
+                if(s == null || s.isEqual(LocalDateTime.ofInstant(Instant.ofEpochSecond(0L), ZoneId.systemDefault()))){
+                    String stampText = "Last import: \nNever!";
+                    timestampView.setText(stampText);
+                }else {
+                    String stampText = "Last import: \n" +
+                            s.getYear() + "\t" + s.getMonth() + "\t" + s.getDayOfMonth() + "\n" +
+                            s.getHour() + ":" + s.getMinute() + ":" + s.getSecond();
+                    timestampView.setText(stampText);
+                }
             }
         });
 
@@ -76,69 +120,107 @@ public class AppFragment extends Fragment {
     private void update(){
         // Fetch app from bundle
         Bundle appBundle = getArguments();
-        final App app = new App(appBundle);
-        appViewModel.setApp(app);
+        if(appBundle != null) {
+            final App app = new App(appBundle);
+            appViewModel.setApp(app);
 
-        // Link to current state of app
-        final LoggedInUser user = main.getUser();
-        user.getApps().observe(main, new Observer<ArrayList<App>>() {
-            @Override
-            public void onChanged(ArrayList<App> apps) {
-                for (App this_app : apps) {
-                    if (this_app.getTitle().equals(app.getTitle())) {
-                        // Assign values
-                        appViewModel.setApp(this_app);
-                        break;
+            // Link to current state of app
+            final LoggedInUser user = main.getUser();
+            user.getApps().observe(main, new Observer<ArrayList<App>>() {
+                @Override
+                public void onChanged(ArrayList<App> apps) {
+                    for (App this_app : apps) {
+                        if (this_app.getTitle().equals(app.getTitle())) {
+                            // Assign values
+                            appViewModel.setApp(this_app);
+                            break;
+                        }
                     }
                 }
-            }
-        });
-
-        // Get type (view or add)
-        redirectType type = (redirectType) appBundle.getSerializable("type");
-        if(type == redirectType.VIEW) {
-            // TODO: cleanup timestamp format for display
-            //
-
-            activateButtons(main, user, app);
-        }else if(type == redirectType.ADD) {
-            // disable timestamp field
-            timestampView.setVisibility(View.INVISIBLE);
-
-            // show 'connect' button
-            connectButton.setText("Connect");
-            connectButton.setVisibility(View.VISIBLE);
-
-            // add 'connect' onclick event
-            connectButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Attempt to login to pocket
-                    Toast.makeText(getActivity(), "Attempting to connect app..", Toast.LENGTH_SHORT).show();
-
-                    // Set callback on back button click
-                    main.setAppCallback(true);
-
-                    // Change buttons
-                    activateButtons(main, user, app);
-
-                    //remove app from user
-                    user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
-                    main.setUser(user);
-                }
             });
+
+            // Get type (view or add)
+            redirectType type = (redirectType) appBundle.getSerializable("type");
+            if (type == redirectType.VIEW) {
+                // Cleanup timestamp format for display
+                if (appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0l)) {
+                    appViewModel.setStamp(null);
+                } else {
+                    Instant stamp = Instant.ofEpochSecond(appViewModel.getApp().getValue().getTimestamp());
+                    appViewModel.setStamp(LocalDateTime.ofInstant(stamp, ZoneId.systemDefault()));
+                }
+
+                // Count # of articles in app
+                if (user.getArticles().getValue() == null || user.getArticles().getValue().size() == 0) {
+                    appViewModel.setArticlesNo(0);
+                } else {
+                    ArrayList<Article> toDisplay = new ArrayList<Article>();
+                    for(Article countArticle : user.getArticles().getValue()) {
+                        if(countArticle.getApp().equals(app.getTitle())){
+                            toDisplay.add(countArticle);
+                        }
+                    }
+                    appViewModel.setArticlesNo(toDisplay.size());
+                }
+                user.getArticles().observe(getViewLifecycleOwner(), new Observer<ArrayList<Article>>() {
+                    @Override
+                    public void onChanged(@Nullable ArrayList<Article> s) {
+                        if (s == null || s.size() == 0) {
+                            appViewModel.setArticlesNo(0);
+                        } else {
+                            ArrayList<Article> toDisplay = new ArrayList<Article>();
+                            for(Article countArticle : s) {
+                                if(countArticle.getApp().equals(app.getTitle())){
+                                    toDisplay.add(countArticle);
+                                }
+                            }
+                            appViewModel.setArticlesNo(toDisplay.size());
+                        }
+                    }
+                });
+
+                activateButtons(main, user, app);
+            } else if (type == redirectType.ADD) {
+                // disable timestamp & number of articles fields
+                timestampView.setVisibility(View.INVISIBLE);
+                articlesnoView.setVisibility(View.INVISIBLE);
+
+                // show 'connect' button
+                connectButton.setText(R.string.action_connect_app);
+                connectButton.setVisibility(View.VISIBLE);
+
+                // add 'connect' onclick event
+                connectButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Attempt to login to pocket
+                        Toast.makeText(getActivity(), "Attempting to connect app..", Toast.LENGTH_SHORT).show();
+
+                        // Set callback on back button click
+                        main.setAppCallback(true);
+
+                        // Change buttons
+                        activateButtons(main, user, app);
+
+                        //remove app from user
+                        user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
+                        main.setUser(user);
+                    }
+                });
+            }
         }
     }
 
-    public void activateButtons(final MainActivity main, final LoggedInUser user, final App app){
+    private void activateButtons(@NonNull final MainActivity main, @NonNull final LoggedInUser user, @NonNull final App app){
         // Show 'import', 'delete' & 'disconnect' buttons
         importButton.setVisibility(View.VISIBLE);
         deleteButton.setVisibility(View.VISIBLE);
-        connectButton.setText("Disconnect");
+        connectButton.setText(R.string.action_disconnect_app);
         connectButton.setVisibility(View.VISIBLE);
 
-        // Show timestamp
+        // Show timestamp & number of articles fields
         timestampView.setVisibility(View.VISIBLE);
+        articlesnoView.setVisibility(View.VISIBLE);
 
         // Add 'import' onclick event
         importButton.setOnClickListener(new View.OnClickListener() {

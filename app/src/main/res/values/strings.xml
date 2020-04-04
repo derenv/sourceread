@@ -35,6 +35,11 @@
     <string name="button_import_all">Import all articles</string>
     <string name="button_delete_all">Delete all imported articles</string>
 
+    <!-- -->
+    <!--==BUTTON ACTIONS-->
+    <string name="action_connect_app">Connect</string>
+    <string name="action_disconnect_app">Disconnect</string>
+
     <!--LOGIN-->
     <!--==TITLES & PROMPTS-->
     <string name="title_activity_login">Sign in</string>
