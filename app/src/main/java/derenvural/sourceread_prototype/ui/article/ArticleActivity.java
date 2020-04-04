@@ -3,16 +3,11 @@ package derenvural.sourceread_prototype.ui.article;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
@@ -23,35 +18,19 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.analyse.analyser;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
-import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
-public class ArticleActivity extends AppCompatActivity {
+public class ArticleActivity extends SourceReadActivity {
     // Android
     private ArticleViewModel articleViewModel;
-    private AppBarConfiguration mAppBarConfiguration;
-    private ProgressBar progressBar;
-    private DrawerLayout drawer;
-    private Menu mainMenu;
-    // Services
-    private FirebaseAuth mAuth;
-    private fdatabase db;
-    // User
-    private LoggedInUser user;
     // Article data
     private Article article;
-    // Variables
-    private boolean interfaceEnabled;
-    private menuStyle menustyle;
-
-    public LoggedInUser getUser() { return user; }
-    public fdatabase getDatabase() { return db; }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,8 +40,7 @@ public class ArticleActivity extends AppCompatActivity {
         // Find viewmodel
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
-
-        menustyle = menuStyle.VISIBLE;
+        menustyle = menuStyle.ARTICLE;
 
         // Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
@@ -88,25 +66,29 @@ public class ArticleActivity extends AppCompatActivity {
                 int id = menuItem.getItemId();
                 switch (id) {
                     case R.id.nav_home:
-                        main_redirect();
+                        // Create bundle with serialised object
+                        Bundle bundle = new Bundle();
+                        getUser().saveInstanceState(bundle);
+
+                        main_redirect("article", bundle);
                         break;
                     case R.id.nav_article:
                         // Change to correct menu
-                        menustyle = menuStyle.VISIBLE;
+                        menustyle = menuStyle.ARTICLE;
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
                         break;
                     case R.id.nav_about:
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.OUTER;
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
                         break;
                     case R.id.nav_settings:
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.SETTINGS;
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
@@ -135,65 +117,6 @@ public class ArticleActivity extends AppCompatActivity {
         }
     }
 
-    // Interface methods
-    private void setDrawerEnabled(boolean enabled) {
-        int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED :
-                DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
-
-        drawer.setDrawerLockMode(lockMode);
-        interfaceEnabled = enabled;
-    }
-    public void deactivate_interface(){
-        progressBar.setVisibility(View.VISIBLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        setDrawerEnabled(false);
-    }
-    public void activate_interface(){
-        progressBar.setVisibility(View.INVISIBLE);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        setDrawerEnabled(true);
-    }
-
-    /*
-     * Redirect to login activity
-     */
-    private void login_redirect(){
-        // Create intent
-        Intent new_activity = new Intent(this, LoginActivity.class);
-
-        // Add any flags to intent
-        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        // Start next activity and end this one
-        startActivity(new_activity);
-        finish();
-    }
-
-    /*
-     * Redirect to main activity
-     */
-    public void main_redirect(){
-        // Create intent
-        Intent main_activity = new Intent(this, MainActivity.class);
-
-        // Create bundle with serialised object
-        LoggedInUser user_data = getUser();
-        Bundle bundle = new Bundle();
-        user_data.saveInstanceState(bundle);
-
-        // Add title, bundle and any flags to intent
-        main_activity.putExtra("activity","article");
-        main_activity.putExtras(bundle);
-        main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        // Start next activity and end this one
-        startActivity(main_activity);
-        finish();
-    }
-
     public void loadBundle(Intent intent){
         // Fetch the bundle & check if it has extras
         Bundle extras = intent.getExtras();
@@ -214,49 +137,15 @@ public class ArticleActivity extends AppCompatActivity {
                 login_redirect();
             }
         }else{
-            main_redirect();
-        }
-    }
+            // Create bundle with serialised object
+            Bundle bundle = new Bundle();
+            getUser().saveInstanceState(bundle);
 
-    private void logout(){
-        // Sign out Firebase user
-        mAuth.signOut();
-
-        // Check for successful sign out
-        if(null == mAuth.getCurrentUser()){
-            Toast.makeText(getApplicationContext(), "Successful Log out", Toast.LENGTH_SHORT).show();
-
-            // Remove objects
-            db = null;
-            user = null;
-
-            // Start login activity
-            Intent new_activity = new Intent(this, LoginActivity.class);
-            new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(new_activity);
-        }else {
-            Toast.makeText(getApplicationContext(), "Log out failed!", Toast.LENGTH_SHORT).show();
+            main_redirect("article", bundle);
         }
     }
 
     // Menu
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        mainMenu = menu;
-        if(menustyle == menuStyle.INVISIBLE){
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.nonhome, mainMenu);
-
-            return true;
-        }else if(menustyle == menuStyle.VISIBLE){
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.article, mainMenu);
-
-            return true;
-        }
-
-        return false;
-    }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(interfaceEnabled){

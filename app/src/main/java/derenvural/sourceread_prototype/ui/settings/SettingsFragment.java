@@ -1,35 +1,182 @@
 package derenvural.sourceread_prototype.ui.settings;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
+import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class SettingsFragment extends Fragment {
-
-    private SettingsViewModel settingsViewModel;
+    // List
+    private ListView listView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        settingsViewModel =
-                ViewModelProviders.of(this).get(SettingsViewModel.class);
+        // Find list view
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
-        final TextView textView = root.findViewById(R.id.text_tools);
-        settingsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        listView = root.findViewById(R.id.list_view);
+
+        // Add onItemClick listener
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Current item in list
+                TextView item = (TextView) view;
+
+                if(item.getText().equals(getResources().getString(R.string.delete_articles))){
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Attempt to delete ALL articles regardless of app
+                            // Get user
+                            SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
+                            LoggedInUser user = currentActivity.getUser();
+
+                            if(user.getApps() != null && user.getApps().getValue() != null && user.getApps().getValue().size() > 0) {
+                                // Deactivate interface
+                                currentActivity.deactivate_interface();
+
+                                // Remove all articles
+                                for (App q : user.getApps().getValue()) {
+                                    user.deleteAllArticles(currentActivity, currentActivity.getDatabase(), q.getTitle());
+                                }
+
+                                // Set updated user
+                                currentActivity.setUser(user);
+
+                                // End dialog
+                                dialog.dismiss();
+                            }else{
+                                Toast.makeText(currentActivity, "no apps to disconnect!", Toast.LENGTH_SHORT).show();
+                                Log.d("TASK", "no apps to disconnect!");
+                            }
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    AlertDialog alertDialog = createDialog(R.string.dialog_delete_all_articles,positive, negative);
+                    alertDialog.show();
+                }else if(item.getText().equals(getResources().getString(R.string.disconnect_apps))){
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Attempt to disconnect ALL apps
+                            // Get user
+                            SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
+                            LoggedInUser user = currentActivity.getUser();
+
+                            if(user.getApps() != null && user.getApps().getValue() != null && user.getApps().getValue().size() > 0) {
+                                // Deactivate interface
+                                currentActivity.deactivate_interface();
+
+                                // Remove all articles
+                                for (App q : user.getApps().getValue()) {
+                                    user.disconnectApp(currentActivity, currentActivity.getDatabase(), q, R.id.nav_settings);
+                                }
+
+                                // Set updated user
+                                currentActivity.setUser(user);
+
+                                // End dialog
+                                dialog.dismiss();
+                            }else{
+                                Toast.makeText(currentActivity, "no apps to disconnect!", Toast.LENGTH_SHORT).show();
+                                Log.d("TASK", "no apps to disconnect!");
+                            }
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    AlertDialog alertDialog = createDialog(R.string.dialog_disconnect_all_apps,positive, negative);
+                    alertDialog.show();
+                }else if(item.getText().equals(getResources().getString(R.string.action_logout_user))){
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Attempt to log out
+                            SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
+                            currentActivity.logout();
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    AlertDialog alertDialog = createDialog(R.string.dialog_log_out,positive, negative);
+                    alertDialog.show();
+                }else if(item.getText().equals(getResources().getString(R.string.delete_account))){
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // TODO: attempt to delete account
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    AlertDialog alertDialog = createDialog(R.string.dialog_delete_account,positive, negative);
+                    alertDialog.show();
+                }
             }
         });
+
         return root;
+    }
+
+    // Dialogue
+    public AlertDialog createDialog(int resource, DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative) {
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+
+        // Set message and listeners
+        builder.setMessage(resource)
+                .setPositiveButton(R.string.user_sure, positive)
+                .setNegativeButton(R.string.user_cancel, negative);
+
+        return builder.create();
     }
 }

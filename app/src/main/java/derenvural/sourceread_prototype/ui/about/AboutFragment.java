@@ -1,8 +1,6 @@
 package derenvural.sourceread_prototype.ui.about;
 
 import android.os.Bundle;
-import android.text.Html;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +19,15 @@ import androidx.lifecycle.ViewModelProviders;
 import derenvural.sourceread_prototype.R;
 
 public class AboutFragment extends Fragment {
-
-    private ListView listView;
     private AboutViewModel aboutViewModel;
+    // List
+    private ListView listView;
+    // Buttons
     private Button backButton;
+    // Views
     private ScrollView scrolledText;
     private TextView text;
+    // Layout
     private LinearLayout ll;
     private LinearLayout.LayoutParams lp;
 
@@ -70,7 +71,7 @@ public class AboutFragment extends Fragment {
                     }
                 });
 
-                if(item.getText().equals("Contact Us")){
+                if(item.getText().equals(getResources().getString(R.string.contact_us))){
                     // Open Contact Us
                     // Set text
                     aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.contact_html), HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -83,7 +84,7 @@ public class AboutFragment extends Fragment {
 
                     // Hide list
                     listView.setVisibility(View.GONE);
-                }else if(item.getText().equals("Privacy Policy")){
+                }else if(item.getText().equals(getResources().getString(R.string.privacy_policy))){
                     // Open Privacy Policy
                     // Set text
                     aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.policy_html), HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -96,7 +97,7 @@ public class AboutFragment extends Fragment {
 
                     // Hide list
                     listView.setVisibility(View.GONE);
-                }else if(item.getText().equals("Terms of Service")){
+                }else if(item.getText().equals(getResources().getString(R.string.tos))){
                     // Open Terms of Service
                     // Set text
                     aboutViewModel.setText(HtmlCompat.fromHtml(getString(R.string.tos_html), HtmlCompat.FROM_HTML_MODE_LEGACY));

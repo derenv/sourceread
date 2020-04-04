@@ -7,14 +7,10 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -22,14 +18,8 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.Menu;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -40,39 +30,18 @@ import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
-import derenvural.sourceread_prototype.ui.app.AppFragment;
-import derenvural.sourceread_prototype.ui.apps.redirectType;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
-import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
-public class MainActivity extends AppCompatActivity {
-    // Android
-    private AppBarConfiguration mAppBarConfiguration;
-    private ProgressBar progressBar;
-    private DrawerLayout drawer;
-    private Menu mainMenu;
-    // Services
-    private FirebaseAuth mAuth;
-    private fdatabase db;
-    private httpHandler httph;
-    // User
-    public LoggedInUser user;
+public class MainActivity extends SourceReadActivity {
     // Variables
-    private boolean interfaceEnabled;
-    private menuStyle menustyle;
     private boolean appCallback;
-
-    public httpHandler getHttpHandler() { return httph; }
-    public fdatabase getDatabase() { return db; }
-    public LoggedInUser getUser() { return user; }
-    public void setUser(LoggedInUser user) { this.user = user; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        menustyle = menuStyle.VISIBLE;
+        menustyle = menuStyle.MAIN;
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -104,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                 switch (id) {
                     case R.id.nav_home: {
                         // Change to correct menu
-                        menustyle = menuStyle.VISIBLE;
+                        menustyle = menuStyle.MAIN;
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_home);
@@ -112,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case R.id.nav_statistics: {
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.OUTER;
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_statistics);
@@ -120,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case R.id.nav_apps: {
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.OUTER;
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_apps);
@@ -128,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case R.id.nav_about: {
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.OUTER;
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
@@ -136,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     case R.id.nav_settings: {
                         // Change to correct menu
-                        menustyle = menuStyle.INVISIBLE;
+                        menustyle = menuStyle.SETTINGS;
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
@@ -170,57 +139,6 @@ public class MainActivity extends AppCompatActivity {
             // handle app links
             handleIntent(getIntent());
         }
-    }
-
-    // Interface methods
-    private void setDrawerEnabled(boolean enabled) {
-        int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED :
-                DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
-
-        drawer.setDrawerLockMode(lockMode);
-        interfaceEnabled = enabled;
-    }
-    public void deactivate_interface(){
-        progressBar.setVisibility(View.VISIBLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        setDrawerEnabled(false);
-    }
-    public void activate_interface(){
-        progressBar.setVisibility(View.INVISIBLE);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        setDrawerEnabled(true);
-    }
-
-    // Redirects
-    private void login_redirect(){
-        // Redirect to login page
-        Intent new_activity = new Intent(this, LoginActivity.class);
-        new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(new_activity);
-        finish();
-    }
-    public void app_fragment_redirect(@NonNull App app, @NonNull redirectType type){
-        // Create bundle with app
-        Bundle appBundle = new Bundle();
-        app.saveInstanceState(appBundle);
-        appBundle.putSerializable("type",type);
-
-        // Navigate to app details fragment
-        Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_app, appBundle);
-        drawer.closeDrawers();
-    }
-    public void apps_fragment_redirect(){
-        // Navigate to app choice fragment
-        Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_apps);
-        drawer.closeDrawers();
-    }
-    public void choice_fragment_redirect(){
-        // Navigate to app choice fragment
-        Navigation.findNavController(this,R.id.nav_host_fragment).navigate(R.id.nav_appschoice);
-        drawer.closeDrawers();
     }
 
     private void handleIntent(Intent intent) {
@@ -281,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
     public void populate(final LoggedInUser user) {
         // Create async task
         final populateUserAsyncTask task = new populateUserAsyncTask(this, db, httph);
-        final MainActivity main = this;
+        final SourceReadActivity currentActivity = this;
 
         // execute async task
         task.execute(user);
@@ -305,9 +223,9 @@ public class MainActivity extends AppCompatActivity {
                             String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
 
                             // Store this object using local persistence
-                            if (storageSaver.write(main, getUser().getUserId().getValue(), getUser())) {
+                            if (storageSaver.write(currentActivity, getUser().getUserId().getValue(), getUser())) {
                                 // Redirect to browser for app login
-                                httph.browser_open(main, url);
+                                httph.browser_open(currentActivity, url);
                             } else {
                                 Log.e("HTTP", "login url request failure");
                             }
@@ -322,23 +240,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Menu
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        mainMenu = menu;
-        if(menustyle == menuStyle.INVISIBLE){
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.nonhome, mainMenu);
-
-            return true;
-        }else if(menustyle == menuStyle.VISIBLE){
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.main, mainMenu);
-
-            return true;
-        }
-
-        return false;
-    }
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(interfaceEnabled){
@@ -386,33 +287,11 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         int fragmentID = navController.getCurrentDestination().getId();
         if(fragmentID == R.id.nav_app && appCallback){
-            apps_fragment_redirect();
+            fragment_redirect(R.id.nav_apps, new Bundle());
             return true;
         }else {
             return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                     || super.onSupportNavigateUp();
-        }
-    }
-
-    private void logout(){
-        // Sign out Firebase user
-        mAuth.signOut();
-
-        // Check for successful sign out
-        if(null == mAuth.getCurrentUser()){
-            Toast.makeText(getApplicationContext(), "Successful Log out", Toast.LENGTH_SHORT).show();
-
-            // Remove objects
-            db = null;
-            httph = null;
-            user = null;
-
-            // Start login activity
-            Intent new_activity = new Intent(this, LoginActivity.class);
-            new_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(new_activity);
-        }else {
-            Toast.makeText(getApplicationContext(), "Log out failed!", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -15,12 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.importAppsAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.AppAdapter;
@@ -105,10 +104,15 @@ public class AppsChoiceFragment extends Fragment {
         for (App app : appChoiceViewModel.getCards().getValue()) {
             if (app.getTitle().equals(title)) {
                 // Fetch user data
-                MainActivity main = (MainActivity) getActivity();
+                SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
+
+                // Create bundle with app
+                Bundle appBundle = new Bundle();
+                app.saveInstanceState(appBundle);
+                appBundle.putSerializable("type",redirectType.ADD);
 
                 // Navigate to page showing data on selected app
-                main.app_fragment_redirect(app, redirectType.ADD);
+                currentActivity.fragment_redirect(R.id.nav_app, appBundle);
                 break;
             }
         }
@@ -119,17 +123,17 @@ public class AppsChoiceFragment extends Fragment {
      * */
     public void update() {
         // Deactivate the UI
-        final MainActivity main = (MainActivity) getActivity();
-        main.deactivate_interface();
+        final SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
+        currentActivity.deactivate_interface();
 
         // Create async task
-        final importAppsAsyncTask task = new importAppsAsyncTask(main.getDatabase());
+        final importAppsAsyncTask task = new importAppsAsyncTask(currentActivity.getDatabase());
 
         // execute async task
-        task.execute(main.getUser().getApps().getValue());
+        task.execute(currentActivity.getUser().getApps().getValue());
 
         // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
@@ -139,7 +143,7 @@ public class AppsChoiceFragment extends Fragment {
                     appChoiceViewModel.setCards(task.getData().getValue());
 
                     // Reactivate the UI
-                    main.activate_interface();
+                    currentActivity.activate_interface();
                 }
             }
         });

@@ -2,7 +2,6 @@ package derenvural.sourceread_prototype.data.login;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,7 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import derenvural.sourceread_prototype.MainActivity;
+import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.populateAppsAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.writeAppsAsyncTask;
@@ -35,7 +35,6 @@ import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
-import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class LoggedInUser implements Serializable {
     // Basic data
@@ -52,14 +51,14 @@ public class LoggedInUser implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Standard constructor
-    public LoggedInUser(FirebaseUser user) {
+    public LoggedInUser(@NonNull FirebaseUser user) {
         // Populate object from database
         setUserId(user.getUid());
         setDisplayName(user.getDisplayName());
         setEmail(user.getEmail());
     }
 
-    public void loadInstanceState(Bundle outState) {
+    public void loadInstanceState(@NonNull Bundle outState) {
         // Basic data
         setUserId((String) outState.getSerializable("id"));
         setDisplayName((String) outState.getSerializable("displayName"));
@@ -71,7 +70,7 @@ public class LoggedInUser implements Serializable {
         // Statistical data
         setVeracity((String) outState.getSerializable("veracity"));
     }
-    public void saveInstanceState(Bundle bundle) {
+    public void saveInstanceState(@NonNull Bundle bundle) {
         // Basic data
         bundle.putSerializable("id", getUserId().getValue());
         bundle.putSerializable("displayName", getDisplayName().getValue());
@@ -84,7 +83,7 @@ public class LoggedInUser implements Serializable {
         bundle.putSerializable("veracity", getVeracity().getValue());
     }
 
-    public void writeObject(ObjectOutputStream stream) throws IOException {
+    public void writeObject(@NonNull ObjectOutputStream stream) throws IOException {
         // Basic data
         stream.writeObject(getUserId().getValue());
         stream.writeObject(getDisplayName().getValue());
@@ -97,7 +96,7 @@ public class LoggedInUser implements Serializable {
         stream.writeObject(getVeracity().getValue());
     }
 
-    public void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    public void readObject(@NonNull ObjectInputStream stream) throws IOException, ClassNotFoundException {
         // Basic data
         setUserId((String) stream.readObject());
         setDisplayName((String) stream.readObject());
@@ -110,7 +109,7 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
-    public void access_tokens(final MainActivity main, httpHandler httph, String app_name){
+    public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull httpHandler httph, @NonNull String app_name){
         // Create async task
         final userAccessAsyncTask task = new userAccessAsyncTask(httph, app_name);
 
@@ -118,7 +117,7 @@ public class LoggedInUser implements Serializable {
         task.execute(this);
 
         // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
@@ -128,13 +127,13 @@ public class LoggedInUser implements Serializable {
                     setApps(task.getData().getValue());
 
                     // Reactivate the UI
-                    main.activate_interface();
+                    currentActivity.activate_interface();
                 }
             }
         });
     }
 
-    public void disconnectApp(final MainActivity main, final fdatabase db, final App app){
+    public void disconnectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final App app, @NonNull final int destination){
         // create list of all remaining apps in user object
         ArrayList<App> currentApps = getApps().getValue();
         ArrayList<App> newApps = new ArrayList<App>();
@@ -143,6 +142,9 @@ public class LoggedInUser implements Serializable {
                 newApps.add(qq);
             }
         }
+
+        // Delete all articles imported from app
+        deleteAllArticles(currentActivity, db, app.getTitle());
 
         // Remove app from user object
         setApps(newApps);
@@ -154,25 +156,25 @@ public class LoggedInUser implements Serializable {
         task.execute(newApps);
 
         // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
                     // Notify user
-                    Toast.makeText(main, app.getTitle()+" disconnected!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(currentActivity, app.getTitle()+" disconnected!", Toast.LENGTH_LONG).show();
                     Log.d("TASK", "apps delete task done!");
 
                     // Reactivate the UI
-                    main.activate_interface();
+                    currentActivity.activate_interface();
 
                     // Redirect to list of apps page
-                    main.apps_fragment_redirect();
+                    currentActivity.fragment_redirect(destination, new Bundle());
                 }
             }
         });
     }
 
-    public void connectApp(final MainActivity main, final fdatabase db, final httpHandler httph, final App app){
+    public void connectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final httpHandler httph, @NonNull final App app){
         // create list of all remaining apps in user object
         ArrayList<App> currentApps = getApps().getValue();
         if(currentApps == null){
@@ -191,7 +193,7 @@ public class LoggedInUser implements Serializable {
         writeAppsTask.execute(currentApps);
 
         // Check for task finish
-        writeAppsTask.getDone().observe(main, new Observer<Boolean>() {
+        writeAppsTask.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
@@ -205,7 +207,7 @@ public class LoggedInUser implements Serializable {
                     appTask.execute(found_apps);
 
                     // Check for task finish
-                    appTask.getDone().observe(main, new Observer<Boolean>() {
+                    appTask.getDone().observe(currentActivity, new Observer<Boolean>() {
                         @Override
                         public void onChanged(Boolean done) {
                             if (done) {
@@ -222,9 +224,9 @@ public class LoggedInUser implements Serializable {
                                         String url = app_login_url.replaceAll("REPLACEME", appToOpen.getRequestToken());
 
                                         // Store this object using local persistence
-                                        if (storageSaver.write(main, getUserId().getValue(), user)) {
+                                        if (storageSaver.write(currentActivity, getUserId().getValue(), user)) {
                                             // Redirect to browser for app login
-                                            httph.browser_open(main, url);
+                                            httph.browser_open(currentActivity, url);
                                         } else {
                                             Log.e("HTTP", "login url request failure");
                                         }
@@ -238,15 +240,15 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void importArticles(final MainActivity main, httpHandler httph, final fdatabase db, final App app){
+    public void importArticles(@NonNull final SourceReadActivity currentActivity, @NonNull httpHandler httph, @NonNull final fdatabase db, @NonNull final App app){
         // Create async task
-        final importArticlesAsyncTask task = new importArticlesAsyncTask(main, this, httph, db);
+        final importArticlesAsyncTask task = new importArticlesAsyncTask(currentActivity, this, httph, db);
 
         // execute async task
         task.execute(app);
 
         // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
@@ -281,10 +283,10 @@ public class LoggedInUser implements Serializable {
 
                                 // Notify user
                                 Log.d("DB","update done");
-                                Toast.makeText(main, "All your articles from "+app.getTitle()+" imported!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(currentActivity, "All your articles from "+app.getTitle()+" imported!", Toast.LENGTH_SHORT).show();
 
                                 // Reactivate the UI
-                                main.activate_interface();
+                                currentActivity.activate_interface();
                             }else{
                                 // Log error
                                 Log.e("DB", "write failed: ", stamp_task.getException());
@@ -296,88 +298,108 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void deleteAllArticles(final MainActivity main, final fdatabase db, final String app_name){
+    public void deleteAllArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final String app_name){
         // Build list of articles to remove
-        ArrayList<Article> articles = new ArrayList<Article>();
-        for(Article article : getArticles().getValue()){
-            if(article.getApp().equals(app_name)) {
-                articles.add(article);
-            }
-        }
-
-        // Create async task
-        final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
-
-        // execute async task
-        task.execute(articles);
-
-        // Check for task finish
-        task.getDone().observe(main, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean done) {
-                if (done) {
-                    Log.d("TASK", "article deletion task done!");
-
-                    // Retrieve data
-                    setArticles(task.getData().getValue());
-
-                    // Replace timestamp with invalid
-                    ArrayList<App> old_apps = getApps().getValue();
-                    ArrayList<App> new_apps = new ArrayList<App>();
-                    for(App this_app : old_apps){
-                        if(this_app.getTitle().equals(app_name)){
-                            // Store timestamp in user object
-                            this_app.setTimestamp(0l);
-                            new_apps.add(this_app);
-
-                            // Store timestamp in database
-                            Map<String, Object> new_stamp = new HashMap<>();
-                            new_stamp.put(app_name, 0l);
-                            db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
-                                    if (stamp_task.isSuccessful()) {
-                                        Log.d("DB","update done");
-
-                                        // Reactivate the UI
-                                        Toast.makeText(main, "All articles imported from "+app_name+" deleted!", Toast.LENGTH_SHORT).show();
-                                        main.activate_interface();
-                                    }else{
-                                        // Log error
-                                        Log.e("DB", "update failed: ", stamp_task.getException());
-                                    }
-                                }
-                            });
-                        }else{
-                            new_apps.add(this_app);
-                        }
-                    }
-                    setApps(new_apps);
+        if(getArticles() != null && getArticles().getValue() != null && getArticles().getValue().size() > 0) {
+            ArrayList<Article> articles = new ArrayList<Article>();
+            for(Article article : getArticles().getValue()){
+                if(article.getApp().equals(app_name)) {
+                    articles.add(article);
                 }
             }
-        });
+            if(articles.size() > 0) {
+
+                // Create async task
+                final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
+
+                // execute async task
+                task.execute(articles);
+
+                // Check for task finish
+                task.getDone().observe(currentActivity, new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(Boolean done) {
+                        if (done) {
+                            Log.d("TASK", "article deletion task done!");
+
+                            // Retrieve data
+                            setArticles(task.getData().getValue());
+
+                            // Replace timestamp with invalid
+                            ArrayList<App> old_apps = getApps().getValue();
+                            ArrayList<App> new_apps = new ArrayList<App>();
+                            for (App this_app : old_apps) {
+                                if (this_app.getTitle().equals(app_name)) {
+                                    // Store timestamp in user object
+                                    this_app.setTimestamp(0L);
+                                    new_apps.add(this_app);
+
+                                    // Store timestamp in database
+                                    Map<String, Object> new_stamp = new HashMap<>();
+                                    new_stamp.put(app_name, 0L);
+                                    db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
+                                            if (stamp_task.isSuccessful()) {
+                                                Log.d("DB", "update done");
+
+                                                // Reactivate the UI
+                                                Toast.makeText(currentActivity, "All articles imported from " + app_name + " deleted!", Toast.LENGTH_SHORT).show();
+                                                currentActivity.activate_interface();
+                                            } else {
+                                                // Log error
+                                                Log.e("DB", "update failed: ", stamp_task.getException());
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    new_apps.add(this_app);
+                                }
+                            }
+                            setApps(new_apps);
+                        }
+                    }
+                });
+            }else{
+                Toast.makeText(currentActivity, "no articles from "+app_name+" to delete!", Toast.LENGTH_SHORT).show();
+                Log.d("TASK", "no articles from "+app_name+" to delete!");
+                currentActivity.activate_interface();
+            }
+        }else{
+            Toast.makeText(currentActivity, "no articles from "+app_name+" to delete!", Toast.LENGTH_SHORT).show();
+            Log.d("TASK", "no articles from "+app_name+" to delete!");
+            currentActivity.activate_interface();
+        }
     }
 
-    public void deleteArticle(final ArticleActivity aa, fdatabase db, final ArrayList<Article> articles){
+    public void deleteArticle(@NonNull final SourceReadActivity currentActivity, @NonNull fdatabase db, @NonNull final ArrayList<Article> articles){
         // Create async task
         final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
 
         // execute async task
         task.execute(articles);
 
+        final LoggedInUser user = this;
+
         // Check for task finish
-        task.getDone().observe(aa, new Observer<Boolean>() {
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
                     Log.d("TASK", "article deletion task done!");
 
                     // Retrieve data
-                    setArticles(task.getData().getValue());
+                    user.setArticles(task.getData().getValue());
 
-                    // Reactivate the UI & redirect to main (no article for fragment to display)
-                    aa.activate_interface();
-                    aa.main_redirect();
+                    // Reactivate the UI
+                    currentActivity.activate_interface();
+
+                    // Create bundle with serialised object
+                    Bundle bundle = new Bundle();
+                    user.saveInstanceState(bundle);
+
+                    // Redirect to main (no article for fragment to display)
+                    currentActivity.main_redirect("article", bundle);
                 }
             }
         });
@@ -408,9 +430,9 @@ public class LoggedInUser implements Serializable {
     }
 
     // SET
-    public void setUserId(String userId) { this.userId.setValue(userId); }
-    public void setDisplayName(String displayName) { this.displayName.setValue(displayName); }
-    public void setEmail(String email) { this.email.setValue(email); }
+    private void setUserId(String userId) { this.userId.setValue(userId); }
+    private void setDisplayName(String displayName) { this.displayName.setValue(displayName); }
+    private void setEmail(String email) { this.email.setValue(email); }
     public void setApps(ArrayList<App> apps) { this.apps.setValue(apps); }
     public void setArticles(ArrayList<Article> articles) { this.articles.setValue(articles); }
     public void setVeracity(String veracity) { this.veracity.setValue(veracity); }

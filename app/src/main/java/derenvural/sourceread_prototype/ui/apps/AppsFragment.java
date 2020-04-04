@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.MainActivity;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.AppAdapter;
 import derenvural.sourceread_prototype.R;
@@ -92,18 +92,23 @@ public class AppsFragment extends Fragment {
      * */
     private void startAppActivity(String title){
         // Fetch user data
-        MainActivity main = (MainActivity) getActivity();
+        SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
 
         // Get app for passing
         if(title.equals("Add new App")){
             // Navigate to list of choices
-            main.choice_fragment_redirect();
+            currentActivity.fragment_redirect(R.id.nav_appschoice, new Bundle());
         }else {
             // Find selected app's data
             for (App app : appsViewModel.getCards().getValue()) {
                 if (app.getTitle().equals(title)) {
+                    // Create bundle with app
+                    Bundle appBundle = new Bundle();
+                    app.saveInstanceState(appBundle);
+                    appBundle.putSerializable("type",redirectType.VIEW);
+
                     // Navigate to page showing data on selected app
-                    main.app_fragment_redirect(app, redirectType.VIEW);
+                    currentActivity.fragment_redirect(R.id.nav_app, appBundle);
                     break;
                 }
             }
@@ -115,9 +120,9 @@ public class AppsFragment extends Fragment {
      * */
     public void update(){
         // Request articles
-        MainActivity main = (MainActivity) getActivity();
+        SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
 
         // Add observer to articles
-        appsViewModel.check_apps(main, main.getUser());
+        appsViewModel.check_apps(currentActivity, currentActivity.getUser());
     }
 }

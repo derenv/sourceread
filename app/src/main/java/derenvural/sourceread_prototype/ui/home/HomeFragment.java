@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
@@ -95,15 +95,15 @@ public class HomeFragment extends Fragment {
         for(Article article: homeViewModel.getCards().getValue()) {
             if(article.getTitle().equals(title)){
                 // Fetch user data
-                MainActivity main = (MainActivity) getActivity();
+                SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
 
                 // create article redirect intent
-                Intent article_activity = new Intent(main, ArticleActivity.class);
+                Intent article_activity = new Intent(currentActivity, ArticleActivity.class);
 
                 // Create bundle with serialised object
                 Bundle bundle = new Bundle();
                 article.saveInstanceState(bundle);
-                main.getUser().saveInstanceState(bundle);
+                currentActivity.getUser().saveInstanceState(bundle);
 
                 // Add title & bundle to intent
                 article_activity.putExtra("activity", "main");
@@ -111,8 +111,8 @@ public class HomeFragment extends Fragment {
                 article_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 // Start article activity and close main activity
-                main.startActivity(article_activity);
-                main.finish();
+                currentActivity.startActivity(article_activity);
+                currentActivity.finish();
             }
         }
     }
@@ -121,18 +121,10 @@ public class HomeFragment extends Fragment {
      * Fetch articles
      * */
     public void update(){
-        if(getActivity().getClass() == MainActivity.class) {
-            // Request articles
-            MainActivity main = (MainActivity) getActivity();
+        // Request articles
+        SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
 
-            // Add observer to articles
-            homeViewModel.check_articles(main, main.getUser());
-        }else if(getActivity().getClass() == ArticleActivity.class){
-            // Request articles
-            ArticleActivity articleActivity = (ArticleActivity) getActivity();
-
-            // Add observer to articles
-            homeViewModel.check_articles(articleActivity, articleActivity.getUser());
-        }
+        // Add observer to articles
+        homeViewModel.check_articles(currentActivity, currentActivity.getUser());
     }
 }

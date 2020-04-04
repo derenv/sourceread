@@ -4,12 +4,10 @@ import android.app.Activity;
 
 import androidx.lifecycle.Observer;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,12 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
-public class LoginActivity extends AppCompatActivity {
-
+public class LoginActivity extends SourceReadActivity {
     private LoginViewModel loginViewModel;
 
     @Override
@@ -137,30 +134,19 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateUiWithUser() {
         // Display login message
-        Toast.makeText(getApplicationContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
-
-        // handle login redirect
-        Intent main_activity = new Intent(getApplicationContext(), MainActivity.class);
-
-        // Get user for passing
-        LoggedInUser user_data = loginViewModel.getLoginUser();
+        Toast.makeText(this, "Authentication successful!", Toast.LENGTH_SHORT).show();
 
         // Create bundle with serialised object
+        LoggedInUser user_data = loginViewModel.getLoginUser();
         Bundle bundle = new Bundle();
         user_data.saveInstanceState(bundle);
 
-        // Add title & bundle to intent
-        main_activity.putExtra("activity","login");
-        main_activity.putExtras(bundle);
-        main_activity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
         // Start next activity and close login activity
-        startActivity(main_activity);
-        finish();
+        main_redirect("login", bundle);
     }
 
     private void showLoginFailed(@StringRes Integer errorString) {
         // Display error message
-        Toast.makeText(getApplicationContext(), "Authentication unsuccessful!: "+errorString, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Authentication unsuccessful!: "+errorString, Toast.LENGTH_SHORT).show();
     }
 }

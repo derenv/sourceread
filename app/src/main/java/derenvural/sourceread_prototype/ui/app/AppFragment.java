@@ -18,12 +18,11 @@ import androidx.lifecycle.ViewModelProviders;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
@@ -39,14 +38,14 @@ public class AppFragment extends Fragment {
     private TextView timestampView;
     private TextView articlesnoView;
     // Context
-    private MainActivity main;
+    private SourceReadActivity currentActivity;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         // Get view model & root element of fragment
         appViewModel = ViewModelProviders.of(this).get(AppViewModel.class);
         View root = inflater.inflate(R.layout.fragment_app, container, false);
-        main = (MainActivity) getActivity();
+        currentActivity = (MainActivity) getActivity();
 
         // Find buttons
         connectButton = root.findViewById(R.id.button_connect);
@@ -106,7 +105,9 @@ public class AppFragment extends Fragment {
         });
 
         // Create callback
+        MainActivity main = (MainActivity) currentActivity;
         main.setAppCallback(false);
+        currentActivity = main;
 
         // Add app to view-model
         update();
@@ -125,8 +126,8 @@ public class AppFragment extends Fragment {
             appViewModel.setApp(app);
 
             // Link to current state of app
-            final LoggedInUser user = main.getUser();
-            user.getApps().observe(main, new Observer<ArrayList<App>>() {
+            final LoggedInUser user = currentActivity.getUser();
+            user.getApps().observe(currentActivity, new Observer<ArrayList<App>>() {
                 @Override
                 public void onChanged(ArrayList<App> apps) {
                     for (App this_app : apps) {
@@ -179,7 +180,7 @@ public class AppFragment extends Fragment {
                     }
                 });
 
-                activateButtons(main, user, app);
+                activateButtons(user, app);
             } else if (type == redirectType.ADD) {
                 // disable timestamp & number of articles fields
                 timestampView.setVisibility(View.INVISIBLE);
@@ -194,24 +195,27 @@ public class AppFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         // Attempt to login to pocket
-                        Toast.makeText(getActivity(), "Attempting to connect app..", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
 
                         // Set callback on back button click
+                        MainActivity main = (MainActivity) currentActivity;
                         main.setAppCallback(true);
 
                         // Change buttons
-                        activateButtons(main, user, app);
+                        activateButtons(user, app);
 
                         //remove app from user
                         user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
                         main.setUser(user);
+
+                        currentActivity = main;
                     }
                 });
             }
         }
     }
 
-    private void activateButtons(@NonNull final MainActivity main, @NonNull final LoggedInUser user, @NonNull final App app){
+    private void activateButtons(@NonNull final LoggedInUser user, @NonNull final App app){
         // Show 'import', 'delete' & 'disconnect' buttons
         importButton.setVisibility(View.VISIBLE);
         deleteButton.setVisibility(View.VISIBLE);
@@ -226,28 +230,22 @@ public class AppFragment extends Fragment {
         importButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Fetch main activity for tool objects
-                MainActivity main = (MainActivity) getActivity();
-
                 // Attempt to import all articles from app
-                Toast.makeText(main, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                main.deactivate_interface();
-                user.importArticles(main, main.getHttpHandler(), main.getDatabase(), appViewModel.getApp().getValue());
-                main.setUser(user);
+                Toast.makeText(currentActivity, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                currentActivity.deactivate_interface();
+                user.importArticles(currentActivity, currentActivity.getHttpHandler(), currentActivity.getDatabase(), appViewModel.getApp().getValue());
+                currentActivity.setUser(user);
             }
         });
         // Add 'delete' onclick event
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Fetch main activity for tool objects
-                MainActivity main = (MainActivity) getActivity();
-
                 // Attempt to delete all articles imported from app
-                Toast.makeText(getActivity(), "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                main.deactivate_interface();
-                user.deleteAllArticles(main, main.getDatabase(), appViewModel.getApp().getValue().getTitle());
-                main.setUser(user);
+                Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                currentActivity.deactivate_interface();
+                user.deleteAllArticles(currentActivity, currentActivity.getDatabase(), appViewModel.getApp().getValue().getTitle());
+                currentActivity.setUser(user);
             }
         });
         // Add 'disconnect' onclick event
@@ -255,14 +253,18 @@ public class AppFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // Attempt to remove app
-                Toast.makeText(getActivity(), "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                Toast.makeText(currentActivity, "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                MainActivity main = (MainActivity) currentActivity;
 
                 // Set callback on back button click
                 main.setAppCallback(false);
 
                 // Disconnect app
-                user.disconnectApp(main, main.getDatabase(), app);
+                user.disconnectApp(main, main.getDatabase(), app, R.id.nav_apps);
                 main.setUser(user);
+
+                currentActivity = main;
             }
         });
     }

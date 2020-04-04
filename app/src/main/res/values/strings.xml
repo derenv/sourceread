@@ -51,22 +51,44 @@
     <string name="action_sign_in_short">login</string>
     <string name="action_register">Register</string>
     <!--==MESSAGES-->
-    <string name="welcome">"Welcome !"</string>
+    <string name="welcome">Welcome!</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-    <string name="register_failed">"Registration failed"</string>
+    <string name="login_failed">Login failed</string>
+    <string name="register_failed">Registration failed</string>
 
     <!--FRAGMENT PLACEHOLDERS-->
     <string name="home_placeholder">This is where imported articles appear!</string>
     <string name="apps_placeholder">This is where you add article saver apps!</string>
 
+    <!--SETTINGS FRAGMENT-->
+    <!--==SECTIONS-->
+    <string name="delete_articles">Delete all imported Articles</string>
+    <string name="disconnect_apps">Disconnect all connected Apps</string>
+    <string name="delete_account">Delete Account</string>
+    <string-array name="settings_list">
+        <item>@string/delete_articles</item>
+        <item>@string/disconnect_apps</item>
+        <item>@string/action_logout_user</item>
+        <item>@string/delete_account</item>
+    </string-array>
+    <!--==DIALOG-->
+    <string name="dialog_delete_all_articles">Are you sure you want to delete all articles? You will need to reimport any you want to keep!</string>
+    <string name="dialog_disconnect_all_apps">Are you sure you want to disconnect all apps? You will need to reconnect any you want to keep!</string>
+    <string name="dialog_log_out">Are you sure you want to log out?</string>
+    <string name="dialog_delete_account">Are you sure you want to delete your account? All personal data is deleted permanently, and you will need to start from scratch if you rejoin!</string>
+    <string name="user_sure">I\'m sure!</string>
+    <string name="user_cancel">Cancel</string>
+
     <!--ABOUT FRAGMENT-->
     <!--==SECTIONS-->
+    <string name="contact_us">Contact Us</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="tos">Terms of Service</string>
     <string-array name="about_list">
-        <item>Contact Us</item>
-        <item>Privacy Policy</item>
-        <item>Terms of Service</item>
+        <item>@string/contact_us</item>
+        <item>@string/privacy_policy</item>
+        <item>@string/tos</item>
     </string-array>
     <!--==BUTTON-->
     <string name="button_back">Back</string>
