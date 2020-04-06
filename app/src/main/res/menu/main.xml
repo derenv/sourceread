@@ -6,7 +6,7 @@
         android:id="@+id/action_import_articles"
         android:orderInCategory="1"
         android:title="@string/action_import_articles"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_refresh_apps"
         android:orderInCategory="2"

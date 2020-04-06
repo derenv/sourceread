@@ -12,15 +12,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class SettingsFragment extends Fragment {
@@ -77,8 +74,11 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    AlertDialog alertDialog = createDialog(R.string.dialog_delete_all_articles,positive, negative);
-                    alertDialog.show();
+                    SourceReadDialog dialogArticles = new SourceReadDialog(getActivity(),
+                                                                            negative, positive,
+                                                                            null, null,
+                                                                            R.string.dialog_delete_all_articles);
+                    dialogArticles.show();
                 }else if(item.getText().equals(getResources().getString(R.string.disconnect_apps))){
                     // Create dialog listeners
                     DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
@@ -116,8 +116,11 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    AlertDialog alertDialog = createDialog(R.string.dialog_disconnect_all_apps,positive, negative);
-                    alertDialog.show();
+                    SourceReadDialog dialogApps = new SourceReadDialog(getActivity(),
+                            negative, positive,
+                            null, null,
+                            R.string.dialog_disconnect_all_apps);
+                    dialogApps.show();
                 }else if(item.getText().equals(getResources().getString(R.string.action_logout_user))){
                     // Create dialog listeners
                     DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
@@ -138,8 +141,11 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    AlertDialog alertDialog = createDialog(R.string.dialog_log_out,positive, negative);
-                    alertDialog.show();
+                    SourceReadDialog dialogLogout = new SourceReadDialog(getActivity(),
+                            negative, positive,
+                            null, null,
+                            R.string.dialog_log_out);
+                    dialogLogout.show();
                 }else if(item.getText().equals(getResources().getString(R.string.delete_account))){
                     // Create dialog listeners
                     DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
@@ -158,25 +164,15 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    AlertDialog alertDialog = createDialog(R.string.dialog_delete_account,positive, negative);
-                    alertDialog.show();
+                    SourceReadDialog dialogAccount = new SourceReadDialog(getActivity(),
+                            negative, positive,
+                            null, null,
+                            R.string.dialog_delete_account);
+                    dialogAccount.show();
                 }
             }
         });
 
         return root;
-    }
-
-    // Dialogue
-    public AlertDialog createDialog(int resource, DialogInterface.OnClickListener positive, DialogInterface.OnClickListener negative) {
-        // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
-
-        // Set message and listeners
-        builder.setMessage(resource)
-                .setPositiveButton(R.string.user_sure, positive)
-                .setNegativeButton(R.string.user_cancel, negative);
-
-        return builder.create();
     }
 }

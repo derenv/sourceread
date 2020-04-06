@@ -79,6 +79,7 @@
     <string name="dialog_delete_account">Are you sure you want to delete your account? All personal data is deleted permanently, and you will need to start from scratch if you rejoin!</string>
     <string name="user_sure">I\'m sure!</string>
     <string name="user_cancel">Cancel</string>
+    <string name="dialog_placeholder">Are you sure?</string>
 
     <!--ABOUT FRAGMENT-->
     <!--==SECTIONS-->
