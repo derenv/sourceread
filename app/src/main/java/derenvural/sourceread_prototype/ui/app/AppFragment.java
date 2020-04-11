@@ -130,11 +130,13 @@ public class AppFragment extends Fragment {
             user.getApps().observe(currentActivity, new Observer<ArrayList<App>>() {
                 @Override
                 public void onChanged(ArrayList<App> apps) {
-                    for (App this_app : apps) {
-                        if (this_app.getTitle().equals(app.getTitle())) {
-                            // Assign values
-                            appViewModel.setApp(this_app);
-                            break;
+                    if(apps != null) {
+                        for (App this_app : apps) {
+                            if (this_app.getTitle().equals(app.getTitle())) {
+                                // Assign values
+                                appViewModel.setApp(this_app);
+                                break;
+                            }
                         }
                     }
                 }

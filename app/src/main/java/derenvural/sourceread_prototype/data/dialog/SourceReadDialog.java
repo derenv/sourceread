@@ -1,6 +1,5 @@
 package derenvural.sourceread_prototype.data.dialog;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 
 import androidx.annotation.NonNull;
@@ -41,6 +40,8 @@ public class SourceReadDialog {
                 };
             }
         }else{
+            this.cancelID = cancelID;
+            cancellable = true;
             this.negative = negative;
         }
 

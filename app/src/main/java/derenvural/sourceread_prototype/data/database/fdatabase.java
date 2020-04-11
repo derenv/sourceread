@@ -1,23 +1,16 @@
 package derenvural.sourceread_prototype.data.database;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Transaction;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.Article;
@@ -105,15 +98,32 @@ public class fdatabase {
         // Return the new ID's
         return newIds;
     }
+
+    // USER HANDLING METHODS
     /*
      * Delete a user document from database
      * */
-    public void delete_user(OnCompleteListener end) {
+    public void delete_user(String uid, OnCompleteListener end) {
         // Get reference to article document in 'articles' collection
-        DocumentReference user_request = get_current_user_request();
+        DocumentReference user_request = get_user_request(uid);
 
         // Execute database delete with onCompleteListener
         user_request.delete().addOnCompleteListener(end);
+    }
+    /*
+     * Create a user document from database
+     * */
+    public void create_user(String uid, OnCompleteListener end) {
+        // Get reference to article document in 'articles' collection
+        CollectionReference users_request = get_users_request();
+
+        Map<String, Object> new_user = new HashMap<String, Object>();
+        new_user.put("apps",new HashMap<String, Integer>());
+        new_user.put("articles",new HashMap<String, String>());
+        new_user.put("veracity","");
+
+        // Execute database delete with onCompleteListener
+        users_request.document(uid).set(new_user).addOnCompleteListener(end);
     }
 
 
@@ -183,6 +193,16 @@ public class fdatabase {
         }else{
             return null;
         }
+    }
+    public CollectionReference get_users_request(){
+        if(mAuth.getUid() != null) {
+            return db.collection("users");
+        }else{
+            return null;
+        }
+    }
+    public DocumentReference get_user_request(String uid){
+        return db.collection("users").document(uid);
     }
     public DocumentReference get_article_request(@NonNull String article_id){
         if(mAuth.getUid() != null) {
