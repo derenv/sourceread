@@ -111,6 +111,9 @@ public class AppsChoiceFragment extends Fragment {
                 app.saveInstanceState(appBundle);
                 appBundle.putSerializable("type",redirectType.ADD);
 
+                // Set help dialog text
+                currentActivity.setHelp(R.string.help_app);
+
                 // Navigate to page showing data on selected app
                 currentActivity.fragment_redirect(R.id.nav_app, appBundle);
                 break;

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import derenvural.sourceread_prototype.data.asyncTasks.populateUserAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
@@ -41,7 +42,12 @@ public class MainActivity extends SourceReadActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        menustyle = menuStyle.MAIN;
+        // Set menu layout style
+        setMenuStyle(menuStyle.MAIN);
+        appCallback = false;
+
+        // Set help dialog content
+        setHelp(R.string.help_home);
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -73,7 +79,10 @@ public class MainActivity extends SourceReadActivity {
                 switch (id) {
                     case R.id.nav_home: {
                         // Change to correct menu
-                        menustyle = menuStyle.MAIN;
+                        setMenuStyle(menuStyle.MAIN);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_home);
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_home);
@@ -81,7 +90,10 @@ public class MainActivity extends SourceReadActivity {
                     }
                     case R.id.nav_statistics: {
                         // Change to correct menu
-                        menustyle = menuStyle.OUTER;
+                        setMenuStyle(menuStyle.OUTER);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_statistics);
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_statistics);
@@ -89,7 +101,10 @@ public class MainActivity extends SourceReadActivity {
                     }
                     case R.id.nav_apps: {
                         // Change to correct menu
-                        menustyle = menuStyle.OUTER;
+                        setMenuStyle(menuStyle.OUTER);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_apps);
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_apps);
@@ -97,7 +112,10 @@ public class MainActivity extends SourceReadActivity {
                     }
                     case R.id.nav_about: {
                         // Change to correct menu
-                        menustyle = menuStyle.OUTER;
+                        setMenuStyle(menuStyle.OUTER);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_about);
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
@@ -105,7 +123,10 @@ public class MainActivity extends SourceReadActivity {
                     }
                     case R.id.nav_settings: {
                         // Change to correct menu
-                        menustyle = menuStyle.SETTINGS;
+                        setMenuStyle(menuStyle.SETTINGS);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_settings);
 
                         // Change fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
@@ -131,10 +152,10 @@ public class MainActivity extends SourceReadActivity {
             login_redirect();
         } else {
             // Create http object
-            httph = new httpHandler(this);
+            setHttpHandler(new httpHandler(this));
 
             // Create database object
-            db = new fdatabase();
+            setDatabase(new fdatabase());
 
             // handle app links
             handleIntent(getIntent());
@@ -159,12 +180,12 @@ public class MainActivity extends SourceReadActivity {
                 Log.d("ACTIVITY","app - "+app_name);
 
                 // Create blank user for populating
-                user = new LoggedInUser(mAuth.getCurrentUser());
+                setUser(new LoggedInUser(mAuth.getCurrentUser()));
 
                 // Fetch user from local persistence
                 if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
                     // Request access tokens (interface reactivated on response)
-                    user.access_tokens(this, httph, app_name);
+                    user.access_tokens(this, getHttpHandler(), app_name);
                 }else{
                     // TODO: show error
                 }
@@ -177,7 +198,7 @@ public class MainActivity extends SourceReadActivity {
             // Fetch the bundle & check if it has extras
             String previous_activity = intent.getStringExtra("activity");
             Bundle extras = intent.getExtras();
-            user = new LoggedInUser(mAuth.getCurrentUser());
+            setUser(new LoggedInUser(mAuth.getCurrentUser()));
             if (extras != null) {
                 // Fetch serialised user
                 user.loadInstanceState(extras);
@@ -198,7 +219,7 @@ public class MainActivity extends SourceReadActivity {
     //Population Methods
     public void populate(final LoggedInUser user) {
         // Create async task
-        final populateUserAsyncTask task = new populateUserAsyncTask(this, db, httph);
+        final populateUserAsyncTask task = new populateUserAsyncTask(this, getDatabase(), getHttpHandler());
         final SourceReadActivity currentActivity = this;
 
         // execute async task
@@ -225,7 +246,7 @@ public class MainActivity extends SourceReadActivity {
                             // Store this object using local persistence
                             if (storageSaver.write(currentActivity, getUser().getUserId().getValue(), getUser())) {
                                 // Redirect to browser for app login
-                                httph.browser_open(currentActivity, url);
+                                getHttpHandler().browser_open(currentActivity, url);
                             } else {
                                 Log.e("HTTP", "login url request failure");
                             }
@@ -242,7 +263,7 @@ public class MainActivity extends SourceReadActivity {
     // Menu
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(interfaceEnabled){
+        if(getInterfaceEnabled()){
             switch (item.getItemId()) {
                 case R.id.action_import_articles:
                     if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
@@ -250,8 +271,9 @@ public class MainActivity extends SourceReadActivity {
                         deactivate_interface();
 
                         // Import articles from user accounts
-                        for(App app: user.getApps().getValue()) {
-                            user.importArticles(this, httph, db, app);
+                        for(App app: getUser().getApps().getValue()) {
+                            // Fetch serialised user
+                            user.importArticles(this, getHttpHandler(), getDatabase(), app);
                         }
                     }else{
                         Toast.makeText(this, "No apps to import from..", Toast.LENGTH_SHORT).show();
@@ -267,9 +289,11 @@ public class MainActivity extends SourceReadActivity {
                     }
 
                     return true;
-                case R.id.action_logout_user:
-                    Toast.makeText(this, "Logging out..", Toast.LENGTH_SHORT).show();
-                    logout();
+                case R.id.action_help:
+                    // Show help dialog
+                    SourceReadDialog helpDialog = new SourceReadDialog(this, null, null, R.string.user_ok, null, getHelp());
+                    helpDialog.show();
+
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);
@@ -286,10 +310,34 @@ public class MainActivity extends SourceReadActivity {
         // Fetch fragment
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         int fragmentID = navController.getCurrentDestination().getId();
-        if(fragmentID == R.id.nav_app && appCallback){
-            fragment_redirect(R.id.nav_apps, new Bundle());
-            return true;
-        }else {
+        int app = R.id.nav_app;
+        int apps = R.id.nav_apps;
+        int apps_c = R.id.nav_apps_choice;
+        if(fragmentID == R.id.nav_app){
+            if(appCallback) {
+                // Set help dialog text
+                setHelp(R.string.help_apps);
+
+                // Redirect to apps choice
+                fragment_redirect(R.id.nav_apps, new Bundle());
+                return true;
+            }else{
+                // Set help dialog text
+                setHelp(R.string.help_apps_choice);
+
+                // Redirect to previous fragment
+                return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                        || super.onSupportNavigateUp();
+            }
+        }else if(fragmentID == R.id.nav_apps_choice){
+            // Set help dialog text
+            setHelp(R.string.help_apps);
+
+            // Redirect to previous fragment
+            return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                    || super.onSupportNavigateUp();
+        }else{
+            // Redirect to previous fragment
             return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                     || super.onSupportNavigateUp();
         }

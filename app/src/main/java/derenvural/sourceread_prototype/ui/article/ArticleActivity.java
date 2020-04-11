@@ -23,6 +23,7 @@ import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.analyse.analyser;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 
@@ -40,7 +41,11 @@ public class ArticleActivity extends SourceReadActivity {
         // Find viewmodel
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
-        menustyle = menuStyle.ARTICLE;
+        // Set menu layout style
+        setMenuStyle(menuStyle.ARTICLE);
+
+        // Set help dialog content
+        setHelp(R.string.help_article);
 
         // Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
@@ -70,25 +75,38 @@ public class ArticleActivity extends SourceReadActivity {
                         Bundle bundle = new Bundle();
                         getUser().saveInstanceState(bundle);
 
+                        // Set help dialog content
+                        setHelp(R.string.help_home);
+
+                        // Redirect to home page
                         main_redirect("article", bundle);
                         break;
                     case R.id.nav_article:
                         // Change to correct menu
-                        menustyle = menuStyle.ARTICLE;
+                        setMenuStyle(menuStyle.ARTICLE);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_article);
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
                         break;
                     case R.id.nav_about:
                         // Change to correct menu
-                        menustyle = menuStyle.OUTER;
+                        setMenuStyle(menuStyle.OUTER);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_about);
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_about);
                         break;
                     case R.id.nav_settings:
                         // Change to correct menu
-                        menustyle = menuStyle.SETTINGS;
+                        setMenuStyle(menuStyle.SETTINGS);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_settings);
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_settings);
@@ -110,7 +128,7 @@ public class ArticleActivity extends SourceReadActivity {
             login_redirect();
         } else {
             // Create database object
-            db = new fdatabase();
+            setDatabase(new fdatabase());
 
             // Get article & user from serial
             loadBundle(getIntent());
@@ -129,8 +147,9 @@ public class ArticleActivity extends SourceReadActivity {
                 articleViewModel.setArticle(article);
 
                 // Fetch serialised user
-                user = new LoggedInUser(mAuth.getCurrentUser());
+                LoggedInUser user = new LoggedInUser(mAuth.getCurrentUser());
                 user.loadInstanceState(extras);
+                setUser(user);
                 articleViewModel.setUser(user);
             }else{
                 logout();
@@ -148,7 +167,7 @@ public class ArticleActivity extends SourceReadActivity {
     // Menu
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(interfaceEnabled){
+        if(getInterfaceEnabled()){
             switch (item.getItemId()) {
                 case R.id.action_analyse_article:
                     Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
@@ -158,7 +177,7 @@ public class ArticleActivity extends SourceReadActivity {
                     progressBar.setVisibility(View.VISIBLE);
 
                     // Get articles and create async task
-                    analyser at = new analyser(db);
+                    analyser at = new analyser(getDatabase());
                     at.fetch_article(this, article, new Observer<Boolean>() {
                         // Called when "fetch_article" has a response
                         @Override
@@ -172,9 +191,11 @@ public class ArticleActivity extends SourceReadActivity {
                     });
 
                     return true;
-                case R.id.action_logout_user:
-                    Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show();
-                    logout();
+                case R.id.action_help:
+                    // Show help dialog
+                    SourceReadDialog helpDialog = new SourceReadDialog(this, null, null, R.string.user_ok, null, getHelp());
+                    helpDialog.show();
+
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);

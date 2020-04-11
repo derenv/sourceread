@@ -140,9 +140,14 @@ public class AppFragment extends Fragment {
                 }
             });
 
+            // Set callback on back button click
+            final MainActivity main = (MainActivity) currentActivity;
+
             // Get type (view or add)
             redirectType type = (redirectType) appBundle.getSerializable("type");
             if (type == redirectType.VIEW) {
+                main.setAppCallback(true);
+
                 // Cleanup timestamp format for display
                 if (appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0l)) {
                     appViewModel.setStamp(null);
@@ -182,6 +187,8 @@ public class AppFragment extends Fragment {
 
                 activateButtons(user, app);
             } else if (type == redirectType.ADD) {
+                main.setAppCallback(false);
+
                 // disable timestamp & number of articles fields
                 timestampView.setVisibility(View.INVISIBLE);
                 articlesnoView.setVisibility(View.INVISIBLE);
@@ -196,10 +203,6 @@ public class AppFragment extends Fragment {
                     public void onClick(View v) {
                         // Attempt to login to pocket
                         Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
-
-                        // Set callback on back button click
-                        MainActivity main = (MainActivity) currentActivity;
-                        main.setAppCallback(true);
 
                         // Change buttons
                         activateButtons(user, app);
@@ -259,6 +262,9 @@ public class AppFragment extends Fragment {
 
                 // Set callback on back button click
                 main.setAppCallback(false);
+
+                // Set help dialog text
+                main.setHelp(R.string.help_apps);
 
                 // Disconnect app
                 user.disconnectApp(main, main.getDatabase(), app, R.id.nav_apps);

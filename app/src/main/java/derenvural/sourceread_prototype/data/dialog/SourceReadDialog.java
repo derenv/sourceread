@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 
 public class SourceReadDialog {
     private AlertDialog alertDialog;
@@ -16,8 +17,9 @@ public class SourceReadDialog {
     private Integer messageID;
     private Integer confirmID;
     private Integer cancelID;
+    private boolean cancellable;
 
-    public SourceReadDialog(@NonNull Activity activity,
+    public SourceReadDialog(@NonNull SourceReadActivity activity,
                             @Nullable DialogInterface.OnClickListener negative,
                             @Nullable DialogInterface.OnClickListener positive,
                             @Nullable Integer confirmID,
@@ -25,19 +27,26 @@ public class SourceReadDialog {
                             @Nullable Integer messageID){
         // Cancel response
         if(negative == null){
-            this.negative = new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // cancel
-                    dialog.dismiss();
-                }
-            };
+            if(cancelID == null){
+                cancellable = false;
+            }else{
+                cancellable = true;
+                this.cancelID = cancelID;
+
+                this.negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // cancel
+                        dialog.dismiss();
+                    }
+                };
+            }
         }else{
             this.negative = negative;
         }
 
         // Accept response
         if(positive == null){
-            this.negative = new DialogInterface.OnClickListener() {
+            this.positive = new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     // cancel
                     dialog.dismiss();
@@ -52,11 +61,6 @@ public class SourceReadDialog {
             this.confirmID = R.string.user_sure;
         }else{
             this.confirmID = confirmID;
-        }
-        if(cancelID == null){
-            this.cancelID = R.string.user_cancel;
-        }else{
-            this.cancelID = cancelID;
         }
         if(messageID == null){
             this.messageID = R.string.dialog_placeholder;
@@ -73,14 +77,19 @@ public class SourceReadDialog {
     }
 
     // Dialogue
-    private AlertDialog createDialog(@NonNull Activity activity) {
+    private AlertDialog createDialog(@NonNull SourceReadActivity activity) {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         // Set message and listeners
         builder.setMessage(this.messageID)
-                .setPositiveButton(R.string.user_sure, this.positive)
-                .setNegativeButton(R.string.user_cancel, this.negative);
+                .setCancelable(cancellable)
+                .setPositiveButton(this.confirmID, this.positive);
+
+        // Check if cancel button needed
+        if(cancellable){
+            builder.setNegativeButton(this.cancelID, this.negative);
+        }
 
         return builder.create();
     }

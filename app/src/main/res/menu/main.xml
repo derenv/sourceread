@@ -13,8 +13,8 @@
         android:title="@string/action_refresh_apps"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_logout_user"
+        android:id="@+id/action_help"
         android:orderInCategory="3"
-        android:title="@string/action_logout_user"
+        android:title="@string/action_help"
         app:showAsAction="never" />
 </menu>

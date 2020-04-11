@@ -8,7 +8,6 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.Navigation;
@@ -16,11 +15,9 @@ import androidx.navigation.ui.AppBarConfiguration;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
-import derenvural.sourceread_prototype.ui.apps.redirectType;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 import derenvural.sourceread_prototype.ui.login.LoginActivity;
 
@@ -31,43 +28,50 @@ public abstract class SourceReadActivity extends AppCompatActivity {
     protected DrawerLayout drawer;
     // Services
     protected FirebaseAuth mAuth;
-    protected fdatabase db;
-    protected httpHandler httph;
+    private fdatabase db;
+    private httpHandler httph;
     // User
-    protected LoggedInUser user;
+    public LoggedInUser user;
     // Variables
-    protected boolean interfaceEnabled;
-    protected menuStyle menustyle;
+    private boolean interfaceEnabled;
+    private menuStyle menustyle;
+    private Integer current_help;
 
     // GET
     public LoggedInUser getUser() { return user; }
     public httpHandler getHttpHandler() { return httph; }
     public fdatabase getDatabase() { return db; }
+    public boolean getInterfaceEnabled() { return interfaceEnabled; }
+    public menuStyle getMenuStyle() { return menustyle; }
+    public Integer getHelp() { return current_help; }
 
     // SET
     public void setUser(LoggedInUser user) { this.user = user; }
     public void setHttpHandler(httpHandler httph) { this.httph = httph; }
     public void setDatabase(fdatabase db) { this.db = db; }
+    public void setInterfaceEnabled(boolean interfaceEnabled) { this.interfaceEnabled = interfaceEnabled; }
+    public void setMenuStyle(menuStyle menustyle) { this.menustyle = menustyle; }
+    public void setHelp(Integer current_help) { this.current_help = current_help; }
 
     // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(menustyle == menuStyle.OUTER){
+        if(getMenuStyle() == menuStyle.OUTER){
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.outer, menu);
 
             return true;
-        }else if(menustyle == menuStyle.MAIN){
+        }else if(getMenuStyle() == menuStyle.MAIN){
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.main, menu);
 
             return true;
-        }else if(menustyle == menuStyle.ARTICLE){
+        }else if(getMenuStyle() == menuStyle.ARTICLE){
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.article, menu);
 
             return true;
-        }else if(menustyle == menuStyle.SETTINGS){
+        }else if(getMenuStyle() == menuStyle.SETTINGS){
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.settings, menu);
 
@@ -83,7 +87,7 @@ public abstract class SourceReadActivity extends AppCompatActivity {
                 DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 
         drawer.setDrawerLockMode(lockMode);
-        interfaceEnabled = enabled;
+        setInterfaceEnabled(enabled);
     }
     public void deactivate_interface(){
         progressBar.setVisibility(View.VISIBLE);
@@ -109,9 +113,9 @@ public abstract class SourceReadActivity extends AppCompatActivity {
             Toast.makeText(this, "Successful Log out", Toast.LENGTH_SHORT).show();
 
             // Remove objects
-            db = null;
-            httph = null;
-            user = null;
+            setDatabase(null);
+            setHttpHandler(null);
+            setUser(null);
 
             // Start login activity
             login_redirect();

@@ -29,6 +29,7 @@
     <string name="action_refresh_apps">Refresh Apps</string>
     <string name="action_import_articles">Import Articles</string>
     <string name="action_logout_user">Log Out</string>
+    <string name="action_help">Help</string>
 
     <!--HOME/APPS FRAGMENTS-->
     <string name="card_image_description">Image for card in list</string>
@@ -78,8 +79,21 @@
     <string name="dialog_log_out">Are you sure you want to log out?</string>
     <string name="dialog_delete_account">Are you sure you want to delete your account? All personal data is deleted permanently, and you will need to start from scratch if you rejoin!</string>
     <string name="user_sure">I\'m sure!</string>
+    <string name="user_ok">OK</string>
     <string name="user_cancel">Cancel</string>
     <string name="dialog_placeholder">Are you sure?</string>
+
+    <string name="help_home">This is the home page, where all imported articles are displayed. To add an article, import from an app or with a link!</string>
+    <string name="help_statistics">This is the collection statistics page, where statistics from across your imported collection are aggregated and shown! Statistics should be recalculated upon new imports, deletions or analyses.</string>
+    <string name="help_apps">This is the apps list page, where all connected apps are shown and managed! Click on an app to change the settings, or add a new one to begin importing!</string>
+    <string name="help_about">This is the about page, where we tell you about ourselves.</string>
+    <string name="help_settings">This is the settings page, where you can change any settings, delete any data you\'ve imported into the app, or disconnect any connected apps!</string>
+
+    <string name="help_app">This page shows detailed information on the selected app. You can import and delete any articles in this app here, and can also disconnect the app if you really want to.</string>
+    <string name="help_apps_choice">This page lists all currently available apps for importing.</string>
+
+    <string name="help_article">This is the article view page, where all data about the article is displayed! On this page analysis can be done on the article, viewed in the statistics page! You can also delete the article from your collection.</string>
+    <string name="help_article_statistics">This is the article statistics page, where statistics calculated from the article are shown! Statistics can be recalculated in the article view page.</string>
 
     <!--ABOUT FRAGMENT-->
     <!--==SECTIONS-->

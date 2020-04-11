@@ -47,7 +47,7 @@ public class AppsFragment extends Fragment {
                 TextView current = vx.findViewById(R.id.card_title);
 
                 // Start app activity with app object
-                startAppActivity(current.getText().toString());
+                startAppFragment(current.getText().toString());
             }
         };
 
@@ -90,26 +90,34 @@ public class AppsFragment extends Fragment {
     /*
      * Start either app view or choose app fragments
      * */
-    private void startAppActivity(String title){
+    private void startAppFragment(String title){
         // Fetch user data
         SourceReadActivity currentActivity = (SourceReadActivity) getActivity();
 
-        // Get app for passing
-        if(title.equals("Add new App")){
-            // Navigate to list of choices
-            currentActivity.fragment_redirect(R.id.nav_appschoice, new Bundle());
-        }else {
-            // Find selected app's data
-            for (App app : appsViewModel.getCards().getValue()) {
-                if (app.getTitle().equals(title)) {
-                    // Create bundle with app
-                    Bundle appBundle = new Bundle();
-                    app.saveInstanceState(appBundle);
-                    appBundle.putSerializable("type",redirectType.VIEW);
+        if(currentActivity != null) {
+            // Get app for passing
+            if (title.equals("Add new App")) {
+                // Set help dialog text
+                currentActivity.setHelp(R.string.help_apps_choice);
 
-                    // Navigate to page showing data on selected app
-                    currentActivity.fragment_redirect(R.id.nav_app, appBundle);
-                    break;
+                // Navigate to list of choices
+                currentActivity.fragment_redirect(R.id.nav_apps_choice, new Bundle());
+            } else {
+                // Find selected app's data
+                for (App app : appsViewModel.getCards().getValue()) {
+                    if (app.getTitle().equals(title)) {
+                        // Create bundle with app
+                        Bundle appBundle = new Bundle();
+                        app.saveInstanceState(appBundle);
+                        appBundle.putSerializable("type", redirectType.VIEW);
+
+                        // Set help dialog text
+                        currentActivity.setHelp(R.string.help_app);
+
+                        // Navigate to page showing data on selected app
+                        currentActivity.fragment_redirect(R.id.nav_app, appBundle);
+                        break;
+                    }
                 }
             }
         }

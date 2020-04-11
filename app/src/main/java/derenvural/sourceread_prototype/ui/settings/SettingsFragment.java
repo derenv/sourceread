@@ -74,9 +74,9 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    SourceReadDialog dialogArticles = new SourceReadDialog(getActivity(),
+                    SourceReadDialog dialogArticles = new SourceReadDialog((SourceReadActivity) getActivity(),
                                                                             negative, positive,
-                                                                            null, null,
+                                                                            null, R.string.user_cancel,
                                                                             R.string.dialog_delete_all_articles);
                     dialogArticles.show();
                 }else if(item.getText().equals(getResources().getString(R.string.disconnect_apps))){
@@ -116,9 +116,9 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    SourceReadDialog dialogApps = new SourceReadDialog(getActivity(),
+                    SourceReadDialog dialogApps = new SourceReadDialog((SourceReadActivity) getActivity(),
                             negative, positive,
-                            null, null,
+                            null, R.string.user_cancel,
                             R.string.dialog_disconnect_all_apps);
                     dialogApps.show();
                 }else if(item.getText().equals(getResources().getString(R.string.action_logout_user))){
@@ -141,9 +141,9 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    SourceReadDialog dialogLogout = new SourceReadDialog(getActivity(),
+                    SourceReadDialog dialogLogout = new SourceReadDialog((SourceReadActivity) getActivity(),
                             negative, positive,
-                            null, null,
+                            null, R.string.user_cancel,
                             R.string.dialog_log_out);
                     dialogLogout.show();
                 }else if(item.getText().equals(getResources().getString(R.string.delete_account))){
@@ -164,9 +164,9 @@ public class SettingsFragment extends Fragment {
                     };
 
                     // Send dialog confirmation
-                    SourceReadDialog dialogAccount = new SourceReadDialog(getActivity(),
+                    SourceReadDialog dialogAccount = new SourceReadDialog((SourceReadActivity) getActivity(),
                             negative, positive,
-                            null, null,
+                            null, R.string.user_cancel,
                             R.string.dialog_delete_account);
                     dialogAccount.show();
                 }
