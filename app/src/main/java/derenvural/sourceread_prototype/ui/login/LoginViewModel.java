@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import android.app.Activity;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.Toast;
 
@@ -16,6 +17,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
+import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginViewModel extends ViewModel {
@@ -52,7 +55,7 @@ public class LoginViewModel extends ViewModel {
         });
     }
 
-    public void register(String email, String password, final Activity cur_context) {
+    public void register(String email, String password, final SourceReadActivity cur_context) {
         // Attempt registration
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
@@ -60,14 +63,26 @@ public class LoginViewModel extends ViewModel {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // Set login result (when registered, user also logged in)
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                    LoggedInUserView new_user = new LoggedInUserView(new LoggedInUser(FirebaseAuth.getInstance().getCurrentUser()));
-                    loginResult.setValue(new LoginResult(new_user));
+                    final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                    //TEST
-                    Toast.makeText(cur_context, "user: "+user.getUid(), Toast.LENGTH_SHORT).show();
+                    // Create user document in DB collection
+                    fdatabase db = new fdatabase();
+                    db.create_user(user.getUid(), new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("LOGIN", "user '"+user.getUid()+"' database object creation successful!");
 
-                    // TODO: create user document in DB collection (0 keys, 0 articles, veracity = 0)
+                                // Update UI
+                                LoggedInUser new_user = new LoggedInUser(user);
+                                LoggedInUserView new_user_view = new LoggedInUserView(new_user);
+                                login_user.setValue(new_user);
+                                loginResult.setValue(new LoginResult(new_user_view));
+                            }else{
+                                Log.d("LOGIN", "user '"+user.getUid()+"' database object creation unsuccessful!");
+                            }
+                        }
+                    });
                 } else {
                     // If sign in fails, display a message to the user.
                     loginResult.setValue(new LoginResult(R.string.register_failed));

@@ -1,21 +1,35 @@
 package derenvural.sourceread_prototype;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
+import com.google.firebase.auth.FirebaseUser;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
+import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
@@ -122,6 +136,89 @@ public abstract class SourceReadActivity extends AppCompatActivity {
         }else {
             Toast.makeText(this, "Log out failed!", Toast.LENGTH_SHORT).show();
         }
+    }
+    public void reauthorize(@NonNull final FirebaseUser user, @NonNull final OnCompleteListener<Void> end){
+        // Create dialog listeners
+        DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Fetch credentials
+                String email = "test2@test.com";
+                String password = "Balls123";
+
+                // Create credentials object
+                AuthCredential credential = EmailAuthProvider.getCredential(email, password);
+
+                // Attempt to authenticate input credentials
+                user.reauthenticate(credential).addOnCompleteListener(end);
+
+                // End dialog
+                dialog.dismiss();
+            }
+        };
+        DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // cancel
+                dialog.dismiss();
+            }
+        };
+        // Get auth credentials from the user for re-authentication
+        SourceReadDialog dialogAccount = new SourceReadDialog(this,
+                negative, positive,
+                null, R.string.user_cancel,
+                R.string.dialog_delete_account);
+        dialogAccount.show();
+    }
+    public void delete_account(@NonNull final FirebaseUser user){
+        final String uid = user.getUid();
+
+        // Attempt to delete account
+        user.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // Attempt database delete
+                    db.delete_user(uid, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("USER", "User account deletion successful!");
+                            }else{
+                                Log.d("USER", "User account deletion unsuccessful!");
+                            }
+                        }
+                    });
+                } else {
+                    // Check why delete failed
+                    Exception e = task.getException();
+                    if(e instanceof FirebaseException) {
+                        Exception fe = task.getException();
+
+                        // Handle exception
+                        if (fe instanceof FirebaseAuthRecentLoginRequiredException) {
+                            reauthorize(user, new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        // Attempt firebase user delete
+                                        delete_account(user);
+                                    } else {
+                                        Log.d("USER", "User account deletion unsuccessful!");
+                                    }
+                                }
+                            });
+                        } else if (fe instanceof FirebaseAuthInvalidCredentialsException) {
+                            Log.d("USER", "Invalid password!");
+                        } else if (fe instanceof FirebaseAuthInvalidUserException) {
+                            Log.d("USER", "Incorrect email address!");
+                        } else {
+                            Log.d("USER", "Error on delete - "+fe.getLocalizedMessage());
+                        }
+                    } else {
+                        Log.d("USER", "Error on delete - "+e.getLocalizedMessage());
+                    }
+                }
+            }
+        });
     }
 
     // Redirects
