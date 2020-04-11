@@ -3,9 +3,9 @@ package derenvural.sourceread_prototype.data.http;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -30,24 +30,27 @@ public class httpHandler {
         queue = Volley.newRequestQueue(context);
     }
 
+    /*
+    * Open url passed in browser
+    * */
     public void browser_open(Context context, String url){
-        Log.d("HTTP","reached request");
-        // Open url passed in browser
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         context.startActivity(browserIntent);
     }
 
-    public void make_volley_request(@NonNull String url,
-                                    HashMap<String, String> parameters,
-                                    @NonNull Response.Listener<JSONObject> response,
-                                    @NonNull Response.ErrorListener error){
+    public void make_volley_request_post(@NonNull String url,
+                                         @Nullable HashMap<String, String> parameters,
+                                         @NonNull Response.Listener<JSONObject> response,
+                                         @NonNull Response.ErrorListener error){
         // Create JSON object
         JSONObject jsonParam = new JSONObject();
 
         //Add string parameters
         try {
-            for(String key : parameters.keySet()) {
-                jsonParam.put(key, parameters.get(key));
+            if(parameters != null) {
+                for (String key : parameters.keySet()) {
+                    jsonParam.put(key, parameters.get(key));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();

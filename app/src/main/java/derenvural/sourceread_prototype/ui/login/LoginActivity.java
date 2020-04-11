@@ -139,6 +139,7 @@ public class LoginActivity extends SourceReadActivity {
         // Create bundle with serialised object
         LoggedInUser user_data = loginViewModel.getLoginUser();
         Bundle bundle = new Bundle();
+        bundle.putString("activity", "login");
         user_data.saveInstanceState(bundle);
 
         // Start next activity and close login activity

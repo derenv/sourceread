@@ -58,7 +58,7 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser, Array
                 parameters.put("redirect_uri", redirect_uri);
 
                 // Request access token by http request to URL
-                httph.make_volley_request(url, parameters,
+                httph.make_volley_request_post(url, parameters,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {

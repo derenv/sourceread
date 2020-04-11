@@ -206,14 +206,8 @@ public class AppFragment extends Fragment {
                         // Attempt to login to pocket
                         Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
 
-                        // Change buttons
-                        activateButtons(user, app);
-
                         //remove app from user
                         user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
-                        main.setUser(user);
-
-                        currentActivity = main;
                     }
                 });
             }

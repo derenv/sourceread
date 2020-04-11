@@ -168,16 +168,14 @@ public class MainActivity extends SourceReadActivity {
         Uri appLinkData = intent.getData();
 
         // Check if intent comes from deep-link or activity
-        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
+        if ((Intent.ACTION_MAIN.equals(appLinkAction) || Intent.ACTION_VIEW.equals(appLinkAction)) && appLinkData != null){
             // Fetch deep-link type
             String link_type = appLinkData.getLastPathSegment();
-            Log.d("ACTIVITY","value - "+appLinkData.toString()+"   type - " + link_type);
 
             // Whitelist deep-links
-            if(link_type.equals("successful_login")){
+            if(link_type != null && (link_type.equals("successful_login") || link_type.equals("successful_auth"))){
                 // Get app name
                 String app_name = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
-                Log.d("ACTIVITY","app - "+app_name);
 
                 // Create blank user for populating
                 setUser(new LoggedInUser(mAuth.getCurrentUser()));
@@ -186,15 +184,27 @@ public class MainActivity extends SourceReadActivity {
                 if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
                     // Request access tokens (interface reactivated on response)
                     user.access_tokens(this, getHttpHandler(), app_name);
+
+                    // Return to correct page
+                    if(link_type.equals("successful_login")) {
+                        // Set help dialog text
+                        setHelp(R.string.help_apps);
+
+                        // Redirect to apps choice
+                        fragment_redirect(R.id.nav_apps, new Bundle());
+                    }
                 }else{
-                    // TODO: show error
+                    // Show error
+                    Toast.makeText(this, "Storage error, attempt login..",Toast.LENGTH_SHORT).show();
+
+                    // Redirect to login due to persistent storage failure
+                    login_redirect();
                 }
             }else{
                 // TODO: other deep links
             }
         }else{
-            Log.d("ACTIVITY","no deep-link");
-
+            // No deep link!
             // Fetch the bundle & check if it has extras
             String previous_activity = intent.getStringExtra("activity");
             Bundle extras = intent.getExtras();
@@ -238,7 +248,7 @@ public class MainActivity extends SourceReadActivity {
                             // Open app in browser for authentication Creates callback
                             // Get login URL
                             HashMap<String, String> requests = app.getRequests();
-                            String app_login_url = requests.get("login");
+                            String app_login_url = requests.get("auth");
 
                             // Insert request token
                             String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
@@ -266,6 +276,9 @@ public class MainActivity extends SourceReadActivity {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
                 case R.id.action_import_articles:
+                    // TODO: replace with box asking link or apps
+                    // TODO: on apps do as usual
+                    // TODO: on link open dialog asking for link
                     if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
                         // loading worm and "importing.."
                         deactivate_interface();
@@ -310,9 +323,6 @@ public class MainActivity extends SourceReadActivity {
         // Fetch fragment
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         int fragmentID = navController.getCurrentDestination().getId();
-        int app = R.id.nav_app;
-        int apps = R.id.nav_apps;
-        int apps_c = R.id.nav_apps_choice;
         if(fragmentID == R.id.nav_app){
             if(appCallback) {
                 // Set help dialog text

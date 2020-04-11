@@ -120,7 +120,7 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
         parameters.put("redirect_uri",redirect_uri);
 
         // Make https POST request
-        httph.make_volley_request(url, parameters,
+        httph.make_volley_request_post(url, parameters,
                 responseListener,
                 new Response.ErrorListener() {
                     @Override

@@ -82,7 +82,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
         final ArrayList<Article> articles = new ArrayList<Article>();
 
         // Request access token by http request to URL
-        httph.make_volley_request(url, parameters,
+        httph.make_volley_request_post(url, parameters,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
