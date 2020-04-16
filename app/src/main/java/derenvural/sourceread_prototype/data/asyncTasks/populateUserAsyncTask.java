@@ -13,27 +13,21 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, LoggedInUser> {
-    // Tools
-    private fdatabase db;
-    private httpHandler httph;
     // Activity
-    private final WeakReference<LifecycleOwner> context;
+    private final WeakReference<SourceReadActivity> context;
     private boolean triggered;
 
-    public populateUserAsyncTask(LifecycleOwner context, fdatabase db, httpHandler httph){
+    public populateUserAsyncTask(SourceReadActivity context){
         super();
+
         // Activity
-        this.context = new WeakReference<>(context);
-
-        // Tools
-        this.db = db;
-        this.httph = httph;
-
+        this.context = new WeakReference<SourceReadActivity>(context);
         this.triggered = false;
     }
 
@@ -44,7 +38,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
         final LoggedInUser user = params[0];
 
         // Request user data
-        db.request_user_data(new OnCompleteListener<DocumentSnapshot>() {
+        context.get().getDatabase().request_user_data(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> userTask) {
                 if (userTask.isSuccessful()) {
@@ -60,7 +54,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                     // Articles
                     if(found_articles.size() > 0) {
                         // Create async task
-                        final populateArticlesAsyncTask articleTask = new populateArticlesAsyncTask(db);
+                        final populateArticlesAsyncTask articleTask = new populateArticlesAsyncTask(context.get().getDatabase());
 
                         // execute async task
                         articleTask.execute(found_articles);
@@ -78,7 +72,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                                     // Apps
                                     if(found_apps.size() > 0) {
                                         // Create async task
-                                        final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+                                        final populateAppsAsyncTask appTask = new populateAppsAsyncTask(context.get());
 
                                         // execute async task
                                         appTask.execute(found_apps);
@@ -113,7 +107,7 @@ public class populateUserAsyncTask extends sourcereadAsyncTask<LoggedInUser, Log
                         // Apps
                         if(found_apps.size() > 0) {
                             // Create async task
-                            final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+                            final populateAppsAsyncTask appTask = new populateAppsAsyncTask(context.get());
 
                             // execute async task
                             appTask.execute(found_apps);

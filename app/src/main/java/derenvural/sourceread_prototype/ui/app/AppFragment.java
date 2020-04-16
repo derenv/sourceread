@@ -207,7 +207,7 @@ public class AppFragment extends Fragment {
                         Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
 
                         //remove app from user
-                        user.connectApp(main, main.getDatabase(), main.getHttpHandler(), app);
+                        user.connectApp(main, app);
                     }
                 });
             }
@@ -232,7 +232,7 @@ public class AppFragment extends Fragment {
                 // Attempt to import all articles from app
                 Toast.makeText(currentActivity, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
                 currentActivity.deactivate_interface();
-                user.importArticles(currentActivity, currentActivity.getHttpHandler(), currentActivity.getDatabase(), appViewModel.getApp().getValue());
+                user.importArticles(currentActivity, appViewModel.getApp().getValue());
                 currentActivity.setUser(user);
             }
         });
@@ -243,7 +243,7 @@ public class AppFragment extends Fragment {
                 // Attempt to delete all articles imported from app
                 Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
                 currentActivity.deactivate_interface();
-                user.deleteAllArticles(currentActivity, currentActivity.getDatabase(), appViewModel.getApp().getValue().getTitle());
+                user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
                 currentActivity.setUser(user);
             }
         });
@@ -263,7 +263,7 @@ public class AppFragment extends Fragment {
                 main.setHelp(R.string.help_apps);
 
                 // Disconnect app
-                user.disconnectApp(main, main.getDatabase(), app, R.id.nav_apps);
+                user.disconnectApp(main, app, R.id.nav_apps);
                 main.setUser(user);
 
                 currentActivity = main;

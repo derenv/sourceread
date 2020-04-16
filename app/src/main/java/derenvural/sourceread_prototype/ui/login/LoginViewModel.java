@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel;
 import android.app.Activity;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -18,7 +17,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginViewModel extends ViewModel {
@@ -35,9 +33,9 @@ public class LoginViewModel extends ViewModel {
         return loginResult;
     }
 
-    public void login(String email, String password, final Activity cur_context) {
+    public void login(String email, String password, final SourceReadActivity cur_context) {
         // Attempt login
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        cur_context.getAuth().signInWithEmailAndPassword(email, password)
         .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -57,17 +55,16 @@ public class LoginViewModel extends ViewModel {
 
     public void register(String email, String password, final SourceReadActivity cur_context) {
         // Attempt registration
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+        cur_context.getAuth().createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // Set login result (when registered, user also logged in)
-                    final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    final FirebaseUser user = cur_context.getAuth().getCurrentUser();
 
                     // Create user document in DB collection
-                    fdatabase db = new fdatabase();
-                    db.create_user(user.getUid(), new OnCompleteListener<AuthResult>() {
+                    cur_context.getDatabase().create_user(user.getUid(), new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
@@ -106,7 +103,7 @@ public class LoginViewModel extends ViewModel {
         if (username == null) {
             return false;
         }
-        if (username.contains("@")) {
+        if (username.contains("@") && username.split("@").length == 2 && username.split("@")[1].contains(".") && username.split("@")[1].split(".").length == 2) {
             return Patterns.EMAIL_ADDRESS.matcher(username).matches();
         } else {
             return !username.trim().isEmpty();

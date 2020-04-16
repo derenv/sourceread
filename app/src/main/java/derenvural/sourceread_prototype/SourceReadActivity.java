@@ -17,7 +17,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthCredential;
@@ -55,6 +54,7 @@ public abstract class SourceReadActivity extends AppCompatActivity {
     public LoggedInUser getUser() { return user; }
     public httpHandler getHttpHandler() { return httph; }
     public fdatabase getDatabase() { return db; }
+    public FirebaseAuth getAuth() { return mAuth; }
     public boolean getInterfaceEnabled() { return interfaceEnabled; }
     public menuStyle getMenuStyle() { return menustyle; }
     public Integer getHelp() { return current_help; }
@@ -63,10 +63,20 @@ public abstract class SourceReadActivity extends AppCompatActivity {
     public void setUser(LoggedInUser user) { this.user = user; }
     public void setHttpHandler(httpHandler httph) { this.httph = httph; }
     public void setDatabase(fdatabase db) { this.db = db; }
+    public void setAuth(FirebaseAuth mAuth) { this.mAuth = mAuth; }
     public void setInterfaceEnabled(boolean interfaceEnabled) { this.interfaceEnabled = interfaceEnabled; }
     public void setMenuStyle(menuStyle menustyle) { this.menustyle = menustyle; }
     public void setHelp(Integer current_help) { this.current_help = current_help; }
 
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setAuth(FirebaseAuth.getInstance());
+        setDatabase(new fdatabase());
+        setHttpHandler(new httpHandler(this));
+    }
     // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,10 +130,10 @@ public abstract class SourceReadActivity extends AppCompatActivity {
     // User Management
     public void logout(){
         // Sign out Firebase user
-        mAuth.signOut();
+        getAuth().signOut();
 
         // Check for successful sign out
-        if(null == mAuth.getCurrentUser()){
+        if(null == getAuth().getCurrentUser()){
             Toast.makeText(this, "Successful Log out", Toast.LENGTH_SHORT).show();
 
             // Remove objects

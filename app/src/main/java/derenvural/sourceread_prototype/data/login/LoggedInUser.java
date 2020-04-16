@@ -31,8 +31,6 @@ import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
-import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 
 public class LoggedInUser implements Serializable {
@@ -108,9 +106,9 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
-    public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull httpHandler httph, @NonNull String app_name){
+    public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull String app_name){
         // Create async task
-        final userAccessAsyncTask task = new userAccessAsyncTask(httph, app_name);
+        final userAccessAsyncTask task = new userAccessAsyncTask(currentActivity.getHttpHandler(), app_name);
 
         // execute async task
         task.execute(this);
@@ -132,7 +130,7 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void disconnectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final App app, @NonNull final int destination){
+    public void disconnectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final App app, @NonNull final Integer destination){
         // create list of all remaining apps in user object
         ArrayList<App> currentApps = getApps().getValue();
         ArrayList<App> newApps = new ArrayList<App>();
@@ -143,13 +141,13 @@ public class LoggedInUser implements Serializable {
         }
 
         // Delete all articles imported from app
-        deleteAllArticles(currentActivity, db, app.getTitle());
+        deleteAllArticles(currentActivity, app.getTitle());
 
         // Remove app from user object
         setApps(newApps);
 
         // Create async task
-        writeAppsAsyncTask task = new writeAppsAsyncTask(db);
+        writeAppsAsyncTask task = new writeAppsAsyncTask(currentActivity.getDatabase());
 
         // execute async task
         task.execute(newApps);
@@ -173,7 +171,7 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void connectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final httpHandler httph, @NonNull final App app){
+    public void connectApp(@NonNull final SourceReadActivity currentActivity, @NonNull final App app){
         // create list of all remaining apps in user object
         ArrayList<App> currentApps = getApps().getValue();
         if(currentApps == null){
@@ -185,7 +183,7 @@ public class LoggedInUser implements Serializable {
         setApps(currentApps);
 
         // Create async task
-        final writeAppsAsyncTask writeAppsTask = new writeAppsAsyncTask(db);
+        final writeAppsAsyncTask writeAppsTask = new writeAppsAsyncTask(currentActivity.getDatabase());
         final LoggedInUser user = this;
 
         // execute async task
@@ -200,7 +198,7 @@ public class LoggedInUser implements Serializable {
                     HashMap<String, Long> found_apps = writeAppsTask.getData().getValue();
 
                     // TODO: Make actual connection to app
-                    final populateAppsAsyncTask appTask = new populateAppsAsyncTask(db, httph);
+                    final populateAppsAsyncTask appTask = new populateAppsAsyncTask(currentActivity);
 
                     // execute async task
                     appTask.execute(found_apps);
@@ -225,7 +223,7 @@ public class LoggedInUser implements Serializable {
                                         // Store this object using local persistence
                                         if (storageSaver.write(currentActivity, getUserId().getValue(), user)) {
                                             // Redirect to browser for app login
-                                            httph.browser_open(currentActivity, url);
+                                            currentActivity.getHttpHandler().browser_open(currentActivity, url);
                                         } else {
                                             Log.e("HTTP", "login url request failure");
                                         }
@@ -239,9 +237,9 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void importArticles(@NonNull final SourceReadActivity currentActivity, @NonNull httpHandler httph, @NonNull final fdatabase db, @NonNull final App app){
+    public void importArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final App app){
         // Create async task
-        final importArticlesAsyncTask task = new importArticlesAsyncTask(currentActivity, this, httph, db);
+        final importArticlesAsyncTask task = new importArticlesAsyncTask(currentActivity);
 
         // execute async task
         task.execute(app);
@@ -262,7 +260,7 @@ public class LoggedInUser implements Serializable {
                     new_stamp.put(app.getTitle(), request_stamp);
 
                     // Store timestamp in database & user object
-                    db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
                             if (stamp_task.isSuccessful()) {
@@ -297,7 +295,7 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    public void deleteAllArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final fdatabase db, @NonNull final String app_name){
+    public void deleteAllArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final String app_name){
         // Build list of articles to remove
         if(getArticles() != null && getArticles().getValue() != null && getArticles().getValue().size() > 0) {
             ArrayList<Article> articles = new ArrayList<Article>();
@@ -309,7 +307,7 @@ public class LoggedInUser implements Serializable {
             if(articles.size() > 0) {
 
                 // Create async task
-                final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
+                final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, currentActivity.getDatabase());
 
                 // execute async task
                 task.execute(articles);
@@ -336,7 +334,7 @@ public class LoggedInUser implements Serializable {
                                     // Store timestamp in database
                                     Map<String, Object> new_stamp = new HashMap<>();
                                     new_stamp.put(app_name, 0L);
-                                    db.update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
                                             if (stamp_task.isSuccessful()) {
@@ -371,9 +369,9 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-    public void deleteArticle(@NonNull final SourceReadActivity currentActivity, @NonNull fdatabase db, @NonNull final ArrayList<Article> articles){
+    public void deleteArticle(@NonNull final SourceReadActivity currentActivity, @NonNull final ArrayList<Article> articles){
         // Create async task
-        final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, db);
+        final deleteArticleAsyncTask task = new deleteArticleAsyncTask(this, currentActivity.getDatabase());
 
         // execute async task
         task.execute(articles);
@@ -402,30 +400,6 @@ public class LoggedInUser implements Serializable {
                 }
             }
         });
-    }
-
-    // ArrayList item addition
-    public void addArticle(Article new_article){
-        // Get previous articles
-        ArrayList<Article> old_articles = getArticles().getValue();
-        if(old_articles == null){
-            old_articles = new ArrayList<Article>();
-        }
-
-        // Add new article
-        old_articles.add(new_article);
-        setArticles(old_articles);
-    }
-    public void addApp(App new_app){
-        // Get previous apps
-        ArrayList<App> apps = getApps().getValue();
-        if (apps == null) {
-            apps = new ArrayList<App>();
-        }
-
-        // Add new app
-        apps.add(new_app);
-        setApps(apps);
     }
 
     // SET

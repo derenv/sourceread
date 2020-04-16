@@ -120,16 +120,10 @@ public class ArticleActivity extends SourceReadActivity {
             }
         });
 
-        // Initialize Firebase Authentication
-        mAuth = FirebaseAuth.getInstance();
-
         // Check if user is signed in (non-null) and update UI accordingly.
-        if(mAuth.getUid() == null){
+        if(getAuth().getUid() == null){
             login_redirect();
         } else {
-            // Create database object
-            setDatabase(new fdatabase());
-
             // Get article & user from serial
             loadBundle(getIntent());
         }
@@ -147,7 +141,7 @@ public class ArticleActivity extends SourceReadActivity {
                 articleViewModel.setArticle(article);
 
                 // Fetch serialised user
-                LoggedInUser user = new LoggedInUser(mAuth.getCurrentUser());
+                LoggedInUser user = new LoggedInUser(getAuth().getCurrentUser());
                 user.loadInstanceState(extras);
                 setUser(user);
                 articleViewModel.setUser(user);

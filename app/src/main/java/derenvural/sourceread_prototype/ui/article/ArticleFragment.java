@@ -49,7 +49,7 @@ public class ArticleFragment extends Fragment {
                 Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
                 ArrayList<Article> articles = new ArrayList<Article>();
                 articles.add(article);
-                user.deleteArticle(aa, aa.getDatabase(), articles);
+                user.deleteArticle(aa, articles);
             }
         });
 

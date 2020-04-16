@@ -144,19 +144,10 @@ public class MainActivity extends SourceReadActivity {
         // Disable interface
         deactivate_interface();
 
-        // Initialize Firebase Authentication
-        mAuth = FirebaseAuth.getInstance();
-
         // Check if user is signed in (non-null) and update UI accordingly.
-        if(mAuth.getUid() == null){
+        if(getAuth().getUid() == null){
             login_redirect();
         } else {
-            // Create http object
-            setHttpHandler(new httpHandler(this));
-
-            // Create database object
-            setDatabase(new fdatabase());
-
             // handle app links
             handleIntent(getIntent());
         }
@@ -178,12 +169,12 @@ public class MainActivity extends SourceReadActivity {
                 String app_name = appLinkData.getPathSegments().get(appLinkData.getPathSegments().size() - 2);
 
                 // Create blank user for populating
-                setUser(new LoggedInUser(mAuth.getCurrentUser()));
+                setUser(new LoggedInUser(getAuth().getCurrentUser()));
 
                 // Fetch user from local persistence
-                if(storageSaver.read(this, mAuth.getCurrentUser().getUid(), user)){
+                if(storageSaver.read(this, getAuth().getCurrentUser().getUid(), user)){
                     // Request access tokens (interface reactivated on response)
-                    user.access_tokens(this, getHttpHandler(), app_name);
+                    user.access_tokens(this, app_name);
 
                     // Return to correct page
                     if(link_type.equals("successful_login")) {
@@ -208,7 +199,7 @@ public class MainActivity extends SourceReadActivity {
             // Fetch the bundle & check if it has extras
             String previous_activity = intent.getStringExtra("activity");
             Bundle extras = intent.getExtras();
-            setUser(new LoggedInUser(mAuth.getCurrentUser()));
+            setUser(new LoggedInUser(getAuth().getCurrentUser()));
             if (extras != null) {
                 // Fetch serialised user
                 user.loadInstanceState(extras);
@@ -229,7 +220,7 @@ public class MainActivity extends SourceReadActivity {
     //Population Methods
     public void populate(final LoggedInUser user) {
         // Create async task
-        final populateUserAsyncTask task = new populateUserAsyncTask(this, getDatabase(), getHttpHandler());
+        final populateUserAsyncTask task = new populateUserAsyncTask(this);
         final SourceReadActivity currentActivity = this;
 
         // execute async task
@@ -286,7 +277,7 @@ public class MainActivity extends SourceReadActivity {
                         // Import articles from user accounts
                         for(App app: getUser().getApps().getValue()) {
                             // Fetch serialised user
-                            user.importArticles(this, getHttpHandler(), getDatabase(), app);
+                            user.importArticles(this, app);
                         }
                     }else{
                         Toast.makeText(this, "No apps to import from..", Toast.LENGTH_SHORT).show();

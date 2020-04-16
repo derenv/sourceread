@@ -23,32 +23,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
-import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.http.httpHandler;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<Article>> {
-    // Tools
-    private fdatabase db;
-    private httpHandler httph;
-    // Data
-    private LoggedInUser user;
     // Activity
-    private final WeakReference<Context> context;
+    private final WeakReference<SourceReadActivity> context;
 
-    public importArticlesAsyncTask(Context context, LoggedInUser user, httpHandler httph, fdatabase db){
+    public importArticlesAsyncTask(SourceReadActivity context){
         super();
         // Activity
-        this.context = new WeakReference<>(context);;
-
-        // Data
-        this.user = user;
-
-        // Tools
-        this.db = db;
-        this.httph = httph;
+        this.context = new WeakReference<>(context);
     }
 
     @Override
@@ -82,7 +68,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
         final ArrayList<Article> articles = new ArrayList<Article>();
 
         // Request access token by http request to URL
-        httph.make_volley_request_post(url, parameters,
+        context.get().getHttpHandler().make_volley_request_post(url, parameters,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -92,7 +78,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                 final JSONObject articles_json = response.getJSONObject("list");
                                 if (articles_json.length() != 0) {
                                     // Fetch list of old saved articles
-                                    db.request_articles(new OnCompleteListener<QuerySnapshot>() {
+                                    context.get().getDatabase().request_articles(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> checkTask) {
                                             if (checkTask.isSuccessful()) {
@@ -139,7 +125,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 }
 
                                                 // Write all new articles to database
-                                                final ArrayList<String> newIds = db.write_new_articles(tobewritten, new OnCompleteListener<CollectionReference>() {
+                                                final ArrayList<String> newIds = context.get().getDatabase().write_new_articles(tobewritten, new OnCompleteListener<CollectionReference>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<CollectionReference> writeManyTask) {
                                                         if (writeManyTask.isSuccessful()) {
@@ -155,7 +141,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 idstobewritten.addAll(newIds);
 
                                                 // Update user 'articles' field in database
-                                                db.add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener() {
+                                                context.get().getDatabase().add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener() {
                                                     @Override
                                                     public void onComplete(@NonNull Task userFieldTask) {
                                                         if (userFieldTask.isSuccessful()) {

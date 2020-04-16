@@ -54,8 +54,8 @@ public class SettingsFragment extends Fragment {
                                     currentActivity.deactivate_interface();
 
                                     // Remove all articles
-                                    for (App q : user.getApps().getValue()) {
-                                        user.deleteAllArticles(currentActivity, currentActivity.getDatabase(), q.getTitle());
+                                    for (App app : user.getApps().getValue()) {
+                                        user.deleteAllArticles(currentActivity, app.getTitle());
                                     }
 
                                     // Set updated user
@@ -95,8 +95,8 @@ public class SettingsFragment extends Fragment {
                                     currentActivity.deactivate_interface();
 
                                     // Remove all articles
-                                    for (App q : user.getApps().getValue()) {
-                                        user.disconnectApp(currentActivity, currentActivity.getDatabase(), q, R.id.nav_settings);
+                                    for (App app : user.getApps().getValue()) {
+                                        user.disconnectApp(currentActivity, app, R.id.nav_settings);
                                     }
 
                                     // Set updated user

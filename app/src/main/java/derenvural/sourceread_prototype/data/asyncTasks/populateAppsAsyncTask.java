@@ -13,24 +13,25 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 
 public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, Long>, ArrayList<App>> {
-    // Tools
-    private fdatabase db;
-    private httpHandler httph;
+    // Activity
+    private final WeakReference<SourceReadActivity> context;
 
-    public populateAppsAsyncTask(fdatabase db, httpHandler httph){
+    public populateAppsAsyncTask(SourceReadActivity context){
         super();
-        // Tools
-        this.db = db;
-        this.httph = httph;
+
+        // Activity
+        this.context = new WeakReference<SourceReadActivity>(context);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
                 final App app = iterator.next();
 
                 // Request app data
-                db.request_app_data(app.getTitle(), new OnCompleteListener<DocumentSnapshot>() {
+                context.get().getDatabase().request_app_data(app.getTitle(), new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
@@ -120,7 +121,7 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
         parameters.put("redirect_uri",redirect_uri);
 
         // Make https POST request
-        httph.make_volley_request_post(url, parameters,
+        context.get().getHttpHandler().make_volley_request_post(url, parameters,
                 responseListener,
                 new Response.ErrorListener() {
                     @Override
