@@ -26,6 +26,7 @@ import java.util.Map;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.populateAppsAsyncTask;
+import derenvural.sourceread_prototype.data.asyncTasks.populateUserAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.writeAppsAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
@@ -106,6 +107,59 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
+    //Population Methods
+    public void populate(final SourceReadActivity currentActivity) {
+        // Create async task
+        final populateUserAsyncTask task = new populateUserAsyncTask(currentActivity);
+
+        // execute async task
+        task.execute(this);
+
+        // Check for task finish
+        task.getDone().observe(currentActivity, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean done) {
+                if (done) {
+                    if(task.getData().getValue() != null) {
+                        // Get user object result
+                        LoggedInUser user1 = task.getData().getValue();
+                        currentActivity.setUser(user1);
+
+                        // Check for access tokens
+                        user1.verify_apps(currentActivity);
+                    }
+                    Log.d("TASK", "user data population task done!");
+                }
+            }
+        });
+    }
+
+    private void verify_apps(@NonNull final SourceReadActivity currentActivity){
+        if(getApps() != null && getApps().getValue() != null && getApps().getValue().size() > 0) {
+            for (App app : getApps().getValue()) {
+                if(app.getAccessToken() == null || app.getAccessToken() == ""){
+                    // Open app in browser for authentication Creates callback
+                    // Get login URL
+                    HashMap<String, String> requests = app.getRequests();
+                    String app_login_url = requests.get("auth");
+
+                    if(app_login_url != null && !app_login_url.equals("")) {
+                        // Insert request token
+                        String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
+
+                        // Store this object using local persistence
+                        if (storageSaver.write(currentActivity, getUserId().getValue(), this)) {
+                            // Redirect to browser for app login
+                            currentActivity.getHttpHandler().browser_open(currentActivity, url);
+                        } else {
+                            Log.e("HTTP", "login url request failure");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull String app_name){
         // Create async task
         final userAccessAsyncTask task = new userAccessAsyncTask(currentActivity.getHttpHandler(), app_name);
@@ -122,6 +176,8 @@ public class LoggedInUser implements Serializable {
 
                     // Set display nameset
                     setApps(task.getData().getValue());
+
+                    verify_apps(currentActivity);
 
                     // Reactivate the UI
                     currentActivity.activate_interface();

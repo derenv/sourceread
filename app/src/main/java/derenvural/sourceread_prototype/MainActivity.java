@@ -205,60 +205,16 @@ public class MainActivity extends SourceReadActivity {
                 user.loadInstanceState(extras);
 
                 if(previous_activity.equals("login")) {
-                    populate(user);
+                    user.populate(this);
                 }else if(previous_activity.equals("article")) {
                     // Reactivate interface & disable worm
                     activate_interface();
                 }
             }else {
                 // Attempt population
-                populate(user);
+                user.populate(this);
             }
         }
-    }
-
-    //Population Methods
-    public void populate(final LoggedInUser user) {
-        // Create async task
-        final populateUserAsyncTask task = new populateUserAsyncTask(this);
-        final SourceReadActivity currentActivity = this;
-
-        // execute async task
-        task.execute(user);
-
-        // Check for task finish
-        task.getDone().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean done) {
-                if (done) {
-                    setUser(task.getData().getValue());
-
-                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
-                        for (App app : getUser().getApps().getValue()) {
-
-                            // Open app in browser for authentication Creates callback
-                            // Get login URL
-                            HashMap<String, String> requests = app.getRequests();
-                            String app_login_url = requests.get("auth");
-
-                            // Insert request token
-                            String url = app_login_url.replaceAll("REPLACEME", app.getRequestToken());
-
-                            // Store this object using local persistence
-                            if (storageSaver.write(currentActivity, getUser().getUserId().getValue(), getUser())) {
-                                // Redirect to browser for app login
-                                getHttpHandler().browser_open(currentActivity, url);
-                            } else {
-                                Log.e("HTTP", "login url request failure");
-                            }
-                        }
-                    }else{
-                        activate_interface();
-                    }
-                    Log.d("TASK", "user data population task done!");
-                }
-            }
-        });
     }
 
     // Menu

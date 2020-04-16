@@ -152,7 +152,7 @@ public class SettingsFragment extends Fragment {
                         DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // Attempt firebase user delete
-                                currentActivity.delete_account(FirebaseAuth.getInstance().getCurrentUser());
+                                currentActivity.delete_account(currentActivity.getAuth().getCurrentUser());
 
                                 // End dialog
                                 dialog.dismiss();
