@@ -8,13 +8,18 @@
         android:title="@string/action_import_articles"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_refresh_apps"
+        android:id="@+id/action_sort"
         android:orderInCategory="2"
+        android:title="@string/action_sort"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_refresh_apps"
+        android:orderInCategory="3"
         android:title="@string/action_refresh_apps"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_help"
-        android:orderInCategory="3"
+        android:orderInCategory="4"
         android:title="@string/action_help"
         app:showAsAction="never" />
 </menu>

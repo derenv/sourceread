@@ -26,6 +26,7 @@ import java.util.HashMap;
 
 import derenvural.sourceread_prototype.data.asyncTasks.populateUserAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.filterType;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
 import derenvural.sourceread_prototype.data.http.httpHandler;
@@ -36,6 +37,10 @@ import derenvural.sourceread_prototype.ui.home.menuStyle;
 public class MainActivity extends SourceReadActivity {
     // Variables
     private boolean appCallback;
+    private filterType filter;
+
+    public filterType getFilter(){return filter;}
+    public void setFilter(filterType filter){this.filter = filter;}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,9 @@ public class MainActivity extends SourceReadActivity {
 
         // Set help dialog content
         setHelp(R.string.help_home);
+
+        // Set default filter
+        setFilter(filterType.ALPHABET_AZ);
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -222,6 +230,19 @@ public class MainActivity extends SourceReadActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
+                case R.id.action_sort:
+                    // TODO: display dialog box to choose sort method (default is A to Z)
+                    // Show dialog
+                    /*
+                    SourceReadDialog sortDialog = new SourceReadDialog(this,
+                            null,
+                            null,
+                            R.string.user_ok,
+                            null,
+                            getHelp());
+                    sortDialog.show();*/
+
+                    return true;
                 case R.id.action_import_articles:
                     // TODO: replace with box asking link or apps
                     // TODO: on apps do as usual

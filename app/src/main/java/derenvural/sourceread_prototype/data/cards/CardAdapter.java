@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 
 public class CardAdapter<T> extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
     protected ArrayList<T> mDataHolders;
@@ -40,7 +41,7 @@ public class CardAdapter<T> extends RecyclerView.Adapter<CardAdapter.CardViewHol
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CardAdapter(Context context, ArrayList<T> newCards, View.OnClickListener listener) {
+    public CardAdapter(SourceReadActivity context, ArrayList<T> newCards, View.OnClickListener listener) {
         this.context = context;
         this.mDataHolders = newCards;
         CardAdapter.listener = listener;

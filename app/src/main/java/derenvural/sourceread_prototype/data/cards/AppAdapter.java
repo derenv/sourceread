@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
+import derenvural.sourceread_prototype.SourceReadActivity;
 
 public class AppAdapter extends CardAdapter<App> {
 
@@ -36,7 +37,7 @@ public class AppAdapter extends CardAdapter<App> {
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public AppAdapter(Context context, ArrayList<App> newCards, View.OnClickListener listener) {
+    public AppAdapter(SourceReadActivity context, ArrayList<App> newCards, View.OnClickListener listener) {
         super(context, newCards, listener);
     }
 

@@ -17,16 +17,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.Article;
 import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
+import derenvural.sourceread_prototype.data.cards.filterType;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
+    private filterType filter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -34,10 +37,10 @@ public class HomeFragment extends Fragment {
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // find view to be linked
+        // Find view to be linked
         recyclerView = root.findViewById(R.id.card_view);
 
-        // use a linear layout manager
+        // Use a linear layout manager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
@@ -53,11 +56,16 @@ public class HomeFragment extends Fragment {
             }
         };
 
-        // specify an adapter
-        mAdapter = new ArticleAdapter(getActivity(), homeViewModel.getCards().getValue(), listener);
+        // Specify filter type
+        final MainActivity main = (MainActivity) getActivity();
+        filter = main.getFilter();
+
+
+        // Specify an adapter
+        mAdapter = new ArticleAdapter(main, homeViewModel.getCards().getValue(), listener, filter);
         recyclerView.setAdapter(mAdapter);
 
-        // link message text to view-model data
+        // Link message text to view-model data
         final TextView textView = root.findViewById(R.id.text_home);
         homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
@@ -66,12 +74,12 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // link cards to view-model data
+        // Link cards to view-model data
         homeViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Article>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Article> updatedList) {
                 // Reset adapter
-                mAdapter = new ArticleAdapter(getActivity(), updatedList, listener);
+                mAdapter = new ArticleAdapter(main, updatedList, listener, filter);
                 recyclerView.setAdapter(mAdapter);
 
                 // If list still empty, display appropriate text and hide loading bar
