@@ -52,7 +52,7 @@ public class AppsFragment extends Fragment {
         };
 
         // specify an adapter
-        mAdapter = new AppAdapter(getActivity(), appsViewModel.getCards().getValue(), listener);
+        mAdapter = new AppAdapter((SourceReadActivity) getActivity(), appsViewModel.getCards().getValue(), listener);
         recyclerView.setAdapter(mAdapter);
 
         // link message text to view-model data
@@ -69,7 +69,7 @@ public class AppsFragment extends Fragment {
             @Override
             public void onChanged(@Nullable ArrayList<App> updatedList) {
                 // Reset adapter
-                mAdapter = new AppAdapter(getActivity(), appsViewModel.getCards().getValue(), listener);
+                mAdapter = new AppAdapter((SourceReadActivity) getActivity(), appsViewModel.getCards().getValue(), listener);
                 recyclerView.setAdapter(mAdapter);
 
                 // If list still empty, display appropriate text

@@ -28,7 +28,7 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 
 import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.http.httpHandler;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
@@ -172,7 +172,7 @@ public abstract class SourceReadActivity extends AppCompatActivity {
             }
         };
         // Get auth credentials from the user for re-authentication
-        SourceReadDialog dialogAccount = new SourceReadDialog(this,
+        helpDialog dialogAccount = new helpDialog(this,
                 negative, positive,
                 null, R.string.user_cancel,
                 R.string.dialog_delete_account);

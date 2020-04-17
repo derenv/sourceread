@@ -80,8 +80,13 @@ public class ArticleAdapter extends CardAdapter<Article> {
                         }
                     }
 
-                    Collator myCollator = Collator.getInstance();
-                    return myCollator.compare(lhs_stamp, rhs_stamp);
+                    if(lhs_stamp > rhs_stamp){
+                        return 1;
+                    }else if(lhs_stamp < rhs_stamp){
+                        return -1;
+                    }else{
+                        return 0;
+                    }
                 }else if(filter.equals(filterType.IMPORT_DT_OLDEST)) {
                     // Add date of import check
                     long lhs_stamp = 0L;
@@ -103,8 +108,13 @@ public class ArticleAdapter extends CardAdapter<Article> {
                         }
                     }
 
-                    Collator myCollator = Collator.getInstance();
-                    return -1 * myCollator.compare(lhs_stamp, rhs_stamp);
+                    if(lhs_stamp > rhs_stamp){
+                        return -1;
+                    }else if(lhs_stamp < rhs_stamp){
+                        return 1;
+                    }else{
+                        return 0;
+                    }
                 }else if(filter.equals(filterType.VERACITY_HIGHEST)) {
                     // Check for unrated article
                     if(lhs.getVeracity() == null || lhs.getVeracity().equals("")){

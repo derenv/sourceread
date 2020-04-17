@@ -1,35 +1,31 @@
 package derenvural.sourceread_prototype;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.core.view.GravityCompat;
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.widget.Toolbar;
 
 import android.widget.Toast;
 
-import java.util.HashMap;
-
-import derenvural.sourceread_prototype.data.asyncTasks.populateUserAsyncTask;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.filterType;
-import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
-import derenvural.sourceread_prototype.data.http.httpHandler;
+import derenvural.sourceread_prototype.data.dialog.choiceDialog;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
@@ -37,10 +33,10 @@ import derenvural.sourceread_prototype.ui.home.menuStyle;
 public class MainActivity extends SourceReadActivity {
     // Variables
     private boolean appCallback;
-    private filterType filter;
+    private MutableLiveData<filterType> filter;
 
-    public filterType getFilter(){return filter;}
-    public void setFilter(filterType filter){this.filter = filter;}
+    public LiveData<filterType> getFilter(){return filter;}
+    public void setFilter(filterType filter){this.filter.setValue(filter);}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +51,7 @@ public class MainActivity extends SourceReadActivity {
         setHelp(R.string.help_home);
 
         // Set default filter
+        filter = new MutableLiveData<filterType>();
         setFilter(filterType.ALPHABET_AZ);
 
         // Toolbar
@@ -231,16 +228,47 @@ public class MainActivity extends SourceReadActivity {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
                 case R.id.action_sort:
-                    // TODO: display dialog box to choose sort method (default is A to Z)
-                    // Show dialog
-                    /*
-                    SourceReadDialog sortDialog = new SourceReadDialog(this,
+                    // Create listeners
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener item_choice = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Find clicked option, specify sort type
+                            if(id == 0){
+                                setFilter(filterType.ALPHABET_AZ);
+                            }else if(id == 1){
+                                setFilter(filterType.ALPHABET_ZA);
+                            }else if(id == 2){
+                                setFilter(filterType.IMPORT_DT_LATEST);
+                            }else if(id == 3){
+                                setFilter(filterType.IMPORT_DT_OLDEST);
+                            }else if(id == 4){
+                                setFilter(filterType.VERACITY_HIGHEST);
+                            }else if(id == 5){
+                                setFilter(filterType.VERACITY_LOWEST);
+                            }else{
+                                // Set default filter
+                                setFilter(filterType.ALPHABET_AZ);
+                            }
+                        }
+                    };
+
+                    // Build dialog
+                    choiceDialog sortDialog = new choiceDialog(this,
+                            getResources().getStringArray(R.array.sorting_options),
+                            new boolean[6],
                             null,
-                            null,
+                            negative,
                             R.string.user_ok,
-                            null,
-                            getHelp());
-                    sortDialog.show();*/
+                            R.string.user_cancel,
+                            item_choice);
+
+                    // Display dialog box to choose sort method (default is A to Z)
+                    sortDialog.show();
 
                     return true;
                 case R.id.action_import_articles:
@@ -272,7 +300,12 @@ public class MainActivity extends SourceReadActivity {
                     return true;
                 case R.id.action_help:
                     // Show help dialog
-                    SourceReadDialog helpDialog = new SourceReadDialog(this, null, null, R.string.user_ok, null, getHelp());
+                    helpDialog helpDialog = new helpDialog(this,
+                            null,
+                            null,
+                            R.string.user_ok,
+                            null,
+                            getHelp());
                     helpDialog.show();
 
                     return true;

@@ -58,8 +58,18 @@ public class HomeFragment extends Fragment {
 
         // Specify filter type
         final MainActivity main = (MainActivity) getActivity();
-        filter = main.getFilter();
-
+        filter = main.getFilter().getValue();
+        main.getFilter().observe(getViewLifecycleOwner(), new Observer<filterType>() {
+            @Override
+            public void onChanged(@Nullable filterType sortFilter) {
+                // Get filter
+                filter = sortFilter;
+                
+                // Reset adapter
+                mAdapter = new ArticleAdapter(main, homeViewModel.getCards().getValue(), listener, filter);
+                recyclerView.setAdapter(mAdapter);
+            }
+        });
 
         // Specify an adapter
         mAdapter = new ArticleAdapter(main, homeViewModel.getCards().getValue(), listener, filter);

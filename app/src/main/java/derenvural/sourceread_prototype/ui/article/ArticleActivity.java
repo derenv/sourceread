@@ -16,14 +16,12 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.analyse.analyser;
 import derenvural.sourceread_prototype.data.cards.Article;
-import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 
@@ -187,7 +185,7 @@ public class ArticleActivity extends SourceReadActivity {
                     return true;
                 case R.id.action_help:
                     // Show help dialog
-                    SourceReadDialog helpDialog = new SourceReadDialog(this, null, null, R.string.user_ok, null, getHelp());
+                    helpDialog helpDialog = new helpDialog(this, null, null, R.string.user_ok, null, getHelp());
                     helpDialog.show();
 
                     return true;

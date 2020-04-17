@@ -14,12 +14,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.dialog.SourceReadDialog;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class SettingsFragment extends Fragment {
@@ -77,7 +75,7 @@ public class SettingsFragment extends Fragment {
                         };
 
                         // Send dialog confirmation
-                        SourceReadDialog dialogArticles = new SourceReadDialog(currentActivity,
+                        helpDialog dialogArticles = new helpDialog(currentActivity,
                                 negative, positive,
                                 null, R.string.user_cancel,
                                 R.string.dialog_delete_all_articles);
@@ -118,7 +116,7 @@ public class SettingsFragment extends Fragment {
                         };
 
                         // Send dialog confirmation
-                        SourceReadDialog dialogApps = new SourceReadDialog(currentActivity,
+                        helpDialog dialogApps = new helpDialog(currentActivity,
                                 negative, positive,
                                 null, R.string.user_cancel,
                                 R.string.dialog_disconnect_all_apps);
@@ -142,7 +140,7 @@ public class SettingsFragment extends Fragment {
                         };
 
                         // Send dialog confirmation
-                        SourceReadDialog dialogLogout = new SourceReadDialog(currentActivity,
+                        helpDialog dialogLogout = new helpDialog(currentActivity,
                                 negative, positive,
                                 null, R.string.user_cancel,
                                 R.string.dialog_log_out);
@@ -166,7 +164,7 @@ public class SettingsFragment extends Fragment {
                         };
 
                         // Send dialog confirmation
-                        SourceReadDialog dialogAccount = new SourceReadDialog(currentActivity,
+                        helpDialog dialogAccount = new helpDialog(currentActivity,
                                 negative, positive,
                                 null, R.string.user_cancel,
                                 R.string.dialog_delete_account);

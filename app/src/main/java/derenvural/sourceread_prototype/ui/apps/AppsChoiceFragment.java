@@ -62,7 +62,7 @@ public class AppsChoiceFragment extends Fragment {
             appChoiceViewModel.setText("No new apps available!");
         }else {
             appChoiceViewModel.setText("");
-            mAdapter = new AppAdapter(getActivity(), appChoiceViewModel.getCards().getValue(), listener);
+            mAdapter = new AppAdapter((SourceReadActivity) getActivity(), appChoiceViewModel.getCards().getValue(), listener);
             recyclerView.setAdapter(mAdapter);
         }
 
@@ -76,7 +76,7 @@ public class AppsChoiceFragment extends Fragment {
                     appChoiceViewModel.setText("");
 
                     // Reset adapter
-                    mAdapter = new AppAdapter(getActivity(), updatedList, listener);
+                    mAdapter = new AppAdapter((SourceReadActivity) getActivity(), updatedList, listener);
                     recyclerView.setAdapter(mAdapter);
                 }
             }

@@ -37,6 +37,25 @@
     <string name="button_import_all">Import all articles</string>
     <string name="button_delete_all">Delete all imported articles</string>
 
+    <!--SORTING LIST-->
+    <string name="action_AZ">Alphabetically (A to Z)</string>
+    <string name="action_ZA">Alphabetically (Z to A)</string>
+    <string name="action_DF">Date of Import (First to Last)</string>
+    <string name="action_DL">Date of Import (Last to First)</string>
+    <string name="action_VH">Veracity Rating (Highest to Lowest)</string>
+    <string name="action_VL">Veracity Rating (Lowest to Highest)</string>
+    <string name="dialog_choice_placeholder">Which choice?</string>
+    <string name="dialog_help_title">Help</string>
+    <string name="dialog_sort_title">Sorting</string>
+    <string-array name="sorting_options">
+        <item>@string/action_AZ</item>
+        <item>@string/action_ZA</item>
+        <item>@string/action_DF</item>
+        <item>@string/action_DL</item>
+        <item>@string/action_VH</item>
+        <item>@string/action_VL</item>
+    </string-array>
+
     <!-- -->
     <!--==BUTTON ACTIONS-->
     <string name="action_connect_app">Connect</string>

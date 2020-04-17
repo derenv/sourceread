@@ -2,96 +2,49 @@ package derenvural.sourceread_prototype.data.dialog;
 
 import android.content.DialogInterface;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
-import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.SourceReadActivity;
-
-public class SourceReadDialog {
+public abstract class SourceReadDialog{
+    // Object
     private AlertDialog alertDialog;
-    private DialogInterface.OnClickListener negative;
-    private DialogInterface.OnClickListener positive;
-    private Integer messageID;
-    private Integer confirmID;
-    private Integer cancelID;
+    // Dialog state
     private boolean cancellable;
-
-    public SourceReadDialog(@NonNull SourceReadActivity activity,
-                            @Nullable DialogInterface.OnClickListener negative,
-                            @Nullable DialogInterface.OnClickListener positive,
-                            @Nullable Integer confirmID,
-                            @Nullable Integer cancelID,
-                            @Nullable Integer messageID){
-        // Cancel response
-        if(negative == null){
-            if(cancelID == null){
-                cancellable = false;
-            }else{
-                cancellable = true;
-                this.cancelID = cancelID;
-
-                this.negative = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // cancel
-                        dialog.dismiss();
-                    }
-                };
-            }
-        }else{
-            this.cancelID = cancelID;
-            cancellable = true;
-            this.negative = negative;
+    // Message ID's
+    private Integer messageID;
+    private Integer cancelID;
+    private Integer confirmID;
+    // Listeners
+    private DialogInterface.OnClickListener positive;
+    private DialogInterface.OnClickListener negative;
+    private DialogInterface.OnClickListener default_negative = new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+            // cancel
+            dialog.dismiss();
         }
+    };
 
-        // Accept response
-        if(positive == null){
-            this.positive = new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // cancel
-                    dialog.dismiss();
-                }
-            };
-        }else{
-            this.positive = positive;
-        }
+    // Show method
+    public void show(){ getAlertDialog().show(); }
 
-        // Messages
-        if(confirmID == null){
-            this.confirmID = R.string.user_sure;
-        }else{
-            this.confirmID = confirmID;
-        }
-        if(messageID == null){
-            this.messageID = R.string.dialog_placeholder;
-        }else{
-            this.messageID = messageID;
-        }
+    // Listeners
+    DialogInterface.OnClickListener getPositive() { return positive; }
+    void setPositive(DialogInterface.OnClickListener positive) { this.positive = positive; }
+    DialogInterface.OnClickListener getNegative() { return negative; }
+    void setNegative(DialogInterface.OnClickListener negative) { this.negative = negative; }
+    DialogInterface.OnClickListener getDefault_negative() { return default_negative; }
 
-        // Create Box
-        alertDialog = createDialog(activity);
-    }
+    // State
+    boolean getCancelable() { return cancellable; }
+    void setCancellable(boolean cancellable) { this.cancellable = cancellable; }
 
-    public void show(){
-        alertDialog.show();
-    }
+    // Message ID's
+    Integer getConfirmID() { return confirmID; }
+    void setConfirmID(Integer confirmID) { this.confirmID = confirmID; }
+    Integer getCancelID() { return cancelID; }
+    void setCancelID(Integer cancelID) { this.cancelID = cancelID; }
+    Integer getMessageID() { return messageID; }
+    void setMessageID(Integer messageID) { this.messageID = messageID; }
 
-    // Dialogue
-    private AlertDialog createDialog(@NonNull SourceReadActivity activity) {
-        // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
-        // Set message and listeners
-        builder.setMessage(this.messageID)
-                .setCancelable(cancellable)
-                .setPositiveButton(this.confirmID, this.positive);
-
-        // Check if cancel button needed
-        if(cancellable){
-            builder.setNegativeButton(this.cancelID, this.negative);
-        }
-
-        return builder.create();
-    }
+    AlertDialog getAlertDialog() { return alertDialog; }
+    void setAlertDialog(AlertDialog alertDialog) { this.alertDialog = alertDialog; }
 }
