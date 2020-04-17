@@ -22,11 +22,14 @@ import java.util.HashMap;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
+import derenvural.sourceread_prototype.data.storage.storageSaver;
 
 public class ArticleFragment extends Fragment {
     private Button removeButton;
+    private Button openButton;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -37,7 +40,7 @@ public class ArticleFragment extends Fragment {
 
         // Find buttons
         removeButton = root.findViewById(R.id.button_remove);
-        removeButton.setText("Delete Article");
+        removeButton.setText(R.string.button_delete);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +77,51 @@ public class ArticleFragment extends Fragment {
                         null, R.string.user_cancel,
                         R.string.dialog_delete_article);
                 dialogAccount.show();
+            }
+        });
+        openButton = root.findViewById(R.id.button_open);
+        openButton.setText(R.string.button_open);
+        openButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final ArticleActivity aa = (ArticleActivity) getActivity();
+                // Create dialog listeners
+                DialogInterface.OnClickListener item_choice = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Find clicked option, specify sort type
+                        switch(id){
+                            case 0:
+                                // Get URL of article
+                                String url = articleViewModel.getArticle().getValue().getResolved_url();
+
+                                // Redirect to browser for article URL
+                                aa.getHttpHandler().browser_open(aa, url);
+
+                                break;
+                            case 1:
+                                Toast.makeText(aa, "Feature not yet implemented..", Toast.LENGTH_SHORT).show();
+
+                                break;
+                        }
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Build dialog
+                choiceDialog sortDialog = new choiceDialog(aa,
+                        getResources().getStringArray(R.array.open_list),
+                        null,
+                        negative,
+                        R.string.dialog_open_title,
+                        null,
+                        R.string.user_cancel,
+                        item_choice);
+                sortDialog.show();
             }
         });
 
