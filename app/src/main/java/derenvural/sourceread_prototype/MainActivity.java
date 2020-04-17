@@ -225,6 +225,7 @@ public class MainActivity extends SourceReadActivity {
     // Menu
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
+        final SourceReadActivity main = this;
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
                 case R.id.action_sort:
@@ -238,21 +239,25 @@ public class MainActivity extends SourceReadActivity {
                     DialogInterface.OnClickListener item_choice = new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             // Find clicked option, specify sort type
-                            if(id == 0){
-                                setFilter(filterType.ALPHABET_AZ);
-                            }else if(id == 1){
-                                setFilter(filterType.ALPHABET_ZA);
-                            }else if(id == 2){
-                                setFilter(filterType.IMPORT_DT_LATEST);
-                            }else if(id == 3){
-                                setFilter(filterType.IMPORT_DT_OLDEST);
-                            }else if(id == 4){
-                                setFilter(filterType.VERACITY_HIGHEST);
-                            }else if(id == 5){
-                                setFilter(filterType.VERACITY_LOWEST);
-                            }else{
-                                // Set default filter
-                                setFilter(filterType.ALPHABET_AZ);
+                            switch(id){
+                                case 0:
+                                    setFilter(filterType.ALPHABET_AZ);
+                                    break;
+                                case 1:
+                                    setFilter(filterType.ALPHABET_ZA);
+                                    break;
+                                case 2:
+                                    setFilter(filterType.IMPORT_DT_LATEST);
+                                    break;
+                                case 3:
+                                    setFilter(filterType.IMPORT_DT_OLDEST);
+                                    break;
+                                case 4:
+                                    setFilter(filterType.VERACITY_HIGHEST);
+                                    break;
+                                case 5:
+                                    setFilter(filterType.VERACITY_LOWEST);
+                                    break;
                             }
                         }
                     };
@@ -260,9 +265,9 @@ public class MainActivity extends SourceReadActivity {
                     // Build dialog
                     choiceDialog sortDialog = new choiceDialog(this,
                             getResources().getStringArray(R.array.sorting_options),
-                            new boolean[6],
                             null,
                             negative,
+                            R.string.dialog_sort_title,
                             R.string.user_ok,
                             R.string.user_cancel,
                             item_choice);
@@ -272,21 +277,56 @@ public class MainActivity extends SourceReadActivity {
 
                     return true;
                 case R.id.action_import_articles:
-                    // TODO: replace with box asking link or apps
-                    // TODO: on apps do as usual
-                    // TODO: on link open dialog asking for link
-                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
-                        // loading worm and "importing.."
-                        deactivate_interface();
+                    //Dialog asking link or apps
 
-                        // Import articles from user accounts
-                        for(App app: getUser().getApps().getValue()) {
-                            // Fetch serialised user
-                            user.importArticles(this, app);
+                    // Create listeners
+                    DialogInterface.OnClickListener cancel = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // cancel
+                            dialog.dismiss();
                         }
-                    }else{
-                        Toast.makeText(this, "No apps to import from..", Toast.LENGTH_SHORT).show();
-                    }
+                    };
+                    DialogInterface.OnClickListener which_button = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Find clicked option, specify sort type
+                            switch(id){
+                                case 0:
+                                    //APP
+                                    // On apps do as usual
+                                    if(getUser().getApps() != null && getUser().getApps().getValue() != null && getUser().getApps().getValue().size() > 0) {
+                                        // loading worm and "importing.."
+                                        main.deactivate_interface();
+
+                                        // Import articles from user accounts
+                                        for(App app: getUser().getApps().getValue()) {
+                                            // Fetch serialised user
+                                            user.importArticles(main, app);
+                                        }
+                                    }else{
+                                        Toast.makeText(main, "No apps to import from..", Toast.LENGTH_SHORT).show();
+                                    }
+                                    break;
+                                case 1:
+                                    //LINK
+                                    // TODO: on link open dialog asking for link
+                                    Toast.makeText(main, "Not yet implemented..", Toast.LENGTH_SHORT).show();
+                                    break;
+                            }
+                        }
+                    };
+
+                    // Build dialog
+                    choiceDialog importDialog = new choiceDialog(this,
+                            getResources().getStringArray(R.array.import_options),
+                            null,
+                            cancel,
+                            R.string.dialog_import_title,
+                            R.string.user_ok,
+                            R.string.user_cancel,
+                            which_button);
+
+                    // Display dialog box to choose sort method (default is A to Z)
+                    importDialog.show();
 
                     return true;
                 case R.id.action_refresh_apps:
@@ -303,6 +343,7 @@ public class MainActivity extends SourceReadActivity {
                     helpDialog helpDialog = new helpDialog(this,
                             null,
                             null,
+                            R.string.dialog_help_title,
                             R.string.user_ok,
                             null,
                             getHelp());

@@ -3,6 +3,7 @@ package derenvural.sourceread_prototype.ui.article;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class ArticleFragment extends Fragment {
@@ -39,17 +41,39 @@ public class ArticleFragment extends Fragment {
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Get user data
-                ArticleActivity aa = (ArticleActivity) getActivity();
-                Article article = articleViewModel.getArticle().getValue();
-                LoggedInUser user = articleViewModel.getUser().getValue();
+                final ArticleActivity aa = (ArticleActivity) getActivity();
+                // Create dialog listeners
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Get user data
+                        Article article = articleViewModel.getArticle().getValue();
+                        LoggedInUser user = articleViewModel.getUser().getValue();
 
-                // Attempt to delete article from database
-                aa.deactivate_interface();
-                Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
-                ArrayList<Article> articles = new ArrayList<Article>();
-                articles.add(article);
-                user.deleteArticle(aa, articles);
+                        // Attempt to delete article from database
+                        aa.deactivate_interface();
+                        Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
+                        ArrayList<Article> articles = new ArrayList<Article>();
+                        articles.add(article);
+                        user.deleteArticle(aa, articles);
+
+                        // End dialog
+                        dialog.dismiss();
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Send dialog confirmation
+                helpDialog dialogAccount = new helpDialog(aa,
+                        negative, positive,
+                        R.string.dialog_default_title,
+                        null, R.string.user_cancel,
+                        R.string.dialog_delete_article);
+                dialogAccount.show();
             }
         });
 

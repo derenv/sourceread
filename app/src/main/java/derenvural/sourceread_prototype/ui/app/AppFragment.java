@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.ui.app;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.App;
 import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.apps.redirectType;
 
@@ -203,11 +205,33 @@ public class AppFragment extends Fragment {
                 connectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Attempt to login to pocket
-                        Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
+                        // Create dialog listeners
+                        DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Attempt to login to app
+                                Toast.makeText(currentActivity, "Attempting to connect app..", Toast.LENGTH_SHORT).show();
 
-                        //remove app from user
-                        user.connectApp(main, app);
+                                // Remove app from user
+                                user.connectApp(main, app);
+
+                                // End dialog
+                                dialog.dismiss();
+                            }
+                        };
+                        DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Cancel
+                                dialog.dismiss();
+                            }
+                        };
+
+                        // Send dialog confirmation
+                        helpDialog dialogAccount = new helpDialog(currentActivity,
+                                negative, positive,
+                                R.string.dialog_default_title,
+                                null, R.string.user_cancel,
+                                R.string.dialog_connect_app);
+                        dialogAccount.show();
                     }
                 });
             }
@@ -229,44 +253,122 @@ public class AppFragment extends Fragment {
         importButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Attempt to import all articles from app
-                Toast.makeText(currentActivity, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                currentActivity.deactivate_interface();
-                user.importArticles(currentActivity, appViewModel.getApp().getValue());
-                currentActivity.setUser(user);
+                // Create dialog listeners
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Deactivate user interface
+                        currentActivity.deactivate_interface();
+
+                        // Attempt to import all articles from app
+                        user.importArticles(currentActivity, appViewModel.getApp().getValue());
+
+                        // Update user
+                        currentActivity.setUser(user);
+
+                        // Notify user
+                        Toast.makeText(currentActivity, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                        // End dialog
+                        dialog.dismiss();
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Send dialog confirmation
+                helpDialog dialogAccount = new helpDialog(currentActivity,
+                        negative, positive,
+                        R.string.dialog_default_title,
+                        null, R.string.user_cancel,
+                        R.string.dialog_import_all_articles);
+                dialogAccount.show();
             }
         });
         // Add 'delete' onclick event
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Attempt to delete all articles imported from app
-                Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-                currentActivity.deactivate_interface();
-                user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
-                currentActivity.setUser(user);
+                // Create dialog listeners
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Deactivate user interface
+                        currentActivity.deactivate_interface();
+
+                        // Attempt to delete all articles imported from app
+                        user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
+
+                        // Update user
+                        currentActivity.setUser(user);
+
+                        // Notify user
+                        Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                        // End dialog
+                        dialog.dismiss();
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Send dialog confirmation
+                helpDialog dialogAccount = new helpDialog(currentActivity,
+                        negative, positive,
+                        R.string.dialog_default_title,
+                        null, R.string.user_cancel,
+                        R.string.dialog_delete_all_articles);
+                dialogAccount.show();
             }
         });
         // Add 'disconnect' onclick event
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Attempt to remove app
-                Toast.makeText(currentActivity, "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+                // Create dialog listeners
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Attempt to remove app
+                        Toast.makeText(currentActivity, "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
 
-                MainActivity main = (MainActivity) currentActivity;
+                        MainActivity main = (MainActivity) currentActivity;
 
-                // Set callback on back button click
-                main.setAppCallback(false);
+                        // Set callback on back button click
+                        main.setAppCallback(false);
 
-                // Set help dialog text
-                main.setHelp(R.string.help_apps);
+                        // Set help dialog text
+                        main.setHelp(R.string.help_apps);
 
-                // Disconnect app
-                user.disconnectApp(main, app, R.id.nav_apps);
-                main.setUser(user);
+                        // Disconnect app
+                        user.disconnectApp(main, app, R.id.nav_apps);
+                        main.setUser(user);
 
-                currentActivity = main;
+                        currentActivity = main;
+
+                        // End dialog
+                        dialog.dismiss();
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Send dialog confirmation
+                helpDialog dialogAccount = new helpDialog(currentActivity,
+                        negative, positive,
+                        R.string.dialog_default_title,
+                        null, R.string.user_cancel,
+                        R.string.dialog_disconnect_app);
+                dialogAccount.show();
             }
         });
     }

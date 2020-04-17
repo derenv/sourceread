@@ -253,7 +253,7 @@ public class LoggedInUser implements Serializable {
                     //Create HashMap<String, Object> of apps
                     HashMap<String, Long> found_apps = writeAppsTask.getData().getValue();
 
-                    // TODO: Make actual connection to app
+                    // Get app data then ask for request token
                     final populateAppsAsyncTask appTask = new populateAppsAsyncTask(currentActivity);
 
                     // execute async task

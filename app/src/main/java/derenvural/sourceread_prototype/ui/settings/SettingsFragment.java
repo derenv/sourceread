@@ -77,6 +77,7 @@ public class SettingsFragment extends Fragment {
                         // Send dialog confirmation
                         helpDialog dialogArticles = new helpDialog(currentActivity,
                                 negative, positive,
+                                R.string.dialog_default_title,
                                 null, R.string.user_cancel,
                                 R.string.dialog_delete_all_articles);
                         dialogArticles.show();
@@ -118,6 +119,7 @@ public class SettingsFragment extends Fragment {
                         // Send dialog confirmation
                         helpDialog dialogApps = new helpDialog(currentActivity,
                                 negative, positive,
+                                R.string.dialog_default_title,
                                 null, R.string.user_cancel,
                                 R.string.dialog_disconnect_all_apps);
                         dialogApps.show();
@@ -142,6 +144,7 @@ public class SettingsFragment extends Fragment {
                         // Send dialog confirmation
                         helpDialog dialogLogout = new helpDialog(currentActivity,
                                 negative, positive,
+                                R.string.dialog_default_title,
                                 null, R.string.user_cancel,
                                 R.string.dialog_log_out);
                         dialogLogout.show();
@@ -166,6 +169,7 @@ public class SettingsFragment extends Fragment {
                         // Send dialog confirmation
                         helpDialog dialogAccount = new helpDialog(currentActivity,
                                 negative, positive,
+                                R.string.dialog_default_title,
                                 null, R.string.user_cancel,
                                 R.string.dialog_delete_account);
                         dialogAccount.show();

@@ -185,7 +185,13 @@ public class ArticleActivity extends SourceReadActivity {
                     return true;
                 case R.id.action_help:
                     // Show help dialog
-                    helpDialog helpDialog = new helpDialog(this, null, null, R.string.user_ok, null, getHelp());
+                    helpDialog helpDialog = new helpDialog(this,
+                            null,
+                            null,
+                            R.string.dialog_help_title,
+                            R.string.user_ok,
+                            null,
+                            getHelp());
                     helpDialog.show();
 
                     return true;

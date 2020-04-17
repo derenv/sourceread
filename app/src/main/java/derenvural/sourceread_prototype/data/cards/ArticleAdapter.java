@@ -1,6 +1,5 @@
 package derenvural.sourceread_prototype.data.cards;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import java.util.Comparator;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class ArticleAdapter extends CardAdapter<Article> {
     private filterType filter;

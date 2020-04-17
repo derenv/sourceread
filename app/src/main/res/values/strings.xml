@@ -47,6 +47,8 @@
     <string name="dialog_choice_placeholder">Which choice?</string>
     <string name="dialog_help_title">Help</string>
     <string name="dialog_sort_title">Sorting</string>
+    <string name="dialog_import_title">Article Import</string>
+    <string name="dialog_default_title"></string>
     <string-array name="sorting_options">
         <item>@string/action_AZ</item>
         <item>@string/action_ZA</item>
@@ -54,6 +56,12 @@
         <item>@string/action_DL</item>
         <item>@string/action_VH</item>
         <item>@string/action_VL</item>
+    </string-array>
+    <string name="action_import_apps">Import from connected apps</string>
+    <string name="action_import_link">Import a link</string>
+    <string-array name="import_options">
+        <item>@string/action_import_apps</item>
+        <item>@string/action_import_link</item>
     </string-array>
 
     <!-- -->
@@ -94,6 +102,10 @@
         <item>@string/delete_account</item>
     </string-array>
     <!--==DIALOG-->
+    <string name="dialog_delete_article">Are you sure you want to delete this article?</string>
+    <string name="dialog_connect_app">Are you sure you want to connect this app?</string>
+    <string name="dialog_disconnect_app">Are you sure you want to disconnect this app? This will remove all articles from this app, and you will need to reconnect it to import any more articles!</string>
+    <string name="dialog_import_all_articles">Are you sure you want to import all articles from this app? You will need to manually delete any you dont want!</string>
     <string name="dialog_delete_all_articles">Are you sure you want to delete all articles? You will need to reimport any you want to keep!</string>
     <string name="dialog_disconnect_all_apps">Are you sure you want to disconnect all apps? You will need to reconnect any you want to keep!</string>
     <string name="dialog_log_out">Are you sure you want to log out?</string>

@@ -14,6 +14,7 @@ public class helpDialog extends SourceReadDialog{
     public helpDialog(@NonNull SourceReadActivity activity,
                       @Nullable DialogInterface.OnClickListener negative,
                       @Nullable DialogInterface.OnClickListener positive,
+                      @Nullable Integer titleID,
                       @Nullable Integer confirmID,
                       @Nullable Integer cancelID,
                       @Nullable Integer messageID){
@@ -53,6 +54,11 @@ public class helpDialog extends SourceReadDialog{
         }else{
             setMessageID(messageID);
         }
+        if(titleID == null){
+            setTitleID(R.string.dialog_default_title);
+        }else{
+            setTitleID(titleID);
+        }
 
         // Create Box
         setAlertDialog(createDialog(activity));
@@ -65,7 +71,7 @@ public class helpDialog extends SourceReadDialog{
 
         // Set message and listeners
         builder.setMessage(getMessageID())
-                .setTitle(R.string.dialog_help_title)
+                .setTitle(getTitleID())
                 .setCancelable(getCancelable())
                 .setPositiveButton(getConfirmID(), getPositive());
 

@@ -73,9 +73,13 @@ public abstract class SourceReadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Tools
         setAuth(FirebaseAuth.getInstance());
         setDatabase(new fdatabase());
         setHttpHandler(new httpHandler(this));
+
+        // Variables
+        setInterfaceEnabled(true);
     }
     // Menu
     @Override
@@ -174,6 +178,7 @@ public abstract class SourceReadActivity extends AppCompatActivity {
         // Get auth credentials from the user for re-authentication
         helpDialog dialogAccount = new helpDialog(this,
                 negative, positive,
+                R.string.dialog_default_title,
                 null, R.string.user_cancel,
                 R.string.dialog_delete_account);
         dialogAccount.show();

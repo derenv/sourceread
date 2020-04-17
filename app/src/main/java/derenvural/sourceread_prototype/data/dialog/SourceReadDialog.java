@@ -10,6 +10,7 @@ public abstract class SourceReadDialog{
     // Dialog state
     private boolean cancellable;
     // Message ID's
+    private Integer titleID;
     private Integer messageID;
     private Integer cancelID;
     private Integer confirmID;
@@ -38,6 +39,8 @@ public abstract class SourceReadDialog{
     void setCancellable(boolean cancellable) { this.cancellable = cancellable; }
 
     // Message ID's
+    void setTitleID(Integer titleID) { this.titleID = titleID; }
+    Integer getTitleID() { return titleID; }
     Integer getConfirmID() { return confirmID; }
     void setConfirmID(Integer confirmID) { this.confirmID = confirmID; }
     Integer getCancelID() { return cancelID; }
@@ -45,6 +48,6 @@ public abstract class SourceReadDialog{
     Integer getMessageID() { return messageID; }
     void setMessageID(Integer messageID) { this.messageID = messageID; }
 
-    AlertDialog getAlertDialog() { return alertDialog; }
+    private AlertDialog getAlertDialog() { return alertDialog; }
     void setAlertDialog(AlertDialog alertDialog) { this.alertDialog = alertDialog; }
 }

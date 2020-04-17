@@ -12,15 +12,14 @@ import derenvural.sourceread_prototype.SourceReadActivity;
 public class choiceDialog extends SourceReadDialog {
     // Dialog state
     private CharSequence[] choices;
-    private boolean[] checked;
     // Listeners
     private DialogInterface.OnClickListener listener;
 
     public choiceDialog(@NonNull SourceReadActivity activity,
                         @NonNull CharSequence[] choices,
-                        boolean[] checked,
                         @Nullable DialogInterface.OnClickListener positive,
                         @Nullable DialogInterface.OnClickListener negative,
+                        @Nullable Integer titleID,
                         @Nullable Integer confirmID,
                         @Nullable Integer cancelID,
                         @NonNull DialogInterface.OnClickListener listener){
@@ -55,9 +54,13 @@ public class choiceDialog extends SourceReadDialog {
         }else{
             setConfirmID(confirmID);
         }
+        if(titleID == null){
+            setTitleID(R.string.dialog_default_title);
+        }else{
+            setTitleID(titleID);
+        }
 
         this.choices = choices;
-        this.checked = checked;
         this.listener = listener;
 
         // Create Box
@@ -70,7 +73,7 @@ public class choiceDialog extends SourceReadDialog {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         // Set message and listeners
-        builder.setTitle(R.string.dialog_sort_title)
+        builder.setTitle(getTitleID())
                 .setCancelable(getCancelable())
                 .setItems(choices, listener);
 
