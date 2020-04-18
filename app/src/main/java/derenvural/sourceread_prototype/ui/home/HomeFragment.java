@@ -82,6 +82,9 @@ public class HomeFragment extends Fragment {
         ArrayList<Function> functions = new ArrayList<Function>();
         functions.add(searchBar);
 
+        // TODO: Create search text listener
+        //
+
         // Specify an adapter
         mSearchAdapter = new SearchBarAdapter(main, functions/*, null*/);
         searchCardView.setAdapter(mSearchAdapter);
