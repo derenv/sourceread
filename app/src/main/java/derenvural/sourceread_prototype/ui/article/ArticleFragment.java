@@ -21,11 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import derenvural.sourceread_prototype.R;
-import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
-import derenvural.sourceread_prototype.data.storage.storageSaver;
 
 public class ArticleFragment extends Fragment {
     private Button removeButton;

@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.importAppsAsyncTask;
-import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.cards.AppAdapter;
+import derenvural.sourceread_prototype.data.cards.apps.App;
+import derenvural.sourceread_prototype.data.cards.apps.AppAdapter;
 
 public class AppsChoiceFragment extends Fragment {
     private AppChoiceViewModel appChoiceViewModel;

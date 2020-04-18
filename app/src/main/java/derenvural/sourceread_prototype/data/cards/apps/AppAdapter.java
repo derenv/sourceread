@@ -1,6 +1,5 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.cards.apps;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
+import derenvural.sourceread_prototype.data.cards.CardAdapter;
 
 public class AppAdapter extends CardAdapter<App> {
 
@@ -45,7 +45,7 @@ public class AppAdapter extends CardAdapter<App> {
     @Override
     public AppAdapter.AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(context).inflate(R.layout.list_row, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.card, parent, false);
         return new AppViewHolder(v);
     }
 

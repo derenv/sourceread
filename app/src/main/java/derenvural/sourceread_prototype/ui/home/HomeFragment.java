@@ -20,16 +20,26 @@ import java.util.ArrayList;
 import derenvural.sourceread_prototype.MainActivity;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.cards.Article;
-import derenvural.sourceread_prototype.data.cards.ArticleAdapter;
-import derenvural.sourceread_prototype.data.cards.filterType;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
+import derenvural.sourceread_prototype.data.cards.articles.ArticleAdapter;
+import derenvural.sourceread_prototype.data.cards.articles.filterType;
+import derenvural.sourceread_prototype.data.functions.Function;
+import derenvural.sourceread_prototype.data.functions.searchBar.SearchBar;
+import derenvural.sourceread_prototype.data.functions.searchBar.SearchBarAdapter;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
 
 public class HomeFragment extends Fragment {
+    // View-Model
     private HomeViewModel homeViewModel;
+    // Article list
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private filterType filter;
+    // Search bar
+    private RecyclerView searchCardView;
+    private RecyclerView.Adapter mSearchAdapter;
+    // Fragment text
+    private TextView textView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -37,6 +47,47 @@ public class HomeFragment extends Fragment {
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // Create activity reference for observers and recycler views
+        MainActivity main = (MainActivity) getActivity();
+
+        // Activate recycler views
+        activate_search_bar(root, main);
+        activate_article_list(root, main);
+
+        // Link message text to view-model data
+        textView = root.findViewById(R.id.text_home);
+        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                textView.setText(s);
+            }
+        });
+
+        // Request articles
+        update();
+
+        return root;
+    }
+
+    private void activate_search_bar(View root, final MainActivity main){
+        // Find search bar
+        searchCardView = root.findViewById(R.id.search_bar_view);
+
+        // Use a linear layout manager
+        RecyclerView.LayoutManager searchLayoutManager = new LinearLayoutManager(getActivity());
+        searchCardView.setLayoutManager(searchLayoutManager);
+
+        // Create search bar function for adapter
+        SearchBar searchBar = new SearchBar(getString(R.string.search_bar_title), getString(R.string.prompt_search));
+        ArrayList<Function> functions = new ArrayList<Function>();
+        functions.add(searchBar);
+
+        // Specify an adapter
+        mSearchAdapter = new SearchBarAdapter(main, functions/*, null*/);
+        searchCardView.setAdapter(mSearchAdapter);
+    }
+
+    private void activate_article_list(View root, final MainActivity main) {
         // Find view to be linked
         recyclerView = root.findViewById(R.id.card_view);
 
@@ -57,14 +108,13 @@ public class HomeFragment extends Fragment {
         };
 
         // Specify filter type
-        final MainActivity main = (MainActivity) getActivity();
         filter = main.getFilter().getValue();
         main.getFilter().observe(getViewLifecycleOwner(), new Observer<filterType>() {
             @Override
             public void onChanged(@Nullable filterType sortFilter) {
                 // Get filter
                 filter = sortFilter;
-                
+
                 // Reset adapter
                 mAdapter = new ArticleAdapter(main, homeViewModel.getCards().getValue(), listener, filter);
                 recyclerView.setAdapter(mAdapter);
@@ -74,15 +124,6 @@ public class HomeFragment extends Fragment {
         // Specify an adapter
         mAdapter = new ArticleAdapter(main, homeViewModel.getCards().getValue(), listener, filter);
         recyclerView.setAdapter(mAdapter);
-
-        // Link message text to view-model data
-        final TextView textView = root.findViewById(R.id.text_home);
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
 
         // Link cards to view-model data
         homeViewModel.getCards().observe(getViewLifecycleOwner(), new Observer<ArrayList<Article>>() {
@@ -101,11 +142,6 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-
-        // Request articles
-        update();
-
-        return root;
     }
 
     private void startArticleActivity(String title){

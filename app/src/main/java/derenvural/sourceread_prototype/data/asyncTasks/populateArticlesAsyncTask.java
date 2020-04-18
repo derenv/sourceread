@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 
 public class populateArticlesAsyncTask extends sourcereadAsyncTask<HashMap<String, String>, ArrayList<Article>> {

@@ -11,7 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 
 public class writeAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, HashMap<String, Long>> {

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 
 public class AppChoiceViewModel extends ViewModel {
     private MutableLiveData<ArrayList<App>> mCards;

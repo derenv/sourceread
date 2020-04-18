@@ -37,6 +37,9 @@
     <string name="button_import_all">Import all articles</string>
     <string name="button_delete_all">Delete all imported articles</string>
 
+    <string name="search_bar_title">Search:</string>
+    <string name="prompt_search">look for articles by title..</string>
+
     <!--SORTING LIST-->
     <string name="action_AZ">Alphabetically (A to Z)</string>
     <string name="action_ZA">Alphabetically (Z to A)</string>

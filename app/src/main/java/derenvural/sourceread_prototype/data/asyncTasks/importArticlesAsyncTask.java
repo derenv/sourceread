@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.cards.apps.App;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
 
 public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<Article>> {
     // Activity

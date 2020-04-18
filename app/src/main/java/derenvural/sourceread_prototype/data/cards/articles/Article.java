@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.cards.articles;
 
 import android.os.Bundle;
 
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import derenvural.sourceread_prototype.data.cards.Card;
 
 public class Article extends Card {
     // Identifiers
@@ -70,8 +72,8 @@ public class Article extends Card {
      * Create object from JSON object
      * */
     public Article(JSONObject article, String app_name) throws JSONException{
-        //FIXME: add excerpt as 3rd param
         super(null, article.getString("resolved_title"),article.getString("excerpt"));
+        // TODO: Add excerpt as field of object
 
         // ((Safe))
         setApp(app_name);

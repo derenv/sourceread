@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 

@@ -12,7 +12,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 
 public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, ArrayList<App>> {

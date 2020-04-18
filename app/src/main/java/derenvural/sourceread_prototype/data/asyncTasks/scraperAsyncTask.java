@@ -15,7 +15,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
-import derenvural.sourceread_prototype.data.cards.Article;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.database.fdatabase;
 
 /* Scrapes content from webpages

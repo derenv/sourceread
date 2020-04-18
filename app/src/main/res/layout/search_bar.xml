@@ -1,0 +1,40 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/search_bar_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/colorAccent"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="10dp"
+    app:cardPreventCornerOverlap="true">
+
+    <LinearLayout
+        android:id="@+id/search_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/search_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_bar_title"
+            android:gravity="start"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/search_bar_text"
+            android:gravity="start"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:selectAllOnFocus="true"
+            android:hint="@string/prompt_search" />
+
+        <!--TODO: ADD DROP DOWN FOR SEARCH TYPE-->
+        <!--TODO: ADD DROP DOWN FOR FILTER-->
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

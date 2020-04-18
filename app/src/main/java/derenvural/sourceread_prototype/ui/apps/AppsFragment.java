@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.cards.AppAdapter;
+import derenvural.sourceread_prototype.data.cards.apps.App;
+import derenvural.sourceread_prototype.data.cards.apps.AppAdapter;
 import derenvural.sourceread_prototype.R;
 
 public class AppsFragment extends Fragment {

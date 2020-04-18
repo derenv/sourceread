@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.cards.articles;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,8 @@ import java.util.Comparator;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
+import derenvural.sourceread_prototype.data.cards.CardAdapter;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 
 public class ArticleAdapter extends CardAdapter<Article> {
     private filterType filter;
@@ -155,7 +157,7 @@ public class ArticleAdapter extends CardAdapter<Article> {
     @Override
     public ArticleAdapter.ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(context).inflate(R.layout.list_row, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.card, parent, false);
         return new ArticleViewHolder(v);
     }
 

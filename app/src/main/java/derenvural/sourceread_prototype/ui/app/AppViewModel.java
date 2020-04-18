@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.time.LocalDateTime;
 
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 
 public class AppViewModel extends ViewModel {
     private MutableLiveData<App> mApp;

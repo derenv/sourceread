@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import derenvural.sourceread_prototype.SourceReadActivity;
-import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.database.fdatabase;
-import derenvural.sourceread_prototype.data.http.httpHandler;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 
 public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, Long>, ArrayList<App>> {
     // Activity

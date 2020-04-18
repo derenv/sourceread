@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.cards.articles;
 
 public enum filterType {
     ALPHABET_AZ,

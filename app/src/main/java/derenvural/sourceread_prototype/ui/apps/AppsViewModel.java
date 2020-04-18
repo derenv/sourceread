@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 
-import derenvural.sourceread_prototype.data.cards.App;
+import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class AppsViewModel extends ViewModel {

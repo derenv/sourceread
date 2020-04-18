@@ -1,28 +1,19 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.functions;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.Serializable;
-
-public abstract class Card implements DataHolder, Serializable {
-    private String image;
+public abstract class Function implements FunctionHolder {
     private String title;
     private String text;
-    // Serialisation
-    private static final long serialVersionUID = 1L;
 
     // extended functionality eg onclick, links, analysis data
-    public Card(@Nullable String newImage, @NonNull String newTitle, @Nullable String newText){
-        setImage(newImage);
+    public Function(@NonNull String newTitle, @Nullable String newText){
         setTitle(newTitle);
         setText(newText);
     }
 
     // GET
-    public String getImage(){
-        return image;
-    }
     public String getTitle(){
         return title;
     }
@@ -31,9 +22,6 @@ public abstract class Card implements DataHolder, Serializable {
     }
 
     // SET
-    public void setImage(String image){
-        this.image = image;
-    }
     public void setTitle(String title){ this.title = title; }
     public void setText(String text){
         this.text = text;

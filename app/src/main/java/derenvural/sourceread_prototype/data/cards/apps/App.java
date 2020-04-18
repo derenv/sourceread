@@ -1,4 +1,4 @@
-package derenvural.sourceread_prototype.data.cards;
+package derenvural.sourceread_prototype.data.cards.apps;
 
 import android.os.Bundle;
 
@@ -6,6 +6,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import derenvural.sourceread_prototype.data.cards.Card;
 
 public class App extends Card {
     private String key;

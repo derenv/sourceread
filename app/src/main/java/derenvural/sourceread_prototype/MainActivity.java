@@ -22,8 +22,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.widget.Toast;
 
-import derenvural.sourceread_prototype.data.cards.App;
-import derenvural.sourceread_prototype.data.cards.filterType;
+import derenvural.sourceread_prototype.data.cards.apps.App;
+import derenvural.sourceread_prototype.data.cards.articles.filterType;
 import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
