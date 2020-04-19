@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -42,10 +43,10 @@ public class ArticleAdapter extends CardAdapter<Article> {
     }
 
     // Call super constructor then sort articles
-    public ArticleAdapter(final SourceReadActivity context,
-                          ArrayList<Article> newCards,
-                          View.OnClickListener listener,
-                          filterType new_filter) {
+    public ArticleAdapter(@NonNull final SourceReadActivity context,
+                          @NonNull ArrayList<Article> newCards,
+                          @NonNull View.OnClickListener listener,
+                          @Nullable filterType new_filter) {
         super(context, newCards, listener);
         this.filter = new_filter;
 
@@ -53,7 +54,9 @@ public class ArticleAdapter extends CardAdapter<Article> {
         Collections.sort(newCards, new Comparator<Article>() {
             @Override
             public int compare(Article lhs, Article rhs) {
-                if(filter.equals(filterType.ALPHABET_AZ)) {
+                if(filter == null){
+                    return 0;
+                }else if(filter.equals(filterType.ALPHABET_AZ)) {
                     Collator myCollator = Collator.getInstance();
                     return myCollator.compare(lhs.getTitle(), rhs.getTitle());
                 }else if(filter.equals(filterType.ALPHABET_ZA)) {

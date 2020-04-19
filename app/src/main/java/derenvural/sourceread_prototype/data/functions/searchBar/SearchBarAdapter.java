@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.data.functions.searchBar;
 
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import derenvural.sourceread_prototype.data.functions.Function;
 import derenvural.sourceread_prototype.data.functions.FunctionAdapter;
 
 public class SearchBarAdapter extends FunctionAdapter<Function> {
+    private static TextWatcher watcher;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -24,6 +26,7 @@ public class SearchBarAdapter extends FunctionAdapter<Function> {
         // data items
         public TextView vTitle;
         public EditText vInput;
+
         public searchbarViewHolder(View v) {
             super(v);
             // Create view references
@@ -31,14 +34,14 @@ public class SearchBarAdapter extends FunctionAdapter<Function> {
             vInput = v.findViewById(R.id.search_bar_text);
 
             // Add click listener for fragment transition
-            //v.setOnClickListener(listener);
+            vInput.addTextChangedListener(watcher);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public SearchBarAdapter(SourceReadActivity context, ArrayList<Function> newCards/*, View.OnClickListener listener*/) {
+    public SearchBarAdapter(SourceReadActivity context, ArrayList<Function> newCards, TextWatcher watcher) {
         super(context, newCards);
-        //SearchBarAdapter.listener = listener;
+        SearchBarAdapter.watcher = watcher;
     }
 
     // Create new views (invoked by the layout manager)

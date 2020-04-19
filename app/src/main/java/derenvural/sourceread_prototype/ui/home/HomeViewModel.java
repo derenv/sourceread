@@ -15,12 +15,15 @@ import derenvural.sourceread_prototype.data.login.LoggedInUser;
 public class HomeViewModel extends ViewModel {
     private MutableLiveData<String> mText;
     private MutableLiveData<ArrayList<Article>> mCards;
+    private MutableLiveData<ArrayList<Article>> mSearchResults;
 
     public HomeViewModel() {
         mText = new MutableLiveData<String>();
         mText.setValue("");
         mCards = new MutableLiveData<ArrayList<Article>>();
         mCards.setValue(new ArrayList<Article>());
+        mSearchResults = new MutableLiveData<ArrayList<Article>>();
+        mSearchResults.setValue(null);
     }
 
     // SET
@@ -30,12 +33,16 @@ public class HomeViewModel extends ViewModel {
     public void setCards(ArrayList<Article> cards) {
         mCards.setValue(cards);
     }
+    public void setSearchResults(ArrayList<Article> cards) {
+        mSearchResults.setValue(cards);
+    }
 
     // GET
     public LiveData<String> getText() {
         return mText;
     }
     public LiveData<ArrayList<Article>> getCards() { return mCards; }
+    public LiveData<ArrayList<Article>> getSearchResults() { return mSearchResults; }
 
     // Check how many articles connected & verify quantity
     public void check_articles(LifecycleOwner context, LoggedInUser user) {

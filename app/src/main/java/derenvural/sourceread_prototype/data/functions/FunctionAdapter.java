@@ -43,7 +43,7 @@ public class FunctionAdapter<T> extends RecyclerView.Adapter<FunctionAdapter.Fun
     public FunctionAdapter(SourceReadActivity context, ArrayList<T> newCards/*, View.OnClickListener listener*/) {
         this.context = context;
         this.mDataHolders = newCards;
-        FunctionAdapter.listener = listener;
+        //FunctionAdapter.listener = listener;
     }
 
     // Create new views (invoked by the layout manager)

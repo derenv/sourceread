@@ -2,10 +2,14 @@ package derenvural.sourceread_prototype.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -82,11 +86,44 @@ public class HomeFragment extends Fragment {
         ArrayList<Function> functions = new ArrayList<Function>();
         functions.add(searchBar);
 
-        // TODO: Create search text listener
-        //
+        // Create search text listener
+        // Check for change in input text
+        TextWatcher afterTextChangedListener = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // ignore
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // ignore
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(s == null || s.toString().equals("") || s.toString().equals(getString(R.string.prompt_search))){
+                    // Clear search results
+                    homeViewModel.setSearchResults(null);
+                }else {
+                    // Create search list
+                    ArrayList<Article> whitelist = new ArrayList<Article>();
+                    for (Article article : homeViewModel.getCards().getValue()) {
+                        // Check if title contains search string
+                        if (article.getTitle().toLowerCase().contains(s.toString().toLowerCase())) {
+                            whitelist.add(article);
+                        }
+                    }
+
+                    // TODO: Sort by relevance?
+                    //
+
+                    homeViewModel.setSearchResults(whitelist);
+                }
+            }
+        };
 
         // Specify an adapter
-        mSearchAdapter = new SearchBarAdapter(main, functions/*, null*/);
+        mSearchAdapter = new SearchBarAdapter(main, functions, afterTextChangedListener);
         searchCardView.setAdapter(mSearchAdapter);
     }
 
@@ -142,6 +179,45 @@ public class HomeFragment extends Fragment {
                 } else {
                     // Set text blank
                     homeViewModel.setText("");
+                }
+            }
+        });
+
+        // Link cards to view-model data
+        homeViewModel.getSearchResults().observe(getViewLifecycleOwner(), new Observer<ArrayList<Article>>() {
+            @Override
+            public void onChanged(@Nullable ArrayList<Article> searchList) {
+                if(searchList == null) {
+                    // Get normal cards
+                    ArrayList<Article> updatedList = homeViewModel.getCards().getValue();
+
+                    // Reset adapter
+                    mAdapter = new ArticleAdapter(main, updatedList, listener, filter);
+                    recyclerView.setAdapter(mAdapter);
+
+                    // If list still empty, display appropriate text and hide loading bar
+                    if(mAdapter.getItemCount() == 0) {
+                        homeViewModel.setText(getString(R.string.home_placeholder));
+                    } else {
+                        // Set text blank
+                        homeViewModel.setText("");
+                    }
+                }else if(searchList.size() != 0) {
+                    // Reset adapter
+                    mAdapter = new ArticleAdapter(main, searchList, listener, null);
+                    recyclerView.setAdapter(mAdapter);
+                }else{
+                    // Reset adapter
+                    mAdapter = new ArticleAdapter(main, searchList, listener, null);
+                    recyclerView.setAdapter(mAdapter);
+
+                    // If list still empty, display appropriate text and hide loading bar
+                    if (mAdapter.getItemCount() == 0) {
+                        homeViewModel.setText(getString(R.string.search_placeholder));
+                    } else {
+                        // Set text blank
+                        homeViewModel.setText("");
+                    }
                 }
             }
         });
