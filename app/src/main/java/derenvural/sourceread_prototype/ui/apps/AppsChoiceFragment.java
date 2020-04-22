@@ -142,11 +142,14 @@ public class AppsChoiceFragment extends Fragment {
                 if (done) {
                     Log.d("TASK", "apps fetched!");
 
-                    // Get apps
-                    appChoiceViewModel.setCards(task.getData().getValue());
+                    // Check task
+                    if(task.getData().getValue() != null) {
+                        // Get apps
+                        appChoiceViewModel.setCards(task.getData().getValue());
 
-                    // Reactivate the UI
-                    currentActivity.activate_interface();
+                        // Reactivate the UI
+                        currentActivity.activate_interface();
+                    }
                 }
             }
         });

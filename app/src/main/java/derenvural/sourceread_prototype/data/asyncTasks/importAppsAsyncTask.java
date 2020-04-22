@@ -27,10 +27,9 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
 
     @Override
     protected ArrayList<App> doInBackground(ArrayList<App>... params){
-
         // Fetch user
         final ArrayList<App> blacklist = params[0];
-        final ArrayList<App> apps = new ArrayList<App>();
+        final ArrayList<App> valid_apps = new ArrayList<App>();
 
         // Request all apps
         db.request_apps(new OnCompleteListener<QuerySnapshot>() {
@@ -43,7 +42,7 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
                     // For each app found
                     for(DocumentSnapshot document: documents){
                         // Create base object
-                        App new_app = new App(document.getId(), 0l);
+                        App new_app = new App(document.getId(), 0L);
 
                         // Check not blacklisted (ie already connected)
                         boolean blacklisted = false;
@@ -56,16 +55,16 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
                             }
                             if (!blacklisted) {
                                 new_app.CreateApp(document);
-                                apps.add(new_app);
+                                valid_apps.add(new_app);
                             }
                         }else{
                             new_app.CreateApp(document);
-                            apps.add(new_app);
+                            valid_apps.add(new_app);
                         }
                     }
 
                     // End task
-                    postData(apps);
+                    postData(valid_apps);
                     postDone(true);
                 } else {
                     // Log error
@@ -73,6 +72,6 @@ public class importAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Arr
                 }
             }
         });
-        return apps;
+        return valid_apps;
     }
 }

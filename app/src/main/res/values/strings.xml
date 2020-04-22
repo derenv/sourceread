@@ -120,7 +120,8 @@
 
     <!--==DIALOG-->
     <string name="dialog_delete_article">Are you sure you want to delete this article?</string>
-    <string name="dialog_connect_app">Are you sure you want to connect this app?</string>
+    <string name="dialog_connect_app">Are you sure you want to connect this app? (NOTE: We are not affiliated with the makers of the app, and we only use your account to import articles!)</string>
+    <string name="dialog_invalid_app">This API has not yet been implemented!</string>
     <string name="dialog_disconnect_app">Are you sure you want to disconnect this app? This will remove all articles from this app, and you will need to reconnect it to import any more articles!</string>
     <string name="dialog_import_all_articles">Are you sure you want to import all articles from this app? You will need to manually delete any you dont want!</string>
     <string name="dialog_delete_all_articles">Are you sure you want to delete all articles? You will need to reimport any you want to keep!</string>

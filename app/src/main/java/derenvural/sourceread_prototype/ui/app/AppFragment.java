@@ -63,7 +63,7 @@ public class AppFragment extends Fragment {
         appViewModel.getApp().observe(getViewLifecycleOwner(), new Observer<App>() {
             @Override
             public void onChanged(@Nullable App s) {
-                // Calculcate new stamp
+                // Calculate new stamp
                 if(appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0L)) {
                     appViewModel.setStamp(null);
                 }else{
@@ -205,7 +205,13 @@ public class AppFragment extends Fragment {
                 connectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Create dialog listeners
+                        // Create listeners
+                        DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Cancel
+                                dialog.dismiss();
+                            }
+                        };
                         DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // Attempt to login to app
@@ -218,19 +224,15 @@ public class AppFragment extends Fragment {
                                 dialog.dismiss();
                             }
                         };
-                        DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // Cancel
-                                dialog.dismiss();
-                            }
-                        };
 
-                        // Send dialog confirmation
+                        // Build appropriate dialog
                         helpDialog dialogAccount = new helpDialog(currentActivity,
                                 negative, positive,
                                 R.string.dialog_default_title,
                                 null, R.string.user_cancel,
                                 R.string.dialog_connect_app);
+
+                        // Send dialog confirmation
                         dialogAccount.show();
                     }
                 });
