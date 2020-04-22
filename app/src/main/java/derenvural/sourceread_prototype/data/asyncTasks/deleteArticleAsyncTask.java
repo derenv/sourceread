@@ -57,17 +57,17 @@ public class deleteArticleAsyncTask extends sourcereadAsyncTask<ArrayList<Articl
         }
 
         // Call database update method
-        db.update_user_field("articles", new_articles_ids, new OnCompleteListener<DocumentSnapshot>() {
+        db.update_user_field("articles", new_articles_ids, new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
+            public void onComplete(@NonNull Task<Void> articlesTask) {
+                if (articlesTask.isSuccessful()) {
                     Log.d("DB","update done");
 
                     postData(newlist);
                     postDone(true);
                 }else{
                     // Log error
-                    Log.e("DB", "update failed: ", task.getException());
+                    Log.e("DB", "update failed: ", articlesTask.getException());
                 }
             }
         });

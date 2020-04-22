@@ -316,9 +316,9 @@ public class LoggedInUser implements Serializable {
                     new_stamp.put(app.getTitle(), request_stamp);
 
                     // Store timestamp in database & user object
-                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<Void>() {
                         @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
+                        public void onComplete(@NonNull Task<Void> stamp_task) {
                             if (stamp_task.isSuccessful()) {
                                 // Store timestamp in user object
                                 ArrayList<App> old_apps = getApps().getValue();
@@ -390,10 +390,10 @@ public class LoggedInUser implements Serializable {
                                     // Store timestamp in database
                                     Map<String, Object> new_stamp = new HashMap<>();
                                     new_stamp.put(app_name, 0L);
-                                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<DocumentSnapshot>() {
+                                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<Void>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<DocumentSnapshot> stamp_task) {
-                                            if (stamp_task.isSuccessful()) {
+                                        public void onComplete(@NonNull Task<Void> stampTask) {
+                                            if (stampTask.isSuccessful()) {
                                                 Log.d("DB", "update done");
 
                                                 // Reactivate the UI
@@ -401,7 +401,7 @@ public class LoggedInUser implements Serializable {
                                                 currentActivity.activate_interface();
                                             } else {
                                                 // Log error
-                                                Log.e("DB", "update failed: ", stamp_task.getException());
+                                                Log.e("DB", "update failed: ", stampTask.getException());
                                             }
                                         }
                                     });

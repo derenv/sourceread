@@ -42,9 +42,9 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
 
         if(article != null && !article.getText().equals("")) {
             // Save text to database
-            db.update_article_field(article, "text", new OnCompleteListener<DocumentSnapshot>() {
+            db.update_article_field(article, "text", new OnCompleteListener<Void>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Log.d("DB", "updated article - '"+article.getDatabase_id()+"' field - 'text'");
                     }else{
@@ -64,14 +64,14 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
             article.analyse();
 
             // Save analysis to database
-            db.update_article_field(article, "veracity", new OnCompleteListener<DocumentSnapshot>() {
+            db.update_article_field(article, "veracity", new OnCompleteListener<Void>() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
+                public void onComplete(@NonNull Task<Void> veracityTask) {
+                    if (veracityTask.isSuccessful()) {
                         Log.d("DB", "updated article - '"+article.getDatabase_id()+"' field - 'veracity'");
                     }else{
                         // Log error
-                        Log.e("DB", "update failed: ", task.getException());
+                        Log.e("DB", "update failed: ", veracityTask.getException());
                     }
                 }
             });

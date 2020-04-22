@@ -36,9 +36,9 @@ public class writeAppsAsyncTask extends sourcereadAsyncTask<ArrayList<App>, Hash
         }
 
         // Write to database
-        db.update_user_field("apps", appsMap, new OnCompleteListener<DocumentSnapshot>() {
+        db.update_user_field("apps", appsMap, new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> appsTask) {
+            public void onComplete(@NonNull Task<Void> appsTask) {
                 if (appsTask.isSuccessful()) {
                     Log.d("DB","update done");
 

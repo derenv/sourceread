@@ -64,10 +64,10 @@ public class LoginViewModel extends ViewModel {
                     final FirebaseUser user = cur_context.getAuth().getCurrentUser();
 
                     // Create user document in DB collection
-                    cur_context.getDatabase().create_user(user.getUid(), new OnCompleteListener<AuthResult>() {
+                    cur_context.getDatabase().create_user(user.getUid(), new OnCompleteListener<Void>() {
                         @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
+                        public void onComplete(@NonNull Task<Void> registerTask) {
+                            if (registerTask.isSuccessful()) {
                                 Log.d("LOGIN", "user '"+user.getUid()+"' database object creation successful!");
 
                                 // Update UI

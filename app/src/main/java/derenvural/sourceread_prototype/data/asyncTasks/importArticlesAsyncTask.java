@@ -125,9 +125,9 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 }
 
                                                 // Write all new articles to database
-                                                final ArrayList<String> newIds = context.get().getDatabase().write_new_articles(tobewritten, new OnCompleteListener<CollectionReference>() {
+                                                final ArrayList<String> newIds = context.get().getDatabase().write_new_articles(tobewritten, new OnCompleteListener<Void>() {
                                                     @Override
-                                                    public void onComplete(@NonNull Task<CollectionReference> writeManyTask) {
+                                                    public void onComplete(@NonNull Task<Void> writeManyTask) {
                                                         if (writeManyTask.isSuccessful()) {
                                                             Log.d("DB", "saved new articles!");
                                                         }else{
@@ -141,9 +141,9 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 idstobewritten.addAll(newIds);
 
                                                 // Update user 'articles' field in database
-                                                context.get().getDatabase().add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener() {
+                                                context.get().getDatabase().add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener<Void>() {
                                                     @Override
-                                                    public void onComplete(@NonNull Task userFieldTask) {
+                                                    public void onComplete(@NonNull Task<Void> userFieldTask) {
                                                         if (userFieldTask.isSuccessful()) {
 
                                                             // Notify user
