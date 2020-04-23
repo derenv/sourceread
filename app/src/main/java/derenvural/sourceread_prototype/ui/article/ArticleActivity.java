@@ -22,7 +22,6 @@ import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.analyse.analyser;
 import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 
 public class ArticleActivity extends SourceReadActivity {

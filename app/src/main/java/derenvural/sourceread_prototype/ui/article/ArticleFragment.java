@@ -17,14 +17,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
-import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class ArticleFragment extends Fragment {
     private Button removeButton;
@@ -49,17 +47,12 @@ public class ArticleFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         // Get user data
                         Article article = articleViewModel.getArticle().getValue();
-                        //LoggedInUser user = articleViewModel.getUser().getValue();
 
                         // Attempt to delete article from database
                         aa.deactivate_interface();
                         Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
 
                         aa.delete_article();
-
-                        //ArrayList<Article> articles = new ArrayList<Article>();
-                        //articles.add(article);
-                        //user.deleteArticle(aa, articles);
 
                         // End dialog
                         dialog.dismiss();
@@ -131,27 +124,40 @@ public class ArticleFragment extends Fragment {
         final TextView titleView = root.findViewById(R.id.text_article_title);
         final TextView urlView = root.findViewById(R.id.text_article_url);
         final TextView authorView = root.findViewById(R.id.text_article_authors);
-        final TextView wordcountView = root.findViewById(R.id.text_article_word_count);
-        final TextView veracityView = root.findViewById(R.id.text_article_veracity);
+        final TextView wordCountView = root.findViewById(R.id.text_article_word_count);
+        final TextView excerptView = root.findViewById(R.id.text_article_excerpt);
         articleViewModel.getArticle().observe(getViewLifecycleOwner(), new Observer<Article>() {
             @Override
             public void onChanged(@Nullable Article s) {
-                titleView.setText("Full Title - "+s.getTitle());
-                urlView.setText("URL - "+s.getResolved_url());
-
-                if(s.getAuthors() != null) {
-                    String q = "Authors:\n'" + s.getAuthors().get(0).get("name") + "'";
-                    for (HashMap<String, String> t : s.getAuthors().subList(1, s.getAuthors().size())) {
-                        q = q + "\n'" + t.get("name") + "'";
+                if(s != null) {
+                    if (s.getTitle() != null && !s.getTitle().equals("")) {
+                        String titleText = "Full Title - " + s.getTitle();
+                        titleView.setText(titleText);
                     }
-                    authorView.setText(q);
+
+                    if (s.getResolved_url() != null && !s.getResolved_url().equals("")) {
+                        String urlText = "URL - " + s.getResolved_url();
+                        urlView.setText(urlText);
+                    }
+
+                    if (s.getAuthors() != null) {
+                        String q = "Authors:\n'" + s.getAuthors().get(0).get("name") + "'";
+                        for (HashMap<String, String> t : s.getAuthors().subList(1, s.getAuthors().size())) {
+                            q = q + "\n'" + t.get("name") + "'";
+                        }
+                        authorView.setText(q);
+                    }
+
+                    if (s.getWord_count() != null && !s.getWord_count().equals("")) {
+                        String wordCountText = "Word Count - " + s.getWord_count();
+                        wordCountView.setText(wordCountText);
+                    }
+
+                    if (s.getExcerpt() != null && !s.getExcerpt().equals("")) {
+                        String excerptText = "Excerpt:\n'" + s.getExcerpt() + "'";
+                        excerptView.setText(excerptText);
+                    }
                 }
-
-                // FIXME: if wordcount invalid
-                wordcountView.setText("Word Count - "+s.getWord_count());
-
-                // Analysis
-                veracityView.setText("Veracity - "+s.getVeracity());
             }
         });
 

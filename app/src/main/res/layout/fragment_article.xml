@@ -63,7 +63,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/text_article_authors" />
         <TextView
-            android:id="@+id/text_article_veracity"
+            android:id="@+id/text_article_excerpt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -88,7 +88,7 @@
             android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_article_veracity" />
+            app:layout_constraintTop_toBottomOf="@+id/text_article_excerpt" />
 
         <Button
             android:id="@+id/button_open"
