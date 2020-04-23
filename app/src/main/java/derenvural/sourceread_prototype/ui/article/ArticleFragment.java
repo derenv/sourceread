@@ -49,14 +49,17 @@ public class ArticleFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         // Get user data
                         Article article = articleViewModel.getArticle().getValue();
-                        LoggedInUser user = articleViewModel.getUser().getValue();
+                        //LoggedInUser user = articleViewModel.getUser().getValue();
 
                         // Attempt to delete article from database
                         aa.deactivate_interface();
                         Toast.makeText(aa, "Deleting '"+article.getTitle()+"'..", Toast.LENGTH_SHORT).show();
-                        ArrayList<Article> articles = new ArrayList<Article>();
-                        articles.add(article);
-                        user.deleteArticle(aa, articles);
+
+                        aa.delete_article();
+
+                        //ArrayList<Article> articles = new ArrayList<Article>();
+                        //articles.add(article);
+                        //user.deleteArticle(aa, articles);
 
                         // End dialog
                         dialog.dismiss();

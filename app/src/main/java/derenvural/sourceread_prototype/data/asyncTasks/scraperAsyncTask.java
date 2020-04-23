@@ -59,10 +59,6 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
             Log.d("JSOUP", article.getText());
             Log.d("JSOUP", "==END==");
 
-            // Analyse article
-            Log.d("JSOUP", "analysing now..");
-            article.analyse();
-
             // Save analysis to database
             db.update_article_field(article, "veracity", new OnCompleteListener<Void>() {
                 @Override

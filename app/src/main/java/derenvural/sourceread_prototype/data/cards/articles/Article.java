@@ -29,13 +29,11 @@ public class Article extends Card {
     private String veracity;
     private String text;
     private String excerpt;
-    //TODO: excerpt (for card)
 
     /*
      * Create object from database document
      * */
     public Article(DocumentSnapshot document) {
-        //FIXME: add excerpt as 3rd param
         super(null, document.get("title").toString(),document.get("title").toString());
         // Identifiers
         setResolved_url(document.get("url").toString());
@@ -61,6 +59,11 @@ public class Article extends Card {
         }else{
             setVeracity(document.get("veracity").toString());
         }
+        if(document.get("excerpt") == null){
+            setExcerpt("");
+        }else{
+            setExcerpt(document.get("excerpt").toString());
+        }
         if(document.get("text") == null){
             setText("");
         }else{
@@ -73,8 +76,7 @@ public class Article extends Card {
      * Create object from JSON object
      * */
     public Article(JSONObject article, String app_name) throws JSONException{
-        super(null, article.getString("resolved_title"),article.getString("excerpt"));
-        // TODO: Add excerpt as field of object
+        super(null, article.getString("resolved_title"),null);
 
         // ((Safe))
         setApp(app_name);
@@ -112,6 +114,11 @@ public class Article extends Card {
         }else{
             setWord_count("");
         }
+        if(article.has("excerpt")){
+            setExcerpt(article.getString("excerpt"));
+        }else{
+            setExcerpt("");
+        }
         setVeracity("");
         setText("");
     }
@@ -138,6 +145,7 @@ public class Article extends Card {
         docData.put("word_count", getWord_count());
         docData.put("veracity", getVeracity());
         docData.put("text", getText());
+        docData.put("excerpt", getExcerpt());
 
         return docData;
     }
@@ -158,6 +166,7 @@ public class Article extends Card {
         setWord_count((String) bundle.getSerializable("word_count"));
         setVeracity((String) bundle.getSerializable("veracity"));
         setText((String) bundle.getSerializable("text"));
+        setExcerpt((String) bundle.getSerializable("excerpt"));
     }
     public void saveInstanceState(Bundle bundle) {
         // Fill in data
@@ -175,11 +184,7 @@ public class Article extends Card {
         bundle.putSerializable("word_count", getWord_count());
         bundle.putSerializable("veracity", getVeracity());
         bundle.putSerializable("text", getText());
-    }
-
-    public void analyse(){
-        // TODO: stub for analysis
-        setVeracity("100");
+        bundle.putSerializable("excerpt", getExcerpt());
     }
 
     // Gets
@@ -193,6 +198,7 @@ public class Article extends Card {
     public String getPublication() { return publication; }
     public String getPublication_veracity() { return publication_veracity; }
     public String getText() { return text; }
+    public String getExcerpt() { return excerpt; }
 
     // Sets
     public void setResolved_url(String resolved_url) { this.resolved_url = resolved_url; }
@@ -205,4 +211,5 @@ public class Article extends Card {
     public void setPublication(String publication) { this.publication = publication; }
     public void setPublication_veracity(String publication_veracity) { this.publication_veracity = publication_veracity; }
     public void setText(String text) { this.text = text; }
+    public void setExcerpt(String excerpt) { this.excerpt = excerpt; }
 }

@@ -69,15 +69,8 @@ public class ArticleActivity extends SourceReadActivity {
                 int id = menuItem.getItemId();
                 switch (id) {
                     case R.id.nav_home:
-                        // Create bundle with serialised object
-                        Bundle bundle = new Bundle();
-                        getUser().saveInstanceState(bundle);
-
-                        // Set help dialog content
-                        setHelp(R.string.help_home);
-
-                        // Redirect to home page
-                        main_redirect("article", bundle);
+                        // End current activity with non-deleting return value
+                        end_activity();
                         break;
                     case R.id.nav_article:
                         // Change to correct menu
@@ -137,23 +130,48 @@ public class ArticleActivity extends SourceReadActivity {
                 article = new Article();
                 article.loadInstanceState(extras);
                 articleViewModel.setArticle(article);
-
-                // Fetch serialised user
-                LoggedInUser user = new LoggedInUser(getAuth().getCurrentUser());
-                user.loadInstanceState(extras);
-                setUser(user);
-                articleViewModel.setUser(user);
             }else{
                 logout();
                 login_redirect();
             }
         }else{
-            // Create bundle with serialised object
-            Bundle bundle = new Bundle();
-            getUser().saveInstanceState(bundle);
-
-            main_redirect("article", bundle);
+            end_activity();
         }
+    }
+
+    // End current activity with deleting return value
+    public void delete_article(){
+        // Create intent
+        Intent returnIntent = new Intent();
+
+        // Create article bundle
+        Bundle bundle = new Bundle();
+        article.saveInstanceState(bundle);
+
+        // Add extras & bundles
+        returnIntent.putExtra("activity", "article");
+        returnIntent.putExtra("result", articleResult.DELETE);
+        returnIntent.putExtras(bundle);
+        returnIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Return result to 'MainActivity'
+        setResult(Activity.RESULT_OK, returnIntent);
+        finish();
+    }
+
+    // End current activity with non-deleting return value
+    public void end_activity(){
+        // Create intent
+        Intent returnIntent = new Intent();
+
+        // Add extras & bundles
+        returnIntent.putExtra("activity", "article");
+        returnIntent.putExtra("result", articleResult.NORMAL);
+        returnIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Return result to 'MainActivity'
+        setResult(Activity.RESULT_OK, returnIntent);
+        finish();
     }
 
     // Menu
@@ -161,8 +179,8 @@ public class ArticleActivity extends SourceReadActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
-                // TODO: move to own fragment
                 case R.id.action_analyse_article:
+                    // TODO: move to own fragment
                     Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
 
                     // Disable menu button

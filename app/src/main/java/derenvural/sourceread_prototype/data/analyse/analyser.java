@@ -1,6 +1,7 @@
 package derenvural.sourceread_prototype.data.analyse;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.Observer;
 
@@ -32,6 +33,9 @@ public class analyser {
     }
 
     public void fetch_article(final Article article, Observer<Boolean> observer){
+        // Inform user of progress
+        Toast.makeText(context.get(), "Scraping article content..", Toast.LENGTH_SHORT).show();
+
         // execute async task
         task.execute(article);
 
@@ -63,17 +67,21 @@ public class analyser {
         HashMap<String, String> parameters = new HashMap<String, String>();
         parameters.put("test",sentences[0]);
 
+        // Inform user of progress
+        Toast.makeText(context.get(), "Analysing..", Toast.LENGTH_SHORT).show();
+
         // Make https POST request
         context.get().getHttpHandler().make_volley_request_post(url, parameters,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         // Cut token out of html response
-                        Log.d("API", "Request Response recieved");
+                        Log.d("ARG-TECH", "Webservice POST Request Response received");
 
                         //try {
                         //
                         Iterator<String> q = response.keys();
+                        Toast.makeText(context.get(), "Analysis complete..", Toast.LENGTH_SHORT).show();
                         //} catch (JSONException error) {
                         //    Log.e("JSON error", "error reading JSON: " + error.getMessage());
                         //}
@@ -82,7 +90,7 @@ public class analyser {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("API error", "api get failed: " + error.getMessage());
+                        Log.e("ARG-TECH error", "Webservice POST request failed: " + error.getMessage());
                     }
                 }
         );

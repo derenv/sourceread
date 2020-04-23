@@ -22,12 +22,16 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import derenvural.sourceread_prototype.data.cards.apps.App;
+import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.cards.articles.filterType;
 import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
+import derenvural.sourceread_prototype.ui.article.articleResult;
 import derenvural.sourceread_prototype.ui.home.menuStyle;
 
 public class MainActivity extends SourceReadActivity {
@@ -218,6 +222,37 @@ public class MainActivity extends SourceReadActivity {
             }else {
                 // Attempt population
                 user.populate(this);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Check valid return value
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                articleResult result = (articleResult) data.getSerializableExtra("result");
+                if(result == articleResult.DELETE){
+                    // Fetch bundle from intent
+                    Bundle extras = data.getExtras();
+
+                    if(extras != null) {
+                        // Fetch serialised article
+                        Article article = new Article();
+                        article.loadInstanceState(extras);
+
+                        // Delete article from user
+                        ArrayList<Article> articles = new ArrayList<Article>();
+                        articles.add(article);
+                        getUser().deleteArticle(this, articles);
+                    }else{
+                        login_redirect();
+                    }
+                }
+            }else{
+                login_redirect();
             }
         }
     }

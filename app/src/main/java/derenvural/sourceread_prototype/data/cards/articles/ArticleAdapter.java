@@ -172,7 +172,7 @@ public class ArticleAdapter extends CardAdapter<Article> {
 
         // Load article card data
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
-        holder.vText.setText(mDataHolders.get(position).getResolved_url());
+        holder.vText.setText(mDataHolders.get(position).getExcerpt());
     }
 
 }

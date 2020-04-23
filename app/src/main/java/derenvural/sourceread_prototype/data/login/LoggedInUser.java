@@ -446,13 +446,6 @@ public class LoggedInUser implements Serializable {
 
                     // Reactivate the UI
                     currentActivity.activate_interface();
-
-                    // Create bundle with serialised object
-                    Bundle bundle = new Bundle();
-                    user.saveInstanceState(bundle);
-
-                    // Redirect to main (no article for fragment to display)
-                    currentActivity.main_redirect("article", bundle);
                 }
             }
         });
