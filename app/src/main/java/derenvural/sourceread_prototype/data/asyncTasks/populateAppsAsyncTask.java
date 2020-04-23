@@ -32,8 +32,9 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
         this.context = new WeakReference<SourceReadActivity>(context);
     }
 
+    @SafeVarargs
     @Override
-    protected ArrayList<App> doInBackground(HashMap<String, Long>... params){
+    protected final ArrayList<App> doInBackground(HashMap<String, Long>... params){
         // Initiate results list
         final ArrayList<App> result_apps = new ArrayList<App>();
 
@@ -100,7 +101,7 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
         return result_apps;
     }
 
-    public void request_token(App app, Response.Listener<JSONObject> responseListener){
+    private void request_token(App app, Response.Listener<JSONObject> responseListener){
         // Get request token request URL for current app
         HashMap<String, String> app_requests = app.getRequests();
         String url = app_requests.get("request");

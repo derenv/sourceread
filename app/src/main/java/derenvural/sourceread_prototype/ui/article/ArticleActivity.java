@@ -161,6 +161,7 @@ public class ArticleActivity extends SourceReadActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
+                // TODO: move to own fragment
                 case R.id.action_analyse_article:
                     Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
 
@@ -169,8 +170,8 @@ public class ArticleActivity extends SourceReadActivity {
                     progressBar.setVisibility(View.VISIBLE);
 
                     // Get articles and create async task
-                    analyser at = new analyser(getDatabase());
-                    at.fetch_article(this, article, new Observer<Boolean>() {
+                    analyser at = new analyser(this, getDatabase());
+                    at.fetch_article(article, new Observer<Boolean>() {
                         // Called when "fetch_article" has a response
                         @Override
                         public void onChanged(Boolean done) {

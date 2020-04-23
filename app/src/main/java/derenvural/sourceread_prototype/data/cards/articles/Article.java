@@ -28,6 +28,7 @@ public class Article extends Card {
     private String word_count;
     private String veracity;
     private String text;
+    private String excerpt;
     //TODO: excerpt (for card)
 
     /*
