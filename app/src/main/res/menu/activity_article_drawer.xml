@@ -11,6 +11,11 @@
         android:id="@+id/nav_article"
         android:icon="@drawable/ic_menu_about"
         android:title="@string/menu_article" />
+    <item
+        android:id="@+id/nav_analysis"
+        android:icon="@drawable/ic_menu_analyse"
+        android:title="@string/menu_analyse" />
+
     <item android:title="@string/menu_section_misc">
         <menu>
             <item

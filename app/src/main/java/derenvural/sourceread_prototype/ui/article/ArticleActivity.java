@@ -48,7 +48,7 @@ public class ArticleActivity extends SourceReadActivity {
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_article, R.id.nav_home,
+                R.id.nav_article, R.id.nav_home, R.id.nav_analysis,
                 R.id.nav_about, R.id.nav_settings)
                 .setDrawerLayout(drawer)
                 .build();
@@ -80,6 +80,17 @@ public class ArticleActivity extends SourceReadActivity {
 
                         // Replace current fragment
                         Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_article);
+                        break;
+                    case R.id.nav_analysis:
+                        // Change to correct menu
+                        setMenuStyle(menuStyle.OUTER);
+
+                        // Set help dialog content
+                        setHelp(R.string.help_analysis);
+
+                        // Replace current fragment
+                        Navigation.findNavController(this_activity,R.id.nav_host_fragment).navigate(R.id.nav_analysis);
+
                         break;
                     case R.id.nav_about:
                         // Change to correct menu

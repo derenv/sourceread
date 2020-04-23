@@ -19,6 +19,7 @@
     <!--==DRAWER DETAIL MENU-->
     <!--====MENU ITEMS-->
     <string name="menu_article">Article</string>
+    <string name="menu_analyse">Analysis</string>
     <string name="menu_app">App</string>
     <!--====MENU SECTIONS-->
     <string name="menu_section_article">Article</string>
@@ -139,6 +140,7 @@
     <string name="help_about">This is the about page, where we tell you about ourselves.</string>
     <string name="help_settings">This is the settings page, where you can change any settings, delete any data you\'ve imported into the app, or disconnect any connected apps!</string>
 
+    <string name="help_analysis">This page is where the article is analysed. Press \'Analyse Article\' to run!</string>
     <string name="help_app">This page shows detailed information on the selected app. You can import and delete any articles in this app here, and can also disconnect the app if you really want to.</string>
     <string name="help_apps_choice">This page lists all currently available apps for importing.</string>
 

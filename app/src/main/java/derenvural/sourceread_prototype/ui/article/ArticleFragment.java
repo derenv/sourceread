@@ -25,9 +25,6 @@ import derenvural.sourceread_prototype.data.dialog.choiceDialog;
 import derenvural.sourceread_prototype.data.dialog.helpDialog;
 
 public class ArticleFragment extends Fragment {
-    private Button removeButton;
-    private Button openButton;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
@@ -36,7 +33,7 @@ public class ArticleFragment extends Fragment {
         final ArticleViewModel articleViewModel = ViewModelProviders.of(getActivity()).get(ArticleViewModel.class);
 
         // Find buttons
-        removeButton = root.findViewById(R.id.button_remove);
+        Button removeButton = root.findViewById(R.id.button_remove);
         removeButton.setText(R.string.button_delete);
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,7 +71,7 @@ public class ArticleFragment extends Fragment {
                 dialogAccount.show();
             }
         });
-        openButton = root.findViewById(R.id.button_open);
+        Button openButton = root.findViewById(R.id.button_open);
         openButton.setText(R.string.button_open);
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -90,6 +90,7 @@ public class analyser {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        // TODO: display some error in analysis page
                         Log.e("ARG-TECH error", "Webservice POST request failed: " + error.getMessage());
                     }
                 }
