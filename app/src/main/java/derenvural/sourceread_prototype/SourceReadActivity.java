@@ -94,11 +94,6 @@ public abstract class SourceReadActivity extends AppCompatActivity {
             getMenuInflater().inflate(R.menu.main, menu);
 
             return true;
-        }else if(getMenuStyle() == menuStyle.ARTICLE){
-            // Inflate the menu; this adds items to the action bar if it is present.
-            getMenuInflater().inflate(R.menu.article, menu);
-
-            return true;
         }else if(getMenuStyle() == menuStyle.SETTINGS){
             // Inflate the menu; this adds items to the action bar if it is present.
             getMenuInflater().inflate(R.menu.settings, menu);

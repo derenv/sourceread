@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.ui.article;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -39,10 +41,14 @@ public class ArticleActivity extends SourceReadActivity {
         articleViewModel = ViewModelProviders.of(this).get(ArticleViewModel.class);
 
         // Set menu layout style
-        setMenuStyle(menuStyle.ARTICLE);
+        setMenuStyle(menuStyle.OUTER);
 
         // Set help dialog content
         setHelp(R.string.help_article);
+
+        // Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         // Navigation Drawer
         drawer = findViewById(R.id.drawer_layout);
@@ -73,7 +79,7 @@ public class ArticleActivity extends SourceReadActivity {
                         break;
                     case R.id.nav_article:
                         // Change to correct menu
-                        setMenuStyle(menuStyle.ARTICLE);
+                        setMenuStyle(menuStyle.OUTER);
 
                         // Set help dialog content
                         setHelp(R.string.help_article);
@@ -189,29 +195,6 @@ public class ArticleActivity extends SourceReadActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         if(getInterfaceEnabled()){
             switch (item.getItemId()) {
-                case R.id.action_analyse_article:
-                    // TODO: move to own fragment
-                    Toast.makeText(this, "Analysing article...", Toast.LENGTH_SHORT).show();
-
-                    // Disable menu button
-                    item.setEnabled(false);
-                    progressBar.setVisibility(View.VISIBLE);
-
-                    // Get articles and create async task
-                    analyser at = new analyser(this, getDatabase());
-                    at.fetch_article(article, new Observer<Boolean>() {
-                        // Called when "fetch_article" has a response
-                        @Override
-                        public void onChanged(Boolean done) {
-                            if (done) {
-                                // Re-enable menu button & disable progress bar
-                                item.setEnabled(true);
-                                progressBar.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    });
-
-                    return true;
                 case R.id.action_help:
                     // Show help dialog
                     helpDialog helpDialog = new helpDialog(this,
