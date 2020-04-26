@@ -148,6 +148,6 @@ public class LoginActivity extends SourceReadActivity {
 
     private void showLoginFailed(@StringRes Integer errorString) {
         // Display error message
-        Toast.makeText(this, "Authentication unsuccessful!: "+errorString, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(errorString), Toast.LENGTH_SHORT).show();
     }
 }
