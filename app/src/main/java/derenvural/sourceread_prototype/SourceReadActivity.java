@@ -192,6 +192,8 @@ public abstract class SourceReadActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 Log.d("USER", "User account deletion successful!");
+
+                                login_redirect();
                             }else{
                                 Log.d("USER", "User account deletion unsuccessful!");
                             }

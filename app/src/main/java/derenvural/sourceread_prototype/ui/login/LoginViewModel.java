@@ -5,33 +5,37 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.app.Activity;
 import android.util.Log;
 import android.util.Patterns;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.login.LoggedInUser;
 
 public class LoginViewModel extends ViewModel {
-
+    // fields
     private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<LoginFormState>();
     private MutableLiveData<LoginResult> loginResult = new MutableLiveData<LoginResult>();
     private MutableLiveData<LoggedInUser> login_user = new MutableLiveData<LoggedInUser>();
 
+    // Gets
     LiveData<LoginFormState> getLoginFormState() {
         return loginFormState;
     }
     LoggedInUser getLoginUser() { return login_user.getValue(); }
-    LiveData<LoginResult> getLoginResult() {
-        return loginResult;
-    }
+    LiveData<LoginResult> getLoginResult() { return loginResult; }
+
+    // Sets
+    void setLoginResult(LoginResult loginResult) { this.loginResult.setValue(loginResult); }
 
     public void login(String email, String password, final SourceReadActivity cur_context) {
         // Attempt login
@@ -68,8 +72,6 @@ public class LoginViewModel extends ViewModel {
                         @Override
                         public void onComplete(@NonNull Task<Void> registerTask) {
                             if (registerTask.isSuccessful()) {
-                                Log.d("LOGIN", "user '"+user.getUid()+"' database object creation successful!");
-
                                 // Update UI
                                 LoggedInUser new_user = new LoggedInUser(user);
                                 LoggedInUserView new_user_view = new LoggedInUserView(new_user);
@@ -113,5 +115,40 @@ public class LoginViewModel extends ViewModel {
     // A placeholder password validation check
     private boolean isPasswordValid(String password) {
         return password != null && password.trim().length() > 5;
+    }
+
+    // Google sign-in
+    public void firebaseAuthWithGoogle(GoogleSignInAccount acct, final SourceReadActivity cur_context) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+
+        cur_context.getAuth().signInWithCredential(credential)
+                .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success,
+                            final FirebaseUser user = cur_context.getAuth().getCurrentUser();
+
+                            // Create user document in DB collection
+                            cur_context.getDatabase().create_user(user.getUid(), new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> registerTask) {
+                                    if (registerTask.isSuccessful()) {
+                                        // Update UI
+                                        LoggedInUser new_user = new LoggedInUser(user);
+                                        LoggedInUserView new_user_view = new LoggedInUserView(new_user);
+                                        login_user.setValue(new_user);
+                                        loginResult.setValue(new LoginResult(new_user_view));
+                                    }else{
+                                        Log.d("LOGIN", "user '"+user.getUid()+"' database object creation unsuccessful!");
+                                    }
+                                }
+                            });
+                        } else {
+                            // Update user interface
+                            loginResult.setValue(new LoginResult(R.string.login_failed));
+                        }
+                    }
+                });
     }
 }
