@@ -1,6 +1,7 @@
 package derenvural.sourceread_prototype.data.asyncTasks;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -10,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.http.httpHandler;
@@ -46,7 +48,7 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser, Array
                 // Cut out redirect URL from url
                 String[] fullUrl = url.split("\\?");
                 url = fullUrl[0];
-                String redirect_uri = fullUrl[1];
+                final String redirect_uri = fullUrl[1];
 
                 // Fetch app key & request token
                 String app_key = app.getKey();
@@ -91,6 +93,24 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser, Array
                             @Override
                             public void onErrorResponse(VolleyError error) {
                                 Log.e("API error", "api get failed: " + error.getMessage());
+
+                                //TODO: PASS AS PARAMETER LISTENER IN SETUP
+
+                                // Find error
+                                Map<String,String> responseHeaders = error.networkResponse.headers;
+                                if(responseHeaders.containsKey("Status")){
+                                    if(responseHeaders.get("Status").equals("403 Forbidden")){
+                                        // Notify user
+                                        //Toast.makeText(context, responseHeaders.get("X-Error"), Toast.LENGTH_SHORT).show();
+
+                                        // No access token
+                                        // so auth/login process failed
+                                        // dump request token
+                                        // inform user unsuccessful
+                                        postData(null);
+                                        postDone(true);
+                                    }
+                                }
                             }
                         }
                 );

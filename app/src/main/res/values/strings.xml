@@ -70,6 +70,10 @@
         <item>@string/action_import_link</item>
     </string-array>
 
+    <string name="retry_app_login_title">App Login</string>
+    <string name="retry_app_login">The attempt to sign-in/authorise has failed, try again?</string>
+
+
     <!-- -->
     <!--==BUTTON ACTIONS-->
     <string name="action_connect_app">Connect</string>

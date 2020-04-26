@@ -264,12 +264,6 @@ public class AppFragment extends Fragment {
                         // Attempt to import all articles from app
                         user.importArticles(currentActivity, appViewModel.getApp().getValue());
 
-                        // Update user
-                        currentActivity.setUser(user);
-
-                        // Notify user
-                        Toast.makeText(currentActivity, "Importing all articles from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-
                         // End dialog
                         dialog.dismiss();
                     }

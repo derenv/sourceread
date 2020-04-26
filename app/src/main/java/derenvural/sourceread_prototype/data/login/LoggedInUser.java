@@ -1,5 +1,6 @@
 package derenvural.sourceread_prototype.data.login;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.asyncTasks.deleteArticleAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.populateAppsAsyncTask;
@@ -32,6 +34,8 @@ import derenvural.sourceread_prototype.data.cards.apps.App;
 import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.asyncTasks.importArticlesAsyncTask;
 import derenvural.sourceread_prototype.data.asyncTasks.userAccessAsyncTask;
+import derenvural.sourceread_prototype.data.dialog.choiceDialog;
+import derenvural.sourceread_prototype.data.dialog.helpDialog;
 import derenvural.sourceread_prototype.data.storage.storageSaver;
 
 public class LoggedInUser implements Serializable {
@@ -137,7 +141,8 @@ public class LoggedInUser implements Serializable {
     private void verify_apps(@NonNull final SourceReadActivity currentActivity){
         if(getApps() != null && getApps().getValue() != null && getApps().getValue().size() > 0) {
             for (App app : getApps().getValue()) {
-                if(app.getAccessToken() == null || app.getAccessToken() == ""){
+                if((app.getAccessToken() == null || app.getAccessToken().equals("")) &&
+                   (app.getRequestToken() != null)){
                     // Open app in browser for authentication Creates callback
                     // Get login URL
                     HashMap<String, String> requests = app.getRequests();
@@ -160,7 +165,7 @@ public class LoggedInUser implements Serializable {
         }
     }
 
-    public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull String app_name){
+    public void access_tokens(@NonNull final SourceReadActivity currentActivity, @NonNull final String app_name){
         // Create async task
         final userAccessAsyncTask task = new userAccessAsyncTask(currentActivity.getHttpHandler(), app_name);
 
@@ -172,15 +177,62 @@ public class LoggedInUser implements Serializable {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
-                    Log.d("TASK", "access tokens task done!");
+                    if(task.getData().getValue() == null){
+                        // Create listeners
+                        DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Remove request token
+                                final ArrayList<App> new_apps = new ArrayList<App>();
+                                for(App app : getApps().getValue()){
+                                    if (app.getTitle().equals(app_name)) {
+                                        // Remove token
+                                        app.setRequestToken(null);
+                                        new_apps.add(app);
+                                    }else{
+                                        // ignore other apps
+                                        new_apps.add(app);
+                                    }
+                                }
+                                setApps(new_apps);
 
-                    // Set display nameset
-                    setApps(task.getData().getValue());
+                                // Next app
+                                verify_apps(currentActivity);
 
-                    verify_apps(currentActivity);
+                                // Reactivate the UI
+                                currentActivity.activate_interface();
 
-                    // Reactivate the UI
-                    currentActivity.activate_interface();
+                                // cancel
+                                dialog.dismiss();
+                            }
+                        };
+                        DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // retry
+                                verify_apps(currentActivity);
+                            }
+                        };
+
+                        // Build dialog
+                        helpDialog retryDialog = new helpDialog(currentActivity,
+                                negative,
+                                positive,
+                                R.string.retry_app_login_title,
+                                R.string.user_ok,
+                                R.string.user_cancel,
+                                R.string.retry_app_login);
+
+                        // Display dialog box to choose sort method (default is A to Z)
+                        retryDialog.show();
+                    }else {
+                        // Set new apps
+                        setApps(task.getData().getValue());
+
+                        // move onto next app
+                        verify_apps(currentActivity);
+
+                        // Reactivate the UI
+                        currentActivity.activate_interface();
+                    }
                 }
             }
         });
@@ -294,61 +346,69 @@ public class LoggedInUser implements Serializable {
     }
 
     public void importArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final App app){
-        // Create async task
-        final importArticlesAsyncTask task = new importArticlesAsyncTask(currentActivity);
+        if(app.getAccessToken() != null && !app.getAccessToken().equals("")) {
+            // Create async task
+            final importArticlesAsyncTask task = new importArticlesAsyncTask(currentActivity);
 
-        // execute async task
-        task.execute(app);
+            // execute async task
+            task.execute(app);
 
-        // Check for task finish
-        task.getDone().observe(currentActivity, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean done) {
-                if (done) {
-                    // Retrieve data
-                    setArticles(task.getData().getValue());
+            // Check for task finish
+            task.getDone().observe(currentActivity, new Observer<Boolean>() {
+                @Override
+                public void onChanged(Boolean done) {
+                    if (done) {
+                        // Retrieve data
+                        setArticles(task.getData().getValue());
 
-                    Log.d("TASK", "articles import task done!");
+                        // Create map object containing timestamp with correct format
+                        final long request_stamp = Instant.now().getEpochSecond();
+                        HashMap<String, Object> new_stamp = new HashMap<String, Object>();
+                        new_stamp.put(app.getTitle(), request_stamp);
 
-                    // Create map object containing timestamp with correct format
-                    final long request_stamp = Instant.now().getEpochSecond();
-                    HashMap<String, Object> new_stamp = new HashMap<String, Object>();
-                    new_stamp.put(app.getTitle(), request_stamp);
-
-                    // Store timestamp in database & user object
-                    currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> stamp_task) {
-                            if (stamp_task.isSuccessful()) {
-                                // Store timestamp in user object
-                                ArrayList<App> old_apps = getApps().getValue();
-                                ArrayList<App> new_apps = new ArrayList<App>();
-                                for(App this_app : old_apps) {
-                                    if (this_app.getTitle().equals(app.getTitle())) {
-                                        // store timestamp
-                                        this_app.setTimestamp(request_stamp);
-                                        new_apps.add(this_app);
-                                    }else{
-                                        new_apps.add(this_app);
+                        // Store timestamp in database & user object
+                        currentActivity.getDatabase().update_user_field("apps", new_stamp, new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> stamp_task) {
+                                if (stamp_task.isSuccessful()) {
+                                    // Store timestamp in user object
+                                    ArrayList<App> old_apps = getApps().getValue();
+                                    ArrayList<App> new_apps = new ArrayList<App>();
+                                    for(App this_app : old_apps) {
+                                        if (this_app.getTitle().equals(app.getTitle())) {
+                                            // store timestamp
+                                            this_app.setTimestamp(request_stamp);
+                                            new_apps.add(this_app);
+                                        }else{
+                                            new_apps.add(this_app);
+                                        }
                                     }
+                                    setApps(new_apps);
+
+                                    // Notify user
+                                    Toast.makeText(currentActivity, "All your articles from "+app.getTitle()+" imported!", Toast.LENGTH_SHORT).show();
+
+                                    // Reactivate the UI
+                                    currentActivity.activate_interface();
+                                }else{
+                                    // Log error
+                                    Log.e("DB", "write failed: ", stamp_task.getException());
                                 }
-                                setApps(new_apps);
-
-                                // Notify user
-                                Log.d("DB","update done");
-                                Toast.makeText(currentActivity, "All your articles from "+app.getTitle()+" imported!", Toast.LENGTH_SHORT).show();
-
-                                // Reactivate the UI
-                                currentActivity.activate_interface();
-                            }else{
-                                // Log error
-                                Log.e("DB", "write failed: ", stamp_task.getException());
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-        });
+            });
+
+            // Notify user
+            Toast.makeText(currentActivity, "Importing all articles from " + app.getTitle() + "..", Toast.LENGTH_SHORT).show();
+        }else{
+            // Reactivate the UI
+            currentActivity.activate_interface();
+
+            // Notify user
+            Toast.makeText(currentActivity, "Cannot import articles from " + app.getTitle() + ", needs authenticated!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void deleteAllArticles(@NonNull final SourceReadActivity currentActivity, @NonNull final String app_name){

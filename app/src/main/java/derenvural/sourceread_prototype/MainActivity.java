@@ -334,7 +334,6 @@ public class MainActivity extends SourceReadActivity {
 
                                         // Import articles from user accounts
                                         for(App app: getUser().getApps().getValue()) {
-                                            // Fetch serialised user
                                             user.importArticles(main, app);
                                         }
                                     }else{
