@@ -46,6 +46,7 @@ public class AppFragment extends Fragment {
     // Views
     private TextView timestampView;
     private TextView articlesnoView;
+    private TextView appNameView;
     // Context
     private SourceReadActivity currentActivity;
 

@@ -123,6 +123,7 @@ public class ArticleFragment extends Fragment {
         final TextView authorView = root.findViewById(R.id.text_article_authors);
         final TextView wordCountView = root.findViewById(R.id.text_article_word_count);
         final TextView excerptView = root.findViewById(R.id.text_article_excerpt);
+        final TextView appNameView = root.findViewById(R.id.text_article_app);
         articleViewModel.getArticle().observe(getViewLifecycleOwner(), new Observer<Article>() {
             @Override
             public void onChanged(@Nullable Article s) {
@@ -143,6 +144,11 @@ public class ArticleFragment extends Fragment {
                             q = q + "\n'" + t.get("name") + "'";
                         }
                         authorView.setText(q);
+                    }
+
+                    if (s.getApp() != null && !s.getApp().equals("")) {
+                        String appNameText = "Imported from - " + s.getApp();
+                        appNameView.setText(appNameText);
                     }
 
                     if (s.getWord_count() != null && !s.getWord_count().equals("")) {
