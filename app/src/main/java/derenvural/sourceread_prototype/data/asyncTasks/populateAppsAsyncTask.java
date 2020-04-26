@@ -62,7 +62,7 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
                             app.CreateApp(document);
 
                             // Ask for request token for authentication
-                            request_token(app, new Response.Listener<JSONObject>() {
+                            context.get().getUser().request_token(context.get(), app, new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
                                     // Cut token out of html response
@@ -99,35 +99,5 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
             postDone(true);
         }
         return result_apps;
-    }
-
-    private void request_token(App app, Response.Listener<JSONObject> responseListener){
-        // Get request token request URL for current app
-        HashMap<String, String> app_requests = app.getRequests();
-        String url = app_requests.get("request");
-
-        // Cut out redirect URL from url
-        String[] fullUrl = url.split("\\?");
-        url = fullUrl[0];
-        String redirect_uri = fullUrl[1];
-
-        // Fetch app key
-        String app_key = app.getKey();
-
-        // Add JSON parameters
-        HashMap<String, String> parameters = new HashMap<String, String>();
-        parameters.put("consumer_key",app_key);
-        parameters.put("redirect_uri",redirect_uri);
-
-        // Make https POST request
-        context.get().getHttpHandler().make_volley_request_post(url, parameters,
-                responseListener,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("API error", "api get failed: " + error.getMessage());
-                    }
-                }
-        );
     }
 }

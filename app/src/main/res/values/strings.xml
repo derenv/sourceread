@@ -70,9 +70,10 @@
         <item>@string/action_import_link</item>
     </string-array>
 
-    <string name="retry_app_login_title">App Login</string>
-    <string name="retry_app_login">The attempt to sign-in/authorise has failed, try again?</string>
-
+    <string name="dialog_authenticate_app_title">App Login</string>
+    <string name="dialog_authenticate_app">The attempt to sign-in/authorise has failed, try again?</string>
+    <string name="app_icon_image_description">app icon</string>
+    <string name="button_auth">Authenticate app</string>
 
     <!-- -->
     <!--==BUTTON ACTIONS-->

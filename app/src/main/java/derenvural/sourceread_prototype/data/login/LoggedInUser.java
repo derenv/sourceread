@@ -10,10 +10,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -111,6 +115,36 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
+    public void request_token(SourceReadActivity context,App app, Response.Listener<JSONObject> responseListener){
+        // Get request token request URL for current app
+        HashMap<String, String> app_requests = app.getRequests();
+        String url = app_requests.get("request");
+
+        // Cut out redirect URL from url
+        String[] fullUrl = url.split("\\?");
+        url = fullUrl[0];
+        String redirect_uri = fullUrl[1];
+
+        // Fetch app key
+        String app_key = app.getKey();
+
+        // Add JSON parameters
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        parameters.put("consumer_key",app_key);
+        parameters.put("redirect_uri",redirect_uri);
+
+        // Make https POST request
+        context.getHttpHandler().make_volley_request_post(url, parameters,
+                responseListener,
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("API error", "api get failed: " + error.getMessage());
+                    }
+                }
+        );
+    }
+
     //Population Methods
     public void populate(final SourceReadActivity currentActivity) {
         // Create async task
@@ -138,7 +172,7 @@ public class LoggedInUser implements Serializable {
         });
     }
 
-    private void verify_apps(@NonNull final SourceReadActivity currentActivity){
+    public void verify_apps(@NonNull final SourceReadActivity currentActivity){
         if(getApps() != null && getApps().getValue() != null && getApps().getValue().size() > 0) {
             for (App app : getApps().getValue()) {
                 if((app.getAccessToken() == null || app.getAccessToken().equals("")) &&
@@ -216,10 +250,10 @@ public class LoggedInUser implements Serializable {
                         helpDialog retryDialog = new helpDialog(currentActivity,
                                 negative,
                                 positive,
-                                R.string.retry_app_login_title,
+                                R.string.dialog_authenticate_app_title,
                                 R.string.user_ok,
                                 R.string.user_cancel,
-                                R.string.retry_app_login);
+                                R.string.dialog_authenticate_app);
 
                         // Display dialog box to choose sort method (default is A to Z)
                         retryDialog.show();

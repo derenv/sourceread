@@ -2,6 +2,7 @@ package derenvural.sourceread_prototype.ui.app;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import com.android.volley.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -36,6 +42,7 @@ public class AppFragment extends Fragment {
     private Button connectButton;
     private Button importButton;
     private Button deleteButton;
+    private Button authButton;
     // Views
     private TextView timestampView;
     private TextView articlesnoView;
@@ -53,6 +60,7 @@ public class AppFragment extends Fragment {
         connectButton = root.findViewById(R.id.button_connect);
         importButton = root.findViewById(R.id.button_import);
         deleteButton = root.findViewById(R.id.button_delete);
+        authButton = root.findViewById(R.id.button_auth);
 
         // link name text to view-model data
         final TextView nameView = root.findViewById(R.id.text_app_name);
@@ -63,20 +71,25 @@ public class AppFragment extends Fragment {
         appViewModel.getApp().observe(getViewLifecycleOwner(), new Observer<App>() {
             @Override
             public void onChanged(@Nullable App s) {
-                // Calculate new stamp
-                if(appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0L)) {
-                    appViewModel.setStamp(null);
-                }else{
-                    Instant stamp = Instant.ofEpochSecond(appViewModel.getApp().getValue().getTimestamp());
-                    appViewModel.setStamp(LocalDateTime.ofInstant(stamp, ZoneId.systemDefault()));
+                if(s != null) {
+                    // Calculate new stamp
+                    if (appViewModel.getApp().getValue() == null || appViewModel.getApp().getValue().getTimestamp().equals(0L)) {
+                        appViewModel.setStamp(null);
+                    } else {
+                        Instant stamp = Instant.ofEpochSecond(appViewModel.getApp().getValue().getTimestamp());
+                        appViewModel.setStamp(LocalDateTime.ofInstant(stamp, ZoneId.systemDefault()));
+                    }
+
+                    // Set text views
+                    if (s.getTitle() != null && !s.getTitle().equals("")) {
+                        String title = "App: " + s.getTitle();
+                        nameView.setText(title);
+                    }
+                    descriptionView.setText(s.getText());
+
+                    // STUB
+                    imageView.setImageResource(R.drawable.ic_card_placeholder2);
                 }
-
-                // Set text views
-                nameView.setText("App: "+s.getTitle());
-                descriptionView.setText(s.getText());
-
-                // STUB
-                imageView.setImageResource(R.drawable.ic_card_placeholder2);
             }
         });
         appViewModel.getArticlesNo().observe(getViewLifecycleOwner(), new Observer<Integer>() {
@@ -241,9 +254,153 @@ public class AppFragment extends Fragment {
     }
 
     private void activateButtons(@NonNull final LoggedInUser user, @NonNull final App app){
-        // Show 'import', 'delete' & 'disconnect' buttons
-        importButton.setVisibility(View.VISIBLE);
-        deleteButton.setVisibility(View.VISIBLE);
+        if (app.getAccessToken() == null || app.getAccessToken().equals("")) {
+            // Show 'authenticate' button
+            authButton.setVisibility(View.VISIBLE);
+
+            // Add 'authenticate' onclick event
+            authButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Deactivate user interface
+                            currentActivity.deactivate_interface();
+
+                            // Ask for request token for authentication
+                            user.request_token(currentActivity, app, new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    // Cut token out of html response
+                                    Log.d("API", "Request Response recieved");
+
+                                    try {
+                                        // Add new request token
+                                        app.setRequestToken(response.getString("code"));
+
+                                        final ArrayList<App> new_apps = new ArrayList<App>();
+                                        for(App this_app : user.getApps().getValue()){
+                                            if (this_app.getTitle().equals(app.getTitle())) {
+                                                // Remove token
+                                                new_apps.add(app);
+                                            }else{
+                                                // ignore other apps
+                                                new_apps.add(this_app);
+                                            }
+                                        }
+                                        user.setApps(new_apps);
+
+                                        // Attempt authentication
+                                        user.verify_apps(currentActivity);
+                                    }catch(JSONException error){
+                                        Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                                    }
+                                }
+                            });
+
+
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    helpDialog dialogAccount = new helpDialog(currentActivity,
+                            negative, positive,
+                            R.string.dialog_authenticate_app_title,
+                            R.string.user_ok, R.string.user_cancel,
+                            R.string.dialog_authenticate_app);
+                    dialogAccount.show();
+                }
+            });
+        }else{
+            // Show 'import', 'delete' & 'disconnect' buttons
+            importButton.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.VISIBLE);
+
+            // Add 'import' onclick event
+            importButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Deactivate user interface
+                            currentActivity.deactivate_interface();
+
+                            // Attempt to import all articles from app
+                            user.importArticles(currentActivity, appViewModel.getApp().getValue());
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    helpDialog dialogAccount = new helpDialog(currentActivity,
+                            negative, positive,
+                            R.string.dialog_default_title,
+                            null, R.string.user_cancel,
+                            R.string.dialog_import_all_articles);
+                    dialogAccount.show();
+                }
+            });
+            // Add 'delete' onclick event
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Deactivate user interface
+                            currentActivity.deactivate_interface();
+
+                            // Attempt to delete all articles imported from app
+                            user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
+
+                            // Update user
+                            currentActivity.setUser(user);
+
+                            // Notify user
+                            Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    helpDialog dialogAccount = new helpDialog(currentActivity,
+                            negative, positive,
+                            R.string.dialog_default_title,
+                            null, R.string.user_cancel,
+                            R.string.dialog_delete_all_articles);
+                    dialogAccount.show();
+                }
+            });
+        }
+
+        // Show other buttons
         connectButton.setText(R.string.action_disconnect_app);
         connectButton.setVisibility(View.VISIBLE);
 
@@ -251,78 +408,7 @@ public class AppFragment extends Fragment {
         timestampView.setVisibility(View.VISIBLE);
         articlesnoView.setVisibility(View.VISIBLE);
 
-        // Add 'import' onclick event
-        importButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create dialog listeners
-                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Deactivate user interface
-                        currentActivity.deactivate_interface();
 
-                        // Attempt to import all articles from app
-                        user.importArticles(currentActivity, appViewModel.getApp().getValue());
-
-                        // End dialog
-                        dialog.dismiss();
-                    }
-                };
-                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Cancel
-                        dialog.dismiss();
-                    }
-                };
-
-                // Send dialog confirmation
-                helpDialog dialogAccount = new helpDialog(currentActivity,
-                        negative, positive,
-                        R.string.dialog_default_title,
-                        null, R.string.user_cancel,
-                        R.string.dialog_import_all_articles);
-                dialogAccount.show();
-            }
-        });
-        // Add 'delete' onclick event
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create dialog listeners
-                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Deactivate user interface
-                        currentActivity.deactivate_interface();
-
-                        // Attempt to delete all articles imported from app
-                        user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
-
-                        // Update user
-                        currentActivity.setUser(user);
-
-                        // Notify user
-                        Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-
-                        // End dialog
-                        dialog.dismiss();
-                    }
-                };
-                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Cancel
-                        dialog.dismiss();
-                    }
-                };
-
-                // Send dialog confirmation
-                helpDialog dialogAccount = new helpDialog(currentActivity,
-                        negative, positive,
-                        R.string.dialog_default_title,
-                        null, R.string.user_cancel,
-                        R.string.dialog_delete_all_articles);
-                dialogAccount.show();
-            }
-        });
         // Add 'disconnect' onclick event
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
