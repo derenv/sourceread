@@ -322,9 +322,8 @@ public class AppFragment extends Fragment {
                 }
             });
         }else{
-            // Show 'import', 'delete' & 'disconnect' buttons
+            // Show 'import' button
             importButton.setVisibility(View.VISIBLE);
-            deleteButton.setVisibility(View.VISIBLE);
 
             // Add 'import' onclick event
             importButton.setOnClickListener(new View.OnClickListener() {
@@ -359,55 +358,58 @@ public class AppFragment extends Fragment {
                     dialogAccount.show();
                 }
             });
-            // Add 'delete' onclick event
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Create dialog listeners
-                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            // Deactivate user interface
-                            currentActivity.deactivate_interface();
-
-                            // Attempt to delete all articles imported from app
-                            user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
-
-                            // Update user
-                            currentActivity.setUser(user);
-
-                            // Notify user
-                            Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-
-                            // End dialog
-                            dialog.dismiss();
-                        }
-                    };
-                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            // Cancel
-                            dialog.dismiss();
-                        }
-                    };
-
-                    // Send dialog confirmation
-                    helpDialog dialogAccount = new helpDialog(currentActivity,
-                            negative, positive,
-                            R.string.dialog_default_title,
-                            null, R.string.user_cancel,
-                            R.string.dialog_delete_all_articles);
-                    dialogAccount.show();
-                }
-            });
         }
-
-        // Show other buttons
-        connectButton.setText(R.string.action_disconnect_app);
-        connectButton.setVisibility(View.VISIBLE);
 
         // Show timestamp & number of articles fields
         timestampView.setVisibility(View.VISIBLE);
         articlesnoView.setVisibility(View.VISIBLE);
 
+        // Show 'delete' button
+        deleteButton.setVisibility(View.VISIBLE);
+
+        // Add 'delete' onclick event
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create dialog listeners
+                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Deactivate user interface
+                        currentActivity.deactivate_interface();
+
+                        // Attempt to delete all articles imported from app
+                        user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
+                        // TODO: if missing request & access tokens remove from apps list
+                        // Update user
+                        currentActivity.setUser(user);
+
+                        // Notify user
+                        Toast.makeText(currentActivity, "Deleting all articles imported from "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                        // End dialog
+                        dialog.dismiss();
+                    }
+                };
+                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Cancel
+                        dialog.dismiss();
+                    }
+                };
+
+                // Send dialog confirmation
+                helpDialog dialogAccount = new helpDialog(currentActivity,
+                        negative, positive,
+                        R.string.dialog_default_title,
+                        null, R.string.user_cancel,
+                        R.string.dialog_delete_all_articles);
+                dialogAccount.show();
+            }
+        });
+
+        // Show 'connect' button
+        connectButton.setText(R.string.action_disconnect_app);
+        connectButton.setVisibility(View.VISIBLE);
 
         // Add 'disconnect' onclick event
         connectButton.setOnClickListener(new View.OnClickListener() {

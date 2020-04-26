@@ -166,7 +166,6 @@ public class LoggedInUser implements Serializable {
                         // Check for access tokens
                         user1.verify_apps(currentActivity);
                     }
-                    Log.d("TASK", "user data population task done!");
                 }
             }
         });
@@ -196,6 +195,8 @@ public class LoggedInUser implements Serializable {
                     }
                 }
             }
+        }else{
+            currentActivity.activate_interface();
         }
     }
 
@@ -276,14 +277,31 @@ public class LoggedInUser implements Serializable {
         // create list of all remaining apps in user object
         ArrayList<App> currentApps = getApps().getValue();
         ArrayList<App> newApps = new ArrayList<App>();
-        for(App qq : currentApps){
-            if(!qq.getTitle().equals(app.getTitle())){
-                newApps.add(qq);
+        for(App this_app : currentApps){
+            // If matching app
+            if(this_app.getTitle().equals(app.getTitle())){
+                // If any articles exist
+                if(getArticles().getValue() != null && getArticles().getValue().size() != 0) {
+                    // Count articles from app
+                    int amount = 0;
+                    for (Article countArticle : getArticles().getValue()) {
+                        if (countArticle.getApp().equals(app.getTitle())) {
+                            amount++;
+                        }
+                    }
+
+                    // If some articles from this app are still present
+                    if (amount != 0) {
+                        // Invalidate app but remain on list (so user can delete)
+                        this_app.setRequestToken(null);
+                        this_app.setAccessToken(null);
+                        newApps.add(this_app);
+                    }
+                }
+            }else{
+                newApps.add(this_app);
             }
         }
-
-        // Delete all articles imported from app
-        deleteAllArticles(currentActivity, app.getTitle());
 
         // Remove app from user object
         setApps(newApps);
@@ -301,7 +319,6 @@ public class LoggedInUser implements Serializable {
                 if (done) {
                     // Notify user
                     Toast.makeText(currentActivity, app.getTitle()+" disconnected!", Toast.LENGTH_LONG).show();
-                    Log.d("TASK", "apps delete task done!");
 
                     // Reactivate the UI
                     currentActivity.activate_interface();
