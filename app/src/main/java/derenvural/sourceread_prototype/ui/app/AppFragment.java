@@ -18,10 +18,12 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -270,35 +272,49 @@ public class AppFragment extends Fragment {
                             currentActivity.deactivate_interface();
 
                             // Ask for request token for authentication
-                            user.request_token(currentActivity, app, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    // Cut token out of html response
-                                    Log.d("API", "Request Response recieved");
+                            user.request_token(currentActivity, app,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        // Cut token out of html response
+                                        Log.d("API", "Request Response recieved");
 
-                                    try {
-                                        // Add new request token
-                                        app.setRequestToken(response.getString("code"));
+                                        try {
+                                            // Add new request token
+                                            app.setRequestToken(response.getString("code"));
 
-                                        final ArrayList<App> new_apps = new ArrayList<App>();
-                                        for(App this_app : user.getApps().getValue()){
-                                            if (this_app.getTitle().equals(app.getTitle())) {
-                                                // Remove token
-                                                new_apps.add(app);
-                                            }else{
-                                                // ignore other apps
-                                                new_apps.add(this_app);
+                                            final ArrayList<App> new_apps = new ArrayList<App>();
+                                            for(App this_app : user.getApps().getValue()){
+                                                if (this_app.getTitle().equals(app.getTitle())) {
+                                                    // Remove token
+                                                    new_apps.add(app);
+                                                }else{
+                                                    // ignore other apps
+                                                    new_apps.add(this_app);
+                                                }
                                             }
-                                        }
-                                        user.setApps(new_apps);
+                                            user.setApps(new_apps);
 
-                                        // Attempt authentication
-                                        user.verify_apps(currentActivity);
-                                    }catch(JSONException error){
-                                        Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                                            // Attempt authentication
+                                            user.verify_apps(currentActivity);
+                                        }catch(JSONException error){
+                                            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                                        }
+                                    }
+                                },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        if(error.getCause() instanceof UnknownHostException){
+                                            // Notify user
+                                            Toast.makeText(currentActivity, "No connection...", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        // Only reached if network error
+                                        currentActivity.activate_interface();
                                     }
                                 }
-                            });
+                            );
 
 
 

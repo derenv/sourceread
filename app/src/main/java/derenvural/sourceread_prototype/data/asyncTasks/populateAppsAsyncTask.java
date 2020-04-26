@@ -1,6 +1,7 @@
 package derenvural.sourceread_prototype.data.asyncTasks;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -14,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,17 +64,41 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
                             app.CreateApp(document);
 
                             // Ask for request token for authentication
-                            context.get().getUser().request_token(context.get(), app, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    // Cut token out of html response
-                                    Log.d("API", "Request Response recieved");
+                            context.get().getUser().request_token(context.get(), app,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        // Cut token out of html response
+                                        Log.d("API", "Request Response recieved");
 
-                                    try {
-                                        // Add new request token
-                                        app.setRequestToken(response.getString("code"));
+                                        try {
+                                            // Add new request token
+                                            app.setRequestToken(response.getString("code"));
+
+                                            // Add to list
+                                            result_apps.add(app);
+
+                                            // End task
+                                            if(!iterator.hasNext()) {
+                                                postData(result_apps);
+                                                postDone(true);
+                                            }
+                                        }catch(JSONException error){
+                                            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                                        }
+                                    }
+                                },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        if(error.getCause() instanceof UnknownHostException){
+                                            // Notify user
+                                            Toast.makeText(context.get(), "No connection...", Toast.LENGTH_SHORT).show();
+                                        }
 
                                         // Add to list
+                                        app.setAccessToken(null);
+                                        app.setRequestToken(null);
                                         result_apps.add(app);
 
                                         // End task
@@ -80,11 +106,9 @@ public class populateAppsAsyncTask extends sourcereadAsyncTask<HashMap<String, L
                                             postData(result_apps);
                                             postDone(true);
                                         }
-                                    }catch(JSONException error){
-                                        Log.e("JSON error", "error reading JSON: " + error.getMessage());
                                     }
                                 }
-                            });
+                            );
                         } else {
                             // Log error
                             Log.e("DB", "read failed: ", task.getException());

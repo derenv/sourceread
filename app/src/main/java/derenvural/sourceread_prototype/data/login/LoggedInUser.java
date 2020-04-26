@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,7 +116,9 @@ public class LoggedInUser implements Serializable {
         setVeracity((String) stream.readObject());
     }
 
-    public void request_token(SourceReadActivity context,App app, Response.Listener<JSONObject> responseListener){
+    public void request_token(final SourceReadActivity currentActivity, App app,
+                              Response.Listener<JSONObject> responseListener,
+                              Response.ErrorListener failureListener){
         // Get request token request URL for current app
         HashMap<String, String> app_requests = app.getRequests();
         String url = app_requests.get("request");
@@ -134,14 +137,9 @@ public class LoggedInUser implements Serializable {
         parameters.put("redirect_uri",redirect_uri);
 
         // Make https POST request
-        context.getHttpHandler().make_volley_request_post(url, parameters,
+        currentActivity.getHttpHandler().make_volley_request_post(url, parameters,
                 responseListener,
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("API error", "api get failed: " + error.getMessage());
-                    }
-                }
+                failureListener
         );
     }
 
@@ -165,6 +163,9 @@ public class LoggedInUser implements Serializable {
 
                         // Check for access tokens
                         user1.verify_apps(currentActivity);
+
+                        // Only reached if network error
+                        currentActivity.activate_interface();
                     }
                 }
             }
