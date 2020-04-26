@@ -322,6 +322,55 @@ public class AppFragment extends Fragment {
                 }
             });
         }else{
+            // Show 'connect' button
+            connectButton.setText(R.string.action_disconnect_app);
+            connectButton.setVisibility(View.VISIBLE);
+
+            // Add 'disconnect' onclick event
+            connectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Create dialog listeners
+                    DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Attempt to remove app
+                            Toast.makeText(currentActivity, "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
+
+                            MainActivity main = (MainActivity) currentActivity;
+
+                            // Set callback on back button click
+                            main.setAppCallback(false);
+
+                            // Set help dialog text
+                            main.setHelp(R.string.help_apps);
+
+                            // Disconnect app
+                            user.disconnectApp(main, app, R.id.nav_apps);
+                            main.setUser(user);
+
+                            currentActivity = main;
+
+                            // End dialog
+                            dialog.dismiss();
+                        }
+                    };
+                    DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // Cancel
+                            dialog.dismiss();
+                        }
+                    };
+
+                    // Send dialog confirmation
+                    helpDialog dialogAccount = new helpDialog(currentActivity,
+                            negative, positive,
+                            R.string.dialog_default_title,
+                            null, R.string.user_cancel,
+                            R.string.dialog_disconnect_app);
+                    dialogAccount.show();
+                }
+            });
+
             // Show 'import' button
             importButton.setVisibility(View.VISIBLE);
 
@@ -379,7 +428,7 @@ public class AppFragment extends Fragment {
 
                         // Attempt to delete all articles imported from app
                         user.deleteAllArticles(currentActivity, appViewModel.getApp().getValue().getTitle());
-                        // TODO: if missing request & access tokens remove from apps list
+
                         // Update user
                         currentActivity.setUser(user);
 
@@ -403,55 +452,6 @@ public class AppFragment extends Fragment {
                         R.string.dialog_default_title,
                         null, R.string.user_cancel,
                         R.string.dialog_delete_all_articles);
-                dialogAccount.show();
-            }
-        });
-
-        // Show 'connect' button
-        connectButton.setText(R.string.action_disconnect_app);
-        connectButton.setVisibility(View.VISIBLE);
-
-        // Add 'disconnect' onclick event
-        connectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create dialog listeners
-                DialogInterface.OnClickListener positive = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Attempt to remove app
-                        Toast.makeText(currentActivity, "Disconnecting "+appViewModel.getApp().getValue().getTitle()+"..", Toast.LENGTH_SHORT).show();
-
-                        MainActivity main = (MainActivity) currentActivity;
-
-                        // Set callback on back button click
-                        main.setAppCallback(false);
-
-                        // Set help dialog text
-                        main.setHelp(R.string.help_apps);
-
-                        // Disconnect app
-                        user.disconnectApp(main, app, R.id.nav_apps);
-                        main.setUser(user);
-
-                        currentActivity = main;
-
-                        // End dialog
-                        dialog.dismiss();
-                    }
-                };
-                DialogInterface.OnClickListener negative = new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Cancel
-                        dialog.dismiss();
-                    }
-                };
-
-                // Send dialog confirmation
-                helpDialog dialogAccount = new helpDialog(currentActivity,
-                        negative, positive,
-                        R.string.dialog_default_title,
-                        null, R.string.user_cancel,
-                        R.string.dialog_disconnect_app);
                 dialogAccount.show();
             }
         });

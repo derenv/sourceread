@@ -489,6 +489,13 @@ public class LoggedInUser implements Serializable {
                             // Retrieve data
                             setArticles(task.getData().getValue());
 
+                            // If missing request & access tokens remove from apps list
+                            for(App this_app : getApps().getValue()) {
+                                if (this_app.getAccessToken() == null && this_app.getRequestToken() == null) {
+                                    disconnectApp(currentActivity, this_app, R.id.nav_apps);
+                                }
+                            }
+
                             // Replace timestamp with invalid
                             ArrayList<App> old_apps = getApps().getValue();
                             ArrayList<App> new_apps = new ArrayList<App>();
