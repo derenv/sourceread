@@ -39,7 +39,7 @@ public class httpHandler {
     }
 
     public void make_volley_request_post(@NonNull String url,
-                                         @Nullable HashMap<String, String> parameters,
+                                         @Nullable HashMap<String, Object> parameters,
                                          @NonNull Response.Listener<JSONObject> response,
                                          @NonNull Response.ErrorListener error){
         // Create JSON object

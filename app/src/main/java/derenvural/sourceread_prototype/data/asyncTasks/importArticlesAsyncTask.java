@@ -50,7 +50,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
         String access_token = app.getAccessToken();
 
         // Add JSON parameters
-        HashMap<String, String> parameters = new HashMap<String, String>();
+        HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("consumer_key", app_key);
         parameters.put("access_token", access_token);
         parameters.put("sort", "newest");
@@ -84,12 +84,8 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                             if (checkTask.isSuccessful()) {
                                                 // Get list of currently stored articles
                                                 List<DocumentSnapshot> documents = checkTask.getResult().getDocuments();
-                                                ArrayList<String> articleList = new ArrayList<String>();
-                                                for(DocumentSnapshot document: documents){
-                                                    articleList.add(document.getId());
-                                                }
                                                 ArrayList<Article> tobewritten = new ArrayList<Article>();
-                                                final ArrayList<String> idstobewritten = new ArrayList<String>();
+                                                final ArrayList<Article> finalArticles = new ArrayList<Article>();
 
                                                 // Check each article
                                                 for (final Iterator<String> it = articles_json.keys(); it.hasNext(); ) {
@@ -101,13 +97,14 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
 
                                                         // If an article already exists
                                                         boolean exists = false;
-                                                        for(String id : articleList){
-                                                            if(id.equals(current_article.getTitle())){
+                                                        for(DocumentSnapshot id : documents){
+                                                            if(id.get("title").equals(current_article.getTitle())){
                                                                 // Notify user
                                                                 Log.d("DB", "already saved article - "+id);
 
                                                                 // Add to idstobewritten list and end loop
-                                                                idstobewritten.add(id);
+                                                                current_article.setDatabase_id(id.getId());
+                                                                finalArticles.add(current_article);
                                                                 exists = true;
                                                                 break;
                                                             }
@@ -125,7 +122,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 }
 
                                                 // Write all new articles to database
-                                                final ArrayList<String> newIds = context.get().getDatabase().write_new_articles(tobewritten, new OnCompleteListener<Void>() {
+                                                final ArrayList<Article> newIds = context.get().getDatabase().write_new_articles(tobewritten, new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> writeManyTask) {
                                                         if (writeManyTask.isSuccessful()) {
@@ -138,10 +135,16 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                 });
 
                                                 // Add all article ID's
-                                                idstobewritten.addAll(newIds);
+                                                for(Article article : newIds) {
+                                                    finalArticles.add(article);
+                                                }
+                                                ArrayList<String> finalIDS = new ArrayList<String>();
+                                                for(Article article : finalArticles) {
+                                                    finalIDS.add(article.getDatabase_id());
+                                                }
 
                                                 // Update user 'articles' field in database
-                                                context.get().getDatabase().add_user_fields("articles.", idstobewritten, app.getTitle(), new OnCompleteListener<Void>() {
+                                                context.get().getDatabase().add_user_fields("articles.", finalIDS, app.getTitle(), new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> userFieldTask) {
                                                         if (userFieldTask.isSuccessful()) {
@@ -151,7 +154,7 @@ public class importArticlesAsyncTask extends sourcereadAsyncTask<App, ArrayList<
                                                             Toast.makeText(context.get(), "Articles imported!", Toast.LENGTH_SHORT).show();
 
                                                             // End task
-                                                            postData(articles);
+                                                            postData(finalArticles);
                                                             postDone(true);
                                                         }else{
                                                             // Log error

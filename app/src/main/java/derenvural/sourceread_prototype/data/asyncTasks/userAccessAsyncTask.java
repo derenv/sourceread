@@ -54,7 +54,7 @@ public class userAccessAsyncTask extends sourcereadAsyncTask<LoggedInUser, Array
                 String app_key = app.getKey();
                 String request_token = app.getRequestToken();
 
-                HashMap<String, String> parameters = new HashMap<String, String>();
+                HashMap<String, Object> parameters = new HashMap<String, Object>();
                 parameters.put("consumer_key", app_key);
                 parameters.put("code", request_token);
                 parameters.put("redirect_uri", redirect_uri);

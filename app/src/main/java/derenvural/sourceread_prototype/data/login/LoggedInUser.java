@@ -132,7 +132,7 @@ public class LoggedInUser implements Serializable {
         String app_key = app.getKey();
 
         // Add JSON parameters
-        HashMap<String, String> parameters = new HashMap<String, String>();
+        HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("consumer_key",app_key);
         parameters.put("redirect_uri",redirect_uri);
 

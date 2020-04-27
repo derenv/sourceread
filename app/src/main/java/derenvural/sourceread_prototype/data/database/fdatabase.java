@@ -75,12 +75,12 @@ public class fdatabase {
     /*
      * Write (new initial) article documents to database collection
      * */
-    public ArrayList<String> write_new_articles(ArrayList<Article> articles, OnCompleteListener<Void> end) {
+    public ArrayList<Article> write_new_articles(ArrayList<Article> articles, OnCompleteListener<Void> end) {
         // Initiate batch db write
         WriteBatch batch = db.batch();
 
         // Initiate list of resulting ID's
-        ArrayList<String> newIds = new ArrayList<String>();
+        ArrayList<Article> newIds = new ArrayList<Article>();
 
         for(Article article : articles) {
             // Create a Map of the object
@@ -91,7 +91,8 @@ public class fdatabase {
             batch.set(article_request,docData);
 
             // Store id
-            newIds.add(article_request.getId());
+            article.setDatabase_id(article_request.getId());
+            newIds.add(article);
         }
 
         // Commit the batch
