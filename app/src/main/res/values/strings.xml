@@ -75,6 +75,10 @@
     <string name="app_icon_image_description">app icon</string>
     <string name="button_auth">Authenticate app</string>
 
+
+    <string name="email_verification_needed">You need to verify your email address!</string>
+    <string name="email_register">Registration email sent!</string>
+
     <!-- -->
     <!--==BUTTON ACTIONS-->
     <string name="action_connect_app">Connect</string>

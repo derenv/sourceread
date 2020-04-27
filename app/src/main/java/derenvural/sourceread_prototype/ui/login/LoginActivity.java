@@ -2,9 +2,11 @@ package derenvural.sourceread_prototype.ui.login;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Observer;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -27,7 +29,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import derenvural.sourceread_prototype.R;
@@ -62,7 +67,6 @@ public class LoginActivity extends SourceReadActivity {
         if(currentUser != null){
             main_redirect("login", null);
         }
-
 
         //get components
         final EditText usernameEditText = findViewById(R.id.username);
@@ -212,5 +216,52 @@ public class LoginActivity extends SourceReadActivity {
                 loginViewModel.setLoginResult(new LoginResult(R.string.login_failed));
             }
         }
+    }
+
+    // Email verification
+    public void checkIfEmailVerified() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user.isEmailVerified()) {
+            LoggedInUser new_user = new LoggedInUser(FirebaseAuth.getInstance().getCurrentUser());
+            LoggedInUserView new_user_view = new LoggedInUserView(new_user);
+            loginViewModel.setLoginUser(new_user);
+            loginViewModel.setLoginResult(new LoginResult(new_user_view));
+        } else {
+            // email is not verified, so just prompt the message to the user and restart this activity.
+            // NOTE: don't forget to log out the user.
+            FirebaseAuth.getInstance().signOut();
+
+            // If sign in fails, display a message to the user.
+            loginViewModel.setLoginResult(new LoginResult(R.string.email_verification_needed));
+
+            //restart login activity
+            login_redirect();
+
+        }
+    }
+    public void sendVerificationEmail() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // email sent
+                    // Logout and finish activity
+                    FirebaseAuth.getInstance().signOut();
+                    login_redirect();
+
+                    // notify user
+                    loginViewModel.setLoginResult(new LoginResult(R.string.email_register));
+                } else {
+                    // If sign in fails, display a message to the user.
+                    loginViewModel.setLoginResult(new LoginResult(R.string.login_failed));
+
+                    //restart login activity
+                    login_redirect();
+                }
+            }
+        });
     }
 }

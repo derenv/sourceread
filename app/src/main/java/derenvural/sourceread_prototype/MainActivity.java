@@ -170,6 +170,7 @@ public class MainActivity extends SourceReadActivity {
         // Check if intent comes from deep-link or activity
         if ((Intent.ACTION_MAIN.equals(appLinkAction) || Intent.ACTION_VIEW.equals(appLinkAction)) && appLinkData != null){
             // Fetch deep-link type
+            String scheme = appLinkData.getScheme();
             String link_type = appLinkData.getLastPathSegment();
 
             // Whitelist deep-links
@@ -200,8 +201,17 @@ public class MainActivity extends SourceReadActivity {
                     // Redirect to login due to persistent storage failure
                     login_redirect();
                 }
+            }else if(link_type != null && (link_type.equals("password_reset") || link_type.equals("confirm_email_registration"))){
+                // account deep-links
+                if(link_type.equals("confirm_email_registration")) {
+                    // TODO: log in user
+                    setUser(new LoggedInUser(getAuth().getCurrentUser()));
+                    user.populate(this);
+                }else{
+                    // TODO!!!
+                }
             }else{
-                // TODO: other deep links
+                //other deep-links?
             }
         }else{
             // No deep link!

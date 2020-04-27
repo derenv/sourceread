@@ -35,20 +35,17 @@ public class LoginViewModel extends ViewModel {
     LiveData<LoginResult> getLoginResult() { return loginResult; }
 
     // Sets
+    void setLoginUser(LoggedInUser login_user) { this.login_user.setValue(login_user); }
     void setLoginResult(LoginResult loginResult) { this.loginResult.setValue(loginResult); }
 
-    public void login(String email, String password, final SourceReadActivity cur_context) {
+    public void login(String email, String password, final LoginActivity cur_context) {
         // Attempt login
         cur_context.getAuth().signInWithEmailAndPassword(email, password)
         .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    // Set login result
-                    LoggedInUser new_user = new LoggedInUser(FirebaseAuth.getInstance().getCurrentUser());
-                    LoggedInUserView new_user_view = new LoggedInUserView(new_user);
-                    login_user.setValue(new_user);
-                    loginResult.setValue(new LoginResult(new_user_view));
+                    cur_context.checkIfEmailVerified();
                 } else {
                     // If sign in fails, display a message to the user.
                     loginResult.setValue(new LoginResult(R.string.login_failed));
@@ -57,7 +54,7 @@ public class LoginViewModel extends ViewModel {
         });
     }
 
-    public void register(String email, String password, final SourceReadActivity cur_context) {
+    public void register(String email, String password, final LoginActivity cur_context) {
         // Attempt registration
         cur_context.getAuth().createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener(cur_context, new OnCompleteListener<AuthResult>() {
@@ -72,11 +69,7 @@ public class LoginViewModel extends ViewModel {
                         @Override
                         public void onComplete(@NonNull Task<Void> registerTask) {
                             if (registerTask.isSuccessful()) {
-                                // Update UI
-                                LoggedInUser new_user = new LoggedInUser(user);
-                                LoggedInUserView new_user_view = new LoggedInUserView(new_user);
-                                login_user.setValue(new_user);
-                                loginResult.setValue(new LoginResult(new_user_view));
+                                cur_context.sendVerificationEmail();
                             }else{
                                 Log.d("LOGIN", "user '"+user.getUid()+"' database object creation unsuccessful!");
                             }
