@@ -58,19 +58,6 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
             Log.d("JSOUP", "==START==");
             Log.d("JSOUP", article.getText());
             Log.d("JSOUP", "==END==");
-
-            // Save analysis to database
-            db.update_article_field(article, "veracity", new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> veracityTask) {
-                    if (veracityTask.isSuccessful()) {
-                        Log.d("DB", "updated article - '"+article.getDatabase_id()+"' field - 'veracity'");
-                    }else{
-                        // Log error
-                        Log.e("DB", "update failed: ", veracityTask.getException());
-                    }
-                }
-            });
         }
 
         // End task

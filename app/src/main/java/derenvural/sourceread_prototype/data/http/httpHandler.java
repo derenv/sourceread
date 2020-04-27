@@ -38,6 +38,35 @@ public class httpHandler {
         context.startActivity(browserIntent);
     }
 
+    public void argtech_request_post(@NonNull String url,
+                                     @Nullable HashMap<String, Object> parameters,
+                                     @NonNull Response.Listener<JSONObject> response,
+                                     @NonNull Response.ErrorListener error){
+        // Create JSON object
+        JSONObject jsonParam = new JSONObject();
+
+        //Add string parameters
+        try {
+            if(parameters != null) {
+                for (String key : parameters.keySet()) {
+                    jsonParam.put(key, parameters.get(key));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Create JSON request with custom headers
+        JsonObjectRequest request_json = new JsonObjectRequest(Request.Method.POST,
+                url,
+                jsonParam,
+                response,
+                error);
+
+        // Add the request to the RequestQueue.
+        queue.add(request_json);
+    }
+
     public void make_volley_request_post(@NonNull String url,
                                          @Nullable HashMap<String, Object> parameters,
                                          @NonNull Response.Listener<JSONObject> response,

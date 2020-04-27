@@ -201,15 +201,6 @@ public class MainActivity extends SourceReadActivity {
                     // Redirect to login due to persistent storage failure
                     login_redirect();
                 }
-            }else if(link_type != null && (link_type.equals("password_reset") || link_type.equals("confirm_email_registration"))){
-                // account deep-links
-                if(link_type.equals("confirm_email_registration")) {
-                    // TODO: log in user
-                    setUser(new LoggedInUser(getAuth().getCurrentUser()));
-                    user.populate(this);
-                }else{
-                    // TODO!!!
-                }
             }else{
                 //other deep-links?
             }
