@@ -120,31 +120,31 @@ public class ArticleAdapter extends CardAdapter<Article> {
                     }
                 }else if(filter.equals(filterType.VERACITY_HIGHEST)) {
                     // Check for unrated article
-                    if(lhs.getVeracity() == null || lhs.getVeracity().equals("")){
-                        if(rhs.getVeracity() == null || rhs.getVeracity().equals("")){
+                    if(lhs.getAif() == null || lhs.getAif().equals("")){
+                        if(rhs.getAif() == null || rhs.getAif().equals("")){
                             return 0;
                         }else{
                             return -1;
                         }
-                    }else if(rhs.getVeracity() == null || rhs.getVeracity().equals("")){
+                    }else if(rhs.getAif() == null || rhs.getAif().equals("")){
                         return 1;
                     }else{
                         Collator myCollator = Collator.getInstance();
-                        return myCollator.compare(Integer.parseInt(lhs.getVeracity()), Integer.parseInt(rhs.getVeracity()));
+                        return myCollator.compare(Integer.parseInt(lhs.getAif()), Integer.parseInt(rhs.getAif()));
                     }
                 }else if(filter.equals(filterType.VERACITY_LOWEST)) {
                     // Check for unrated article
-                    if(lhs.getVeracity() == null || lhs.getVeracity().equals("")){
-                        if(rhs.getVeracity() == null || rhs.getVeracity().equals("")){
+                    if(lhs.getAif() == null || lhs.getAif().equals("")){
+                        if(rhs.getAif() == null || rhs.getAif().equals("")){
                             return 0;
                         }else{
                             return 1;
                         }
-                    }else if(rhs.getVeracity() == null || rhs.getVeracity().equals("")){
+                    }else if(rhs.getAif() == null || rhs.getAif().equals("")){
                         return -1;
                     }else{
                         Collator myCollator = Collator.getInstance();
-                        return -1 * myCollator.compare(Integer.parseInt(lhs.getVeracity()), Integer.parseInt(rhs.getVeracity()));
+                        return -1 * myCollator.compare(Integer.parseInt(lhs.getAif()), Integer.parseInt(rhs.getAif()));
                     }
                 }else{
                     return 0;

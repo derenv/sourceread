@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -66,7 +65,7 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
         postDone(true);
     }
 
-    private Connection.Response getResponse(String url){
+    private Connection.Response getResponse(@NonNull String url){
         try {
             return Jsoup.connect(url)
                     .ignoreContentType(true)
@@ -100,29 +99,70 @@ public class scraperAsyncTask extends sourcereadAsyncTask<Article, Article> {
             }else if(response.statusCode() != 200) {
                 Log.e("JSOUP", "error response scraping web-page code: " + response.statusCode());
                 Log.e("JSOUP", "error response scraping web-page message: " + response.statusMessage());
+            }else {
+                // Fetch paragraph elements of page
+                Elements paragraphElements = response
+                        .parse()
+                        .body()
+                        .getElementsByTag("p");
+
+                // Extract paragraphs from paragraph elements
+                StringBuilder text = new StringBuilder("text=Author:");
+                for (Element paragraph : paragraphElements) {
+                    // TODO: remove image descriptions & credits
+                    // TODO: remove publication descriptions & credits
+                    // TODO: remove author descriptions & credits
+                    StringBuilder paraChars = new StringBuilder(paragraph.text());
+
+                    // Remove initial end space character
+                    if(paraChars.substring(0, 1).equals(" ")) {
+                        paraChars = new StringBuilder(paraChars.substring(1, paraChars.length()));
+                    }
+
+                    if(!paraChars.toString().equals("") && !paraChars.toString().equals("Advertisement")) {
+                        text.append(paragraph.text()).append("\\ntext=Author:");
+                    }
+                }
+
+                // Replace invalid semicolon characters
+                text = new StringBuilder(text.toString().replace(";", ","));
+
+                // Replace invalid single quote characters
+                text = new StringBuilder(text.toString().replace("\'", ""));
+                text = new StringBuilder(text.toString().replace(String.valueOf((char) 8216), ""));
+                text = new StringBuilder(text.toString().replace(String.valueOf((char) 8217), ""));
+
+                // Replace invalid double quote characters
+                text = new StringBuilder(text.toString().replace("\"", ""));
+                text = new StringBuilder(text.toString().replace(String.valueOf((char) 8220), ""));
+                text = new StringBuilder(text.toString().replace(String.valueOf((char) 8221), ""));
+                text = new StringBuilder(text.toString().replace(String.valueOf((char) 34), ""));
+
+                // Replace end of sentence markers
+                text = new StringBuilder(text.toString().replace("Mr.", "Mr"));
+                //text = new StringBuilder(text.toString().replace(".", ".\\ntext=Author:"));
+                //text = new StringBuilder(text.toString().replace("?", "?\\ntext=Author:"));
+                //text = new StringBuilder(text.toString().replace("!", "!\\ntext=Author:"));
+
+                // Replace extraneous space characters
+                text = new StringBuilder(text.toString().replace("  ", " "));
+                text = new StringBuilder(text.toString().replace("text=Author: ", "text=Author:"));
+
+                // Remove unnecessary end space character
+                if(text.substring(text.length() - 1, text.length()).equals(" ")) {
+                    text = new StringBuilder(text.substring(0, text.length() - 1));
+                }
+
+                // Remove unnecessary (and breaking) arg-tech parameter label
+                if(text.substring(text.length() - 12, text.length()).equals("text=Author:")){
+                    text = new StringBuilder(text.substring(0, text.length() - 12));
+                }
+
+                //text.append("\\n");
+
+                // Add text to article
+                article.setText(text.toString());
             }
-
-            // Fetch paragraph elements of page
-            Elements paragraphElements = response
-                    .parse()
-                    .body()
-                    .getElementsByTag("p");
-
-            // Extract paragraphs from paragraph elements
-            String text = "";
-            for (Element paragraph : paragraphElements) {
-                // TODO: remove image descriptions & credits
-                // TODO: remove publication descriptions & credits
-                // TODO: remove author descriptions & credits
-                text += paragraph.text();
-            }
-
-            // replace extraneous spaces
-            text.replace("  "," ");
-            text.substring(0,text.length() -1);
-
-            // Add text to article
-            article.setText(text);
         } catch (IOException error) {
             Log.e("JSOUP", "unknown error scraping web-page: " + error.getMessage());
             error.printStackTrace();

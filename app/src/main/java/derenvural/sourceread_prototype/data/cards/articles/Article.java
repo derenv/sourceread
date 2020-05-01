@@ -22,11 +22,9 @@ public class Article extends Card {
     private String app;
     // External Information
     private ArrayList<HashMap<String, String>> authors;
-    private String publication;
-    private String publication_veracity;
     // Article Information
     private String word_count;
-    private String veracity;
+    private String aif;
     private String text;
     private String excerpt;
 
@@ -47,17 +45,16 @@ public class Article extends Card {
         }else{
             setAuthors((ArrayList<HashMap<String, String>>) document.get("authors"));
         }
-        //setPublication(document.get("publication").toString());
         // Article Information
         if(document.get("word_count") == null) {
             setWord_count("");
         }else{
             setWord_count(document.get("word_count").toString());
         }
-        if(document.get("veracity") == null){
-            setVeracity("");
+        if(document.get("aif") == null){
+            setAif("");
         }else{
-            setVeracity(document.get("veracity").toString());
+            setAif(document.get("aif").toString());
         }
         if(document.get("excerpt") == null){
             setExcerpt("");
@@ -119,7 +116,7 @@ public class Article extends Card {
         }else{
             setExcerpt("");
         }
-        setVeracity("");
+        setAif("");
         setText("");
     }
 
@@ -139,11 +136,9 @@ public class Article extends Card {
         docData.put("app", getApp());
         // External Information
         docData.put("authors", getAuthors());
-        //docData.put("publication", getPublication());
-        //docData.put("publication_veracity", getPublication_veracity());
         // Article Information
         docData.put("word_count", getWord_count());
-        docData.put("veracity", getVeracity());
+        docData.put("aif", getAif());
         docData.put("text", getText());
         docData.put("excerpt", getExcerpt());
 
@@ -160,11 +155,9 @@ public class Article extends Card {
         setApp((String) bundle.getSerializable("app"));
         // External Information
         setAuthors((ArrayList) bundle.getSerializable("authors"));
-        //setPublication(bundle.getSerializable("publication"));
-        //setPublication_veracity(bundle.getSerializable"publication_veracity"));
         // Article Information
         setWord_count((String) bundle.getSerializable("word_count"));
-        setVeracity((String) bundle.getSerializable("veracity"));
+        setAif((String) bundle.getSerializable("aif"));
         setText((String) bundle.getSerializable("text"));
         setExcerpt((String) bundle.getSerializable("excerpt"));
     }
@@ -178,11 +171,9 @@ public class Article extends Card {
         bundle.putSerializable("app", getApp());
         // External Information
         bundle.putSerializable("authors", getAuthors());
-        //bundle.putSerializable("publication", getPublication());
-        //bundle.putSerializable("publication_veracity", getPublication_veracity());
         // Article Information
         bundle.putSerializable("word_count", getWord_count());
-        bundle.putSerializable("veracity", getVeracity());
+        bundle.putSerializable("aif", getAif());
         bundle.putSerializable("text", getText());
         bundle.putSerializable("excerpt", getExcerpt());
     }
@@ -193,10 +184,8 @@ public class Article extends Card {
     public String getDatabase_id() { return database_id; }
     public ArrayList<HashMap<String, String>> getAuthors() { return authors; }
     public String getWord_count() { return word_count; }
-    public String getVeracity() { return veracity; }
+    public String getAif() { return aif; }
     public String getApp() { return app; }
-    public String getPublication() { return publication; }
-    public String getPublication_veracity() { return publication_veracity; }
     public String getText() { return text; }
     public String getExcerpt() { return excerpt; }
 
@@ -206,10 +195,8 @@ public class Article extends Card {
     public void setDatabase_id(String database_id) { this.database_id = database_id; }
     public void setAuthors(ArrayList<HashMap<String, String>> authors) { this.authors = authors; }
     public void setWord_count(String word_count) { this.word_count = word_count; }
-    public void setVeracity(String veracity) { this.veracity = veracity; }
+    public void setAif(String aif) { this.aif = aif; }
     public void setApp(String app) { this.app = app; }
-    public void setPublication(String publication) { this.publication = publication; }
-    public void setPublication_veracity(String publication_veracity) { this.publication_veracity = publication_veracity; }
     public void setText(String text) { this.text = text; }
     public void setExcerpt(String excerpt) { this.excerpt = excerpt; }
 }

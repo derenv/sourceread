@@ -4,6 +4,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.android.volley.Response;
@@ -11,6 +12,7 @@ import com.android.volley.VolleyError;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -26,6 +28,11 @@ public class analyser {
     private scraperAsyncTask task;
     private WeakReference<SourceReadActivity> context;
     private fdatabase db;
+    private JSONObject jsonAIF;
+    private MutableLiveData<Article> article;
+    // Constants
+    private static final String converterURL = "http://ws.arg.tech/m/turninator";
+    private static final String analyserURL = "http://ws.arg.tech/m/inference_identifier";
 
     public analyser(SourceReadActivity owner, fdatabase db) {
         // Set database
@@ -36,14 +43,18 @@ public class analyser {
 
         // Set activity
         context = new WeakReference<SourceReadActivity>(owner);
+
+        // Set article
+        article = new MutableLiveData<Article>(null);
     }
 
-    public void fetch_article(final Article article, Observer<Boolean> observer) {
+    public void fetch_article(final Article newArticle, Observer<Boolean> observer) {
         // Inform user of progress
         Toast.makeText(context.get(), "Scraping article content..", Toast.LENGTH_SHORT).show();
 
         // execute async task
-        task.execute(article);
+        article.setValue(newArticle);
+        task.execute(article.getValue());
 
         // Check for task finish
         task.getDone().observe(context.get(), observer);
@@ -52,14 +63,13 @@ public class analyser {
             @Override
             public void onChanged(Boolean done) {
                 if (done) {
-                    // Convert to JSON-AIF
-                    convertToJSONAIF(article);
+                    // Set live data
+                    article.setValue(task.getData().getValue());
 
-                    // Analyse the JSON-AIF
-                    analyse(article);
-
-                    // Update database
-                    update_database(article);
+                    if(article != null && article.getValue() != null) {
+                        // Convert to JSON-AIF
+                        convertToJSONAIF();
+                    }
                 }
             }
         });
@@ -79,68 +89,38 @@ public class analyser {
      *
      *
      **/
-    private void convertToJSONAIF(Article article) {
-        // Get URL
-        final String url = "http://ws.arg.tech/m/turninator";
-
-        // Get JSON-AIF
-        String data = article.getText();
-        String[] sentences = data.split("\\.");
-        HashMap[] nodes = new HashMap[sentences.length];
-        HashMap[] locutions = new HashMap[sentences.length];
-        String[] edges = new String[(sentences.length * 2) - 2];
-        for (int i = 0; i < sentences.length; i++) {
-            HashMap<String, Object> locution = new HashMap<String, Object>();
-            HashMap<String, Object> info = new HashMap<String, Object>();
-
-            locution.put("text", sentences[i]);
-            locution.put("type", "L");
-            locution.put("nodeID", i);
-            locution.put("timestamp", i);
-
-            nodes[i] = locution;
-
-            info.put("personID", 0);
-            info.put("nodeID", i);
-            info.put("timestamp", i);
-
-            locutions[i] = info;
-            /*
-            if(i == 0){
-                // 1 edge, latter
-                edges[i] = i - 1;
-            }else if (i == (sentences.length - 1)){
-                // 1 edge, former
-            }else{
-                // 2 edges
-            }*/
-        }
-
-        // Add JSON parameters
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("nodes", nodes);
-        parameters.put("edges", edges);
-        parameters.put("text", data);
-        parameters.put("locutions", locutions);
+    private void convertToJSONAIF() {
+        // Get body text & clean
+        String data = article.getValue().getText();
 
         // Inform user of progress
         Toast.makeText(context.get(), "Analysing..", Toast.LENGTH_SHORT).show();
 
         // Make https POST request
-        context.get().getHttpHandler().argtech_request_post(url, parameters,
-                new Response.Listener<JSONObject>() {
+        context.get().getHttpHandler().argtech_request_post(converterURL, data,
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         // Cut token out of html response
                         Log.d("ARG-TECH", "Webservice POST Request Response received");
 
-                        //try {
-                        //
-                        Iterator<String> q = response.keys();
-                        Toast.makeText(context.get(), "Analysis complete..", Toast.LENGTH_SHORT).show();
-                        //} catch (JSONException error) {
-                        //    Log.e("JSON error", "error reading JSON: " + error.getMessage());
-                        //}
+                        try {
+                            // Attempt to create the JSON object response
+                            jsonAIF = new JSONObject(response);
+
+                            // Put response into article
+                            Article newArticle = article.getValue();
+                            newArticle.setAif(jsonAIF.toString());
+                            article.setValue(newArticle);
+
+                            // Notify user
+                            Toast.makeText(context.get(), "Conversion to AIF complete..", Toast.LENGTH_SHORT).show();
+
+                            // Attempt analysis on json-aif
+                            analyse();
+                        } catch (JSONException error) {
+                            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -156,68 +136,38 @@ public class analyser {
     /*
      * Make POST requests to ARG-tech webservices for analysis of sent JSON-AIF
      **/
-    private void analyse(Article article) {
-        // Get URL
-        final String url = "http://ws.arg.tech/m/inference_identifier";
-
+    private void analyse() {
         // Get JSON-AIF
-        String data = article.getText();
-        String[] sentences = data.split("\\.");
-        HashMap[] nodes = new HashMap[sentences.length];
-        HashMap[] locutions = new HashMap[sentences.length];
-        String[] edges = new String[(sentences.length * 2) - 2];
-        for (int i = 0; i < sentences.length; i++) {
-            HashMap<String, Object> locution = new HashMap<String, Object>();
-            HashMap<String, Object> info = new HashMap<String, Object>();
-
-            locution.put("text", sentences[i]);
-            locution.put("type", "L");
-            locution.put("nodeID", i);
-            locution.put("timestamp", i);
-
-            nodes[i] = locution;
-
-            info.put("personID", 0);
-            info.put("nodeID", i);
-            info.put("timestamp", i);
-
-            locutions[i] = info;
-            /*
-            if(i == 0){
-                // 1 edge, latter
-                edges[i] = i - 1;
-            }else if (i == (sentences.length - 1)){
-                // 1 edge, former
-            }else{
-                // 2 edges
-            }*/
-        }
-
-        // Add JSON parameters
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("nodes", nodes);
-        parameters.put("edges", edges);
-        parameters.put("text", data);
-        parameters.put("locutions", locutions);
+        String data = article.getValue().getAif();
 
         // Inform user of progress
         Toast.makeText(context.get(), "Analysing..", Toast.LENGTH_SHORT).show();
 
         // Make https POST request
-        context.get().getHttpHandler().make_volley_request_post(url, parameters,
-                new Response.Listener<JSONObject>() {
+        context.get().getHttpHandler().argtech_request_post(analyserURL, data,
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         // Cut token out of html response
                         Log.d("ARG-TECH", "Webservice POST Request Response received");
 
-                        //try {
-                        //
-                        Iterator<String> q = response.keys();
-                        Toast.makeText(context.get(), "Analysis complete..", Toast.LENGTH_SHORT).show();
-                        //} catch (JSONException error) {
-                        //    Log.e("JSON error", "error reading JSON: " + error.getMessage());
-                        //}
+                        try {
+                            // Attempt to create the JSON object response
+                            jsonAIF = new JSONObject(response);
+
+                            // Put response into article
+                            Article newArticle = article.getValue();
+                            newArticle.setAif(jsonAIF.toString());
+                            article.setValue(newArticle);
+
+                            // Notify user
+                            Toast.makeText(context.get(), "Argument Structure analysis complete..", Toast.LENGTH_SHORT).show();
+
+                            // Update database
+                            update_database();
+                        } catch (JSONException error) {
+                            Log.e("JSON error", "error reading JSON: " + error.getMessage());
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -231,18 +181,20 @@ public class analyser {
     }
 
 
-    private void update_database(final Article article) {
-        // Save analysis to database
-        db.update_article_field(article, "veracity",new OnCompleteListener<Void>(){
-            @Override
-            public void onComplete (@NonNull Task<Void> veracityTask) {
-                if (veracityTask.isSuccessful()) {
-                    Log.d("DB", "updated article - '" + article.getDatabase_id() + "' field - 'veracity'");
-                } else {
-                    // Log error
-                    Log.e("DB", "update failed: ", veracityTask.getException());
+    private void update_database() {
+        if(article != null && article.getValue() != null) {
+            // Save analysis to database
+            db.update_article_field(article.getValue(), "aif", new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> aifTask) {
+                    if (aifTask.isSuccessful()) {
+                        Toast.makeText(context.get(), "Article '" + article.getValue().getTitle() + "' analysis saved to database!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Log error
+                        Log.e("DB", "update failed: ", aifTask.getException());
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }

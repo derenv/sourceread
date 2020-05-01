@@ -3,20 +3,25 @@ package derenvural.sourceread_prototype.data.http;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,32 +44,20 @@ public class httpHandler {
     }
 
     public void argtech_request_post(@NonNull String url,
-                                     @Nullable HashMap<String, Object> parameters,
-                                     @NonNull Response.Listener<JSONObject> response,
+                                     @NonNull final String body,
+                                     @NonNull Response.Listener<String> response,
                                      @NonNull Response.ErrorListener error){
-        // Create JSON object
-        JSONObject jsonParam = new JSONObject();
-
-        //Add string parameters
-        try {
-            if(parameters != null) {
-                for (String key : parameters.keySet()) {
-                    jsonParam.put(key, parameters.get(key));
-                }
+        // Construct string request
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                response, error) {
+            @Override
+            public byte[] getBody() {
+                return body.getBytes(StandardCharsets.UTF_8);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        };
 
-        // Create JSON request with custom headers
-        JsonObjectRequest request_json = new JsonObjectRequest(Request.Method.POST,
-                url,
-                jsonParam,
-                response,
-                error);
-
-        // Add the request to the RequestQueue.
-        queue.add(request_json);
+        // Add to Volley request queue
+        queue.add(stringRequest);
     }
 
     public void make_volley_request_post(@NonNull String url,
@@ -72,23 +65,17 @@ public class httpHandler {
                                          @NonNull Response.Listener<JSONObject> response,
                                          @NonNull Response.ErrorListener error){
         // Create JSON object
-        JSONObject jsonParam = new JSONObject();
-
-        //Add string parameters
-        try {
-            if(parameters != null) {
-                for (String key : parameters.keySet()) {
-                    jsonParam.put(key, parameters.get(key));
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        JSONObject jsonParameters;
+        if(parameters != null) {
+            jsonParameters = new JSONObject(parameters);
+        }else{
+            jsonParameters = new JSONObject();
         }
 
         // Create JSON request with custom headers
         JsonObjectRequest request_json = new JsonObjectRequest(Request.Method.POST,
                 url,
-                jsonParam,
+                jsonParameters,
                 response,
                 error){
             /**
