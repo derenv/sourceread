@@ -4,10 +4,12 @@ public interface FunctionHolder {
     // Methods
 
     // GET
-    String getTitle();
-    String getText();
+    Integer getImage();
+    CharSequence getTitle();
+    CharSequence getText();
 
     // SET
-    void setTitle(String title);
-    void setText(String text);
+    void setImage(Integer title);
+    void setTitle(CharSequence title);
+    void setText(CharSequence text);
 }

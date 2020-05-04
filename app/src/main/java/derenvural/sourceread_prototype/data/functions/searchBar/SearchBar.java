@@ -6,6 +6,6 @@ public class SearchBar extends Function {
 
     // Constructors
     public SearchBar(String title, String prompt) {
-        super(title, prompt);
+        super(title, prompt, null);
     }
 }

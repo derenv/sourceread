@@ -26,10 +26,6 @@ public class ArticleAdapter extends CardAdapter<Article> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class ArticleViewHolder extends CardViewHolder {
-        // data items
-        public ImageView vImage;
-        public TextView vTitle;
-        public TextView vText;
         public ArticleViewHolder(View v) {
             super(v);
             // Create view references

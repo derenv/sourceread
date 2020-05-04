@@ -26,7 +26,6 @@ import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.cards.articles.Article;
 import derenvural.sourceread_prototype.data.cards.articles.ArticleAdapter;
 import derenvural.sourceread_prototype.data.cards.articles.filterType;
-import derenvural.sourceread_prototype.data.functions.Function;
 import derenvural.sourceread_prototype.data.functions.searchBar.SearchBar;
 import derenvural.sourceread_prototype.data.functions.searchBar.SearchBarAdapter;
 import derenvural.sourceread_prototype.ui.article.ArticleActivity;
@@ -82,7 +81,7 @@ public class HomeFragment extends Fragment {
 
         // Create search bar function for adapter
         SearchBar searchBar = new SearchBar(getString(R.string.search_bar_title), getString(R.string.prompt_search));
-        ArrayList<Function> functions = new ArrayList<Function>();
+        ArrayList<SearchBar> functions = new ArrayList<SearchBar>();
         functions.add(searchBar);
 
         // Create search text listener
@@ -134,6 +133,7 @@ public class HomeFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        // Add line divider
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 ((LinearLayoutManager) layoutManager).getOrientation());
         recyclerView.addItemDecoration(dividerItemDecoration);

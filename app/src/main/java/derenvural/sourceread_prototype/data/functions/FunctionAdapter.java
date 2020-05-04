@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 
-public class FunctionAdapter<T> extends RecyclerView.Adapter<FunctionAdapter.FunctionViewHolder> {
+public abstract class FunctionAdapter<T> extends RecyclerView.Adapter<FunctionAdapter.FunctionViewHolder> {
     protected ArrayList<T> mDataHolders;
-    protected static Context context;
+    protected Context context;
     protected static View.OnClickListener listener;
 
     // Provide a reference to the views for each data item
@@ -26,23 +27,17 @@ public class FunctionAdapter<T> extends RecyclerView.Adapter<FunctionAdapter.Fun
     public static class FunctionViewHolder extends RecyclerView.ViewHolder {
         // data items
         public TextView vTitle;
-        public EditText vInput;
         public FunctionViewHolder(View v) {
             super(v);
             // Create view references
             vTitle = v.findViewById(R.id.search_bar_title);
-            vInput = v.findViewById(R.id.search_bar_text);
-
-            // Add click listener for fragment transition
-            //v.setOnClickListener(listener);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public FunctionAdapter(SourceReadActivity context, ArrayList<T> newCards/*, View.OnClickListener listener*/) {
+    public FunctionAdapter(SourceReadActivity context, ArrayList<T> newCards) {
         this.context = context;
         this.mDataHolders = newCards;
-        //FunctionAdapter.listener = listener;
     }
 
     // Create new views (invoked by the layout manager)

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 
-public class CardAdapter<T> extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
+public abstract class CardAdapter<T> extends RecyclerView.Adapter<CardAdapter.CardViewHolder> {
     protected ArrayList<T> mDataHolders;
     protected static Context context;
     protected static View.OnClickListener listener;

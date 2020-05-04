@@ -327,4 +327,14 @@
         ]]>
     </string>
     <string name="asset_statements" translatable="false">[{ \"include\": \"https://sourceread.firebaseapp.com/.well-known/assetlinks.json\" }]</string>
+    <string name="graphImageDescription">AIF directed graph depicting the argument structure</string>
+    <string name="inference_graph_title">Inference Graph</string>
+    <string name="inference_graph_text">This graph shows the various statements and claims made within the argument, showing how they connect</string>
+    <string name="centrality_card_title">Centrality Analysis</string>
+    <string name="centrality_card_text"><b>\"Mr Ren, an outspoken property tycoon in Beijing, wrote in a scathing essay that Chinas leader, Xi Jinping, was a power-hungry clown.\"</b>\n\n\n-This is where we would perform line-by-line analysis.\n-For example, centrality - where we measure which statements are central to the argument.</string>
+
+    <string name="overall_from_card_title">News Sources</string>
+    <string name="overall_from_card_text">By percentage:\n\tGuardian\t-\t46%\n\tBBC News\t-\t10%\n\tThe Independent\t-\t10%\n\tWashington Post\t-\t14%\n\tNew York Times\t-\t12%\n\tOthers\t-\t8%</string>
+    <string name="overall_quality_card_title">Source Quality</string>
+    <string name="overall_quality_card_text">Top 5:\nGuardian - 79/100\nBBC News - 86/100\nThe Independant - 79/100\nWashington Post - 81/100\nNew York Times - 80/100\nOthers - 52/100</string>
 </resources>

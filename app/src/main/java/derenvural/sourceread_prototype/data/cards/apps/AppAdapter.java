@@ -20,10 +20,6 @@ public class AppAdapter extends CardAdapter<App> {
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public static class AppViewHolder extends CardViewHolder {
-        // data items
-        public ImageView vImage;
-        public TextView vTitle;
-        public TextView vText;
         public AppViewHolder(View v) {
             super(v);
             // Create view references

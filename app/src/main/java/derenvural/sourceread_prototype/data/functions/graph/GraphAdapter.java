@@ -1,10 +1,9 @@
-package derenvural.sourceread_prototype.data.functions.searchBar;
+package derenvural.sourceread_prototype.data.functions.graph;
 
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,39 +14,35 @@ import derenvural.sourceread_prototype.R;
 import derenvural.sourceread_prototype.SourceReadActivity;
 import derenvural.sourceread_prototype.data.functions.FunctionAdapter;
 
-public class SearchBarAdapter extends FunctionAdapter<SearchBar> {
-    private static TextWatcher watcher;
-
+public class GraphAdapter extends FunctionAdapter<Graph> {
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class searchbarViewHolder extends FunctionViewHolder {
+    public static class graphViewHolder extends FunctionViewHolder {
         // data items
-        public EditText vInput;
+        public TextView vText;
+        public ImageView vImage;
 
-        public searchbarViewHolder(View v) {
+        public graphViewHolder(View v) {
             super(v);
             // Create view references
-            vTitle = v.findViewById(R.id.search_bar_title);
-            vInput = v.findViewById(R.id.search_bar_text);
-
-            // Add click listener for fragment transition
-            vInput.addTextChangedListener(watcher);
+            vTitle = v.findViewById(R.id.graph_title);
+            vText = v.findViewById(R.id.graph_text);
+            vImage = v.findViewById(R.id.graph_svg_view);
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public SearchBarAdapter(SourceReadActivity context, ArrayList<SearchBar> newCards, TextWatcher watcher) {
+    public GraphAdapter(SourceReadActivity context, ArrayList<Graph> newCards) {
         super(context, newCards);
-        SearchBarAdapter.watcher = watcher;
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public SearchBarAdapter.searchbarViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public GraphAdapter.graphViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(context).inflate(R.layout.search_bar, parent, false);
-        return new searchbarViewHolder(v);
+        View v = LayoutInflater.from(context).inflate(R.layout.graph, parent, false);
+        return new graphViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -57,10 +52,17 @@ public class SearchBarAdapter extends FunctionAdapter<SearchBar> {
         holder.vTitle.setText(mDataHolders.get(position).getTitle());
 
         // Convert to current view-holder
-        searchbarViewHolder viewHolder = (searchbarViewHolder) holder;
+        graphViewHolder viewHolder = (graphViewHolder) holder;
 
-        // Load edittext prompt
-        viewHolder.vInput.setText(mDataHolders.get(position).getText());
+        // Load graph image
+        if(viewHolder.vImage != null && mDataHolders.get(position).getImage() != null) {
+            viewHolder.vImage.setImageResource(mDataHolders.get(position).getImage());
+        }
+
+        // Load text
+        if(viewHolder.vText != null && mDataHolders.get(position).getText() != null) {
+            viewHolder.vText.setText(mDataHolders.get(position).getText());
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
